@@ -2,41 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Gaming Grid Design System - Dark theme with neon green accents inspired by the logo */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Gaming Dark Theme */
+    --background: 220 13% 8%;
+    --foreground: 120 100% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 13% 10%;
+    --card-foreground: 120 100% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 13% 10%;
+    --popover-foreground: 120 100% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Neon Green Primary (from logo) */
+    --primary: 127 100% 50%;
+    --primary-foreground: 220 13% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 120 100% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 13% 12%;
+    --muted-foreground: 120 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 127 100% 45%;
+    --accent-foreground: 220 13% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 120 100% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 127 100% 40%;
+    --success-foreground: 220 13% 8%;
 
-    --radius: 0.5rem;
+    --warning: 48 100% 50%;
+    --warning-foreground: 220 13% 8%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 15%;
+    --ring: 127 100% 50%;
+
+    /* Gaming specific colors */
+    --gaming-bg: 220 13% 6%;
+    --gaming-surface: 220 13% 12%;
+    --gaming-border: 220 13% 20%;
+    --gaming-glow: 127 100% 50%;
+    --gaming-accent: 127 80% 55%;
+
+    /* Equipment status colors */
+    --status-available: 127 100% 45%;
+    --status-occupied: 0 72% 51%;
+    --status-reserved: 48 100% 50%;
+    --status-pending: 220 20% 65%;
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +119,50 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
+    background: linear-gradient(135deg, hsl(var(--gaming-bg)), hsl(var(--background)));
+  }
+}
+
+@layer components {
+  /* Gaming UI Components */
+  .gaming-glow {
+    box-shadow: 0 0 20px hsl(var(--gaming-glow) / 0.3);
+  }
+
+  .gaming-glow-strong {
+    box-shadow: 0 0 30px hsl(var(--gaming-glow) / 0.5);
+  }
+
+  .gaming-text-glow {
+    text-shadow: 0 0 10px hsl(var(--gaming-glow) / 0.8);
+  }
+
+  .gaming-border-glow {
+    border: 1px solid hsl(var(--gaming-glow) / 0.5);
+    box-shadow: 0 0 15px hsl(var(--gaming-glow) / 0.2);
+  }
+
+  .equipment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Status indicators */
+  .status-available {
+    @apply bg-green-500/20 border-green-500/50 text-green-400;
+  }
+
+  .status-occupied {
+    @apply bg-red-500/20 border-red-500/50 text-red-400;
+  }
+
+  .status-reserved {
+    @apply bg-yellow-500/20 border-yellow-500/50 text-yellow-400;
+  }
+
+  .status-pending {
+    @apply bg-gray-500/20 border-gray-500/50 text-gray-400;
   }
 }

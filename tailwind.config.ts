@@ -36,6 +36,14 @@ export default {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'
 				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
@@ -51,6 +59,19 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				gaming: {
+					bg: 'hsl(var(--gaming-bg))',
+					surface: 'hsl(var(--gaming-surface))',
+					border: 'hsl(var(--gaming-border))',
+					glow: 'hsl(var(--gaming-glow))',
+					accent: 'hsl(var(--gaming-accent))'
+				},
+				status: {
+					available: 'hsl(var(--status-available))',
+					occupied: 'hsl(var(--status-occupied))',
+					reserved: 'hsl(var(--status-reserved))',
+					pending: 'hsl(var(--status-pending))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
