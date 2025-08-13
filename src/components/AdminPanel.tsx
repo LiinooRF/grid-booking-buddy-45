@@ -62,7 +62,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onLogin, isAuthenticate
     return (
       <Card className="max-w-md mx-auto bg-gaming-surface border-gaming-border">
         <CardHeader>
-          <CardTitle className="gaming-text-glow flex items-center gap-2">
+          <CardTitle className="text-primary flex items-center gap-2">
             <Shield className="h-5 w-5" />
             Acceso Administrador
           </CardTitle>
@@ -96,7 +96,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onLogin, isAuthenticate
     <div className="space-y-6">
       <Card className="bg-gaming-surface border-gaming-border">
         <CardHeader>
-          <CardTitle className="gaming-text-glow flex items-center gap-2">
+          <CardTitle className="text-primary flex items-center gap-2">
             <Shield className="h-5 w-5" />
             Panel de Administración
           </CardTitle>

@@ -6,16 +6,17 @@ import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
-import { Gamepad2, Users, Settings, Clock } from "lucide-react";
+import { isOperatingHours, formatOperatingHours, getRemainingTimeToClose, sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
+import { Gamepad2, Users, Settings, Clock, AlertCircle } from "lucide-react";
 
 // Mock data - In real app this would come from API
 const mockEquipment = [
-  { id: '1', code: 'PC1', type: 'PC' as const, name: 'Gaming PC RTX 4080', status: 'available' as const },
-  { id: '2', code: 'PC2', type: 'PC' as const, name: 'Gaming PC RTX 4070', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'Player01' },
-  { id: '3', code: 'PC3', type: 'PC' as const, name: 'Gaming PC RTX 4060', status: 'available' as const },
-  { id: '4', code: 'PC4', type: 'PC' as const, name: 'Gaming PC RTX 4070', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'GamerX' },
-  { id: '5', code: 'PC5', type: 'PC' as const, name: 'Gaming PC RTX 4080', status: 'available' as const },
-  { id: '6', code: 'PC6', type: 'PC' as const, name: 'Gaming PC RTX 4060', status: 'available' as const },
+  { id: '1', code: 'PC1', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '2', code: 'PC2', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'Player01' },
+  { id: '3', code: 'PC3', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '4', code: 'PC4', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'GamerX' },
+  { id: '5', code: 'PC5', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '6', code: 'PC6', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
   { id: '7', code: 'CON1', type: 'CONSOLE' as const, name: 'Nintendo Switch', status: 'available' as const },
   { id: '8', code: 'CON2', type: 'CONSOLE' as const, name: 'PlayStation 5', status: 'reserved_pending' as const }
 ];
@@ -76,6 +77,15 @@ const Index = () => {
   const [reservations, setReservations] = useState(mockReservations);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(isOperatingHours());
+
+  // Check operating hours every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsOpen(isOperatingHours());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.code);
@@ -87,6 +97,16 @@ const Index = () => {
   };
 
   const handleReservationSubmit = async (data: any) => {
+    // Check if cyber is open
+    if (!isOpen) {
+      toast({
+        title: "Cyber cerrado",
+        description: `Horario de atención: ${formatOperatingHours()}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Simulate API call
     const ticketNumber = `GG${Date.now().toString().slice(-6)}`;
     setReservationTicket(ticketNumber);
@@ -104,6 +124,18 @@ const Index = () => {
       status: 'pending' as const,
       createdAt: new Date().toISOString()
     };
+    
+    // Send Telegram notification
+    try {
+      await sendTelegramNotification(formatReservationNotification(newReservation));
+      toast({
+        title: "Notificación enviada",
+        description: "El administrador ha sido notificado por Telegram",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error("Error sending Telegram notification:", error);
+    }
     
     setReservations(prev => [...prev, newReservation]);
     setSelectedEquipment('');
@@ -149,15 +181,30 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png" 
                 alt="Gaming Grid" 
-                className="h-10 w-auto gaming-glow"
+                className="h-10 w-auto"
               />
               <div>
-                <h1 className="text-2xl font-bold gaming-text-glow">GAMING GRID</h1>
+                <h1 className="text-2xl font-bold text-primary">GAMING GRID</h1>
                 <p className="text-sm text-muted-foreground">Sistema de Reservas</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
+              <div className="operating-hours">
+                {isOpen ? (
+                  <>
+                    <Clock className="h-4 w-4 text-green-500" />
+                    <span className="text-green-500">Abierto</span>
+                    <span className="text-xs">({getRemainingTimeToClose()})</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500">Cerrado</span>
+                    <span className="text-xs">({formatOperatingHours()})</span>
+                  </>
+                )}
+              </div>
               <Badge variant="outline" className="status-available">
                 {mockEquipment.filter(eq => eq.status === 'available').length} Disponibles
               </Badge>
@@ -172,9 +219,9 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {reservationTicket ? (
           <div className="max-w-2xl mx-auto text-center space-y-6">
-            <div className="bg-gaming-surface border-gaming-border rounded-lg p-8 gaming-glow">
+            <div className="bg-gaming-surface border-gaming-border rounded-lg p-8">
               <div className="text-6xl mb-4">🎮</div>
-              <h2 className="text-3xl font-bold gaming-text-glow mb-4">¡Reserva Enviada!</h2>
+              <h2 className="text-3xl font-bold text-primary mb-4">¡Reserva Enviada!</h2>
               <div className="text-xl mb-4">
                 Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
               </div>
@@ -208,7 +255,7 @@ const Index = () => {
 
             <TabsContent value="equipos" className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold gaming-text-glow">Estado de Equipos</h2>
+                <h2 className="text-3xl font-bold text-primary">Estado de Equipos</h2>
                 <p className="text-muted-foreground">
                   Selecciona un equipo disponible para hacer tu reserva
                 </p>
@@ -234,11 +281,21 @@ const Index = () => {
 
             <TabsContent value="reservar" className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold gaming-text-glow">Nueva Reserva</h2>
+                <h2 className="text-3xl font-bold text-primary">Nueva Reserva</h2>
                 <p className="text-muted-foreground">
                   Completa el formulario y sube tu comprobante de transferencia
                 </p>
               </div>
+              
+              {!isOpen && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center">
+                  <AlertCircle className="h-6 w-6 mx-auto mb-2 text-destructive" />
+                  <p className="text-destructive font-semibold">Cyber Cerrado</p>
+                  <p className="text-sm text-muted-foreground">
+                    Horario de atención: {formatOperatingHours()}
+                  </p>
+                </div>
+              )}
               
               <div className="max-w-4xl mx-auto">
                 <ReservationForm

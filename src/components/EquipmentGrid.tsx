@@ -74,8 +74,8 @@ const EquipmentGrid = ({
             className={cn(
               "cursor-pointer transition-all duration-300 hover:scale-[1.02]",
               config.bgClass,
-              isSelected && "ring-2 ring-primary gaming-glow",
-              eq.status === 'available' && "hover:gaming-border-glow"
+              isSelected && "ring-2 ring-primary",
+              eq.status === 'available' && "modern-border"
             )}
             onClick={() => handleSelect(eq)}
           >
@@ -87,7 +87,7 @@ const EquipmentGrid = ({
                   ) : (
                     <Gamepad2 className="h-5 w-5 text-primary" />
                   )}
-                  <span className="gaming-text-glow font-bold">{eq.code}</span>
+                  <span className="font-bold text-primary">{eq.code}</span>
                 </div>
                 <Badge variant="outline" className={config.className}>
                   {config.label}

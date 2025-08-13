@@ -115,7 +115,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
   return (
     <Card className="bg-gaming-surface border-gaming-border">
       <CardHeader>
-        <CardTitle className="gaming-text-glow flex items-center gap-2">
+        <CardTitle className="text-primary flex items-center gap-2">
           <Users className="h-5 w-5" />
           Nueva Reserva
         </CardTitle>
@@ -205,7 +205,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
                         key={plan.id}
                         className={`p-3 rounded-lg border cursor-pointer transition-all ${
                           formData.planId === plan.id 
-                            ? 'border-primary bg-primary/10 gaming-glow' 
+                            ? 'border-primary bg-primary/10 ring-2 ring-primary/30' 
                             : 'border-gaming-border bg-gaming-bg hover:border-gaming-accent'
                         }`}
                         onClick={() => setFormData(prev => ({ ...prev, planId: plan.id }))}

@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 gaming-glow transition-all duration-300",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-gaming-border bg-background hover:bg-gaming-surface hover:text-accent-foreground gaming-border-glow",
+          "border border-gaming-border bg-background hover:bg-gaming-surface hover:text-accent-foreground transition-all duration-300",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gaming: "bg-gaming-glow text-gaming-bg hover:bg-gaming-accent gaming-glow-strong font-bold uppercase tracking-wider",
+        gaming: "bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-wider transition-all duration-300",
         status: "border-2 transition-all duration-300 hover:scale-105",
         admin: "bg-warning text-warning-foreground hover:bg-warning/90 font-semibold",
       },

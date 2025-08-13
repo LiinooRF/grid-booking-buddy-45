@@ -125,24 +125,7 @@
 }
 
 @layer components {
-  /* Gaming UI Components */
-  .gaming-glow {
-    box-shadow: 0 0 20px hsl(var(--gaming-glow) / 0.3);
-  }
-
-  .gaming-glow-strong {
-    box-shadow: 0 0 30px hsl(var(--gaming-glow) / 0.5);
-  }
-
-  .gaming-text-glow {
-    text-shadow: 0 0 10px hsl(var(--gaming-glow) / 0.8);
-  }
-
-  .gaming-border-glow {
-    border: 1px solid hsl(var(--gaming-glow) / 0.5);
-    box-shadow: 0 0 15px hsl(var(--gaming-glow) / 0.2);
-  }
-
+  /* Clean Gaming UI Components - No Glow Effects */
   .equipment-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -164,5 +147,15 @@
 
   .status-pending {
     @apply bg-gray-500/20 border-gray-500/50 text-gray-400;
+  }
+
+  /* Clean modern borders */
+  .modern-border {
+    @apply border border-gaming-border/60 hover:border-gaming-border transition-colors duration-300;
+  }
+
+  /* Operating hours indicator */
+  .operating-hours {
+    @apply text-sm text-muted-foreground flex items-center gap-2;
   }
 }
