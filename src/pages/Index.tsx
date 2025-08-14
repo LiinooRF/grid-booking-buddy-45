@@ -51,8 +51,10 @@ interface Reservation {
   planName: string;
   planPrice: number;
   receiptUrl: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 const mockReservations: Reservation[] = [
@@ -171,6 +173,38 @@ const Index = () => {
     );
   };
 
+  const handleMarkArrived = (id: string) => {
+    setReservations(prev => 
+      prev.map(r => r.id === id ? { ...r, status: 'arrived' as const } : r)
+    );
+  };
+
+  const handleRelease = (id: string) => {
+    setReservations(prev => prev.filter(r => r.id !== id));
+    toast({
+      title: "Equipo liberado",
+      description: "El equipo ha sido liberado y está disponible",
+      variant: "default"
+    });
+  };
+
+  const handleExtendTime = (id: string, minutes: number) => {
+    setReservations(prev => 
+      prev.map(r => {
+        if (r.id === id && r.endTime) {
+          const [hours, mins] = r.endTime.split(':').map(Number);
+          const endDate = new Date();
+          endDate.setHours(hours, mins, 0, 0);
+          endDate.setMinutes(endDate.getMinutes() + minutes);
+          
+          const newEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+          return { ...r, endTime: newEndTime };
+        }
+        return r;
+      })
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
@@ -270,8 +304,15 @@ const Index = () => {
               {selectedEquipment && (
                 <div className="text-center">
                   <Button variant="gaming" size="lg" onClick={() => {
-                    const tabsTrigger = document.querySelector('[value="reservar"]') as HTMLElement;
-                    tabsTrigger?.click();
+                    const reservarTab = document.querySelector('[data-state="inactive"][value="reservar"]') as HTMLElement;
+                    if (reservarTab) {
+                      reservarTab.click();
+                    } else {
+                      // Fallback: trigger tab change via state
+                      const tabsContainer = document.querySelector('[role="tablist"]');
+                      const reservarButton = tabsContainer?.querySelector('[value="reservar"]') as HTMLElement;
+                      reservarButton?.click();
+                    }
                   }}>
                     Continuar con Reserva
                   </Button>
@@ -313,6 +354,9 @@ const Index = () => {
                   reservations={reservations}
                   onConfirm={handleReservationConfirm}
                   onCancel={handleReservationCancel}
+                  onMarkArrived={handleMarkArrived}
+                  onRelease={handleRelease}
+                  onExtendTime={handleExtendTime}
                   onLogin={handleAdminLogin}
                   isAuthenticated={isAdminAuthenticated}
                 />

@@ -39,6 +39,8 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     email: '',
     equipmentCode: selectedEquipment || '',
     planId: '',
+    startTime: '',
+    endTime: '',
     receipt: null as File | null
   });
 
@@ -62,14 +64,83 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     }
   };
 
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 12; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        slots.push(timeString);
+      }
+    }
+    slots.push("00:00"); // Add midnight
+    return slots;
+  };
+
+  const calculateEndTime = (startTime: string, planId: string) => {
+    if (!startTime || !planId) return '';
+    
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) return '';
+    
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
+    
+    let durationHours = 0;
+    if (plan.name.includes('1 Hour')) durationHours = 1;
+    else if (plan.name.includes('3 Hours')) durationHours = 3;
+    else if (plan.name.includes('Day Pass')) durationHours = 12;
+    else if (plan.name.includes('5 Hours')) durationHours = 5;
+    else if (plan.name.includes('10 Hours')) durationHours = 10;
+    else if (plan.name.includes('20 Hours')) durationHours = 20;
+    else if (plan.name.includes('50 Hours')) durationHours = 50;
+    else if (plan.name.includes('2 Hours')) durationHours = 2;
+    else durationHours = 1;
+    
+    const endDate = new Date(startDate.getTime() + durationHours * 60 * 60 * 1000);
+    
+    // If end time goes past midnight, cap at midnight
+    if (endDate.getHours() < 12 && endDate.getDate() !== startDate.getDate()) {
+      return "00:00";
+    }
+    
+    return `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const isTimeSlotAvailable = (startTime: string, endTime: string, equipmentCode: string) => {
+    // This would check against existing reservations in a real app
+    // For now, we'll just validate the time range
+    if (!startTime || !endTime) return false;
+    
+    const [startHour] = startTime.split(':').map(Number);
+    const [endHour] = endTime.split(':').map(Number);
+    
+    // Validate operating hours
+    if (startHour < 12 || (endHour > 0 && endHour < 12 && endTime !== "00:00")) {
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.fullName || !formData.alias || !formData.phone || !formData.email || 
-        !formData.equipmentCode || !formData.planId || !formData.receipt) {
+        !formData.equipmentCode || !formData.planId || !formData.startTime || !formData.receipt) {
       toast({
         title: "Campos requeridos",
-        description: "Por favor completa todos los campos y sube el comprobante",
+        description: "Por favor completa todos los campos, selecciona horario y sube el comprobante",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const endTime = calculateEndTime(formData.startTime, formData.planId);
+    if (!isTimeSlotAvailable(formData.startTime, endTime, formData.equipmentCode)) {
+      toast({
+        title: "Horario no válido",
+        description: "El horario seleccionado no está disponible o está fuera del horario de operación",
         variant: "destructive"
       });
       return;
@@ -93,6 +164,8 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
         email: '',
         equipmentCode: '',
         planId: '',
+        startTime: '',
+        endTime: '',
         receipt: null
       });
     } catch (error) {
@@ -192,6 +265,45 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
             </Select>
           </div>
 
+          {/* Time Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startTime">Hora de Inicio *</Label>
+              <Select 
+                value={formData.startTime} 
+                onValueChange={(value) => {
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    startTime: value,
+                    endTime: calculateEndTime(value, prev.planId)
+                  }))
+                }}
+              >
+                <SelectTrigger className="bg-gaming-bg border-gaming-border">
+                  <SelectValue placeholder="Selecciona hora de inicio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateTimeSlots().map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="endTime">Hora de Fin</Label>
+              <Input
+                id="endTime"
+                value={formData.endTime || calculateEndTime(formData.startTime, formData.planId)}
+                readOnly
+                placeholder="Se calcula automáticamente"
+                className="bg-gaming-bg border-gaming-border"
+              />
+            </div>
+          </div>
+
           {/* Plan Selection */}
           <div className="space-y-4">
             <Label>Plan de Gaming *</Label>
@@ -208,7 +320,11 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
                             ? 'border-primary bg-primary/10 ring-2 ring-primary/30' 
                             : 'border-gaming-border bg-gaming-bg hover:border-gaming-accent'
                         }`}
-                        onClick={() => setFormData(prev => ({ ...prev, planId: plan.id }))}
+                        onClick={() => setFormData(prev => ({ 
+                          ...prev, 
+                          planId: plan.id,
+                          endTime: calculateEndTime(prev.startTime, plan.id)
+                        }))}
                       >
                         <div className="flex justify-between items-start">
                           <div>
