@@ -355,6 +355,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
                 <p><strong>Método:</strong> Transferencia Bancaria</p>
                 <p><strong>Titular:</strong> Gaming Grid</p>
                 <p><strong>Banco:</strong> Banco Estado</p>
+                <p><strong>RUT:</strong> 78.204.783-8</p>
                 <p><strong>Tipo:</strong> Cuenta Vista</p>
                 <p><strong>Número:</strong> 90278363871</p>
               </div>
