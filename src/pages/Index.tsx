@@ -458,7 +458,7 @@ const Index = () => {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              Gaming Grid - Tu destino gamer en Chile
+              Gaming Grid - Avenida Francisco Bilbao 1449, Providencia.
             </p>
           </div>
         </div>
