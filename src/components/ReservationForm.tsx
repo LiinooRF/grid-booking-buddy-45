@@ -67,10 +67,8 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 12; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        slots.push(timeString);
-      }
+      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+      slots.push(timeString);
     }
     slots.push("00:00"); // Add midnight
     return slots;
@@ -197,7 +195,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nombre Completo *</Label>
               <Input
@@ -266,7 +264,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
           </div>
 
           {/* Time Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startTime">Hora de Inicio *</Label>
               <Select 

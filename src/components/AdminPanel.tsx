@@ -224,23 +224,23 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                 
                 <Button
                   variant="outline"
-                  onClick={() => handleExtendTime(reservation, 15)}
-                >
-                  +15 min
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => handleExtendTime(reservation, 30)}
-                >
-                  +30 min
-                </Button>
-                
-                <Button
-                  variant="outline"
                   onClick={() => handleExtendTime(reservation, 60)}
                 >
-                  +60 min
+                  +1 hora
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => handleExtendTime(reservation, 120)}
+                >
+                  +2 horas
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => handleExtendTime(reservation, 180)}
+                >
+                  +3 horas
                 </Button>
                 
                 <Button
@@ -256,23 +256,23 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
               <>
                 <Button
                   variant="outline"
-                  onClick={() => handleExtendTime(reservation, 15)}
-                >
-                  +15 min
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => handleExtendTime(reservation, 30)}
-                >
-                  +30 min
-                </Button>
-                
-                <Button
-                  variant="outline"
                   onClick={() => handleExtendTime(reservation, 60)}
                 >
-                  +60 min
+                  +1 hora
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => handleExtendTime(reservation, 120)}
+                >
+                  +2 horas
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => handleExtendTime(reservation, 180)}
+                >
+                  +3 horas
                 </Button>
                 
                 <Button

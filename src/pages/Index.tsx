@@ -189,12 +189,13 @@ const Index = () => {
   };
 
   const handleExtendTime = (id: string, minutes: number) => {
+    const hours = Math.floor(minutes / 60);
     setReservations(prev => 
       prev.map(r => {
         if (r.id === id && r.endTime) {
-          const [hours, mins] = r.endTime.split(':').map(Number);
+          const [endHours, endMins] = r.endTime.split(':').map(Number);
           const endDate = new Date();
-          endDate.setHours(hours, mins, 0, 0);
+          endDate.setHours(endHours, endMins, 0, 0);
           endDate.setMinutes(endDate.getMinutes() + minutes);
           
           const newEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
@@ -203,6 +204,12 @@ const Index = () => {
         return r;
       })
     );
+    
+    toast({
+      title: "Tiempo extendido",
+      description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}`,
+      variant: "default"
+    });
   };
 
   return (
@@ -218,31 +225,34 @@ const Index = () => {
                 className="h-10 w-auto"
               />
               <div>
-                <h1 className="text-2xl font-bold text-primary">GAMING GRID</h1>
-                <p className="text-sm text-muted-foreground">Sistema de Reservas</p>
+                <h1 className="text-xl md:text-2xl font-bold">
+                  <span className="text-white">GAMING</span>{' '}
+                  <span className="text-primary">GRID</span>
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground">Sistema de Reservas</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="operating-hours">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="hidden md:flex operating-hours">
                 {isOpen ? (
                   <>
                     <Clock className="h-4 w-4 text-green-500" />
-                    <span className="text-green-500">Abierto</span>
+                    <span className="text-green-500 text-sm">Abierto</span>
                     <span className="text-xs">({getRemainingTimeToClose()})</span>
                   </>
                 ) : (
                   <>
                     <AlertCircle className="h-4 w-4 text-red-500" />
-                    <span className="text-red-500">Cerrado</span>
+                    <span className="text-red-500 text-sm">Cerrado</span>
                     <span className="text-xs">({formatOperatingHours()})</span>
                   </>
                 )}
               </div>
-              <Badge variant="outline" className="status-available">
+              <Badge variant="outline" className="status-available text-xs">
                 {mockEquipment.filter(eq => eq.status === 'available').length} Disponibles
               </Badge>
-              <Badge variant="outline" className="status-occupied">
+              <Badge variant="outline" className="status-occupied text-xs">
                 {mockEquipment.filter(eq => eq.status === 'occupied').length} Ocupados
               </Badge>
             </div>
@@ -250,21 +260,22 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-2 md:px-4 py-4 md:py-8">
         {reservationTicket ? (
           <div className="max-w-2xl mx-auto text-center space-y-6">
-            <div className="bg-gaming-surface border-gaming-border rounded-lg p-8">
-              <div className="text-6xl mb-4">🎮</div>
-              <h2 className="text-3xl font-bold text-primary mb-4">¡Reserva Enviada!</h2>
-              <div className="text-xl mb-4">
+            <div className="bg-gaming-surface border-gaming-border rounded-lg p-4 md:p-8">
+              <div className="text-4xl md:text-6xl mb-4">✓</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4">Reserva Enviada</h2>
+              <div className="text-lg md:text-xl mb-4">
                 Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
               </div>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 text-sm md:text-base">
                 Tu reserva está en revisión. Nos pondremos en contacto contigo una vez confirmemos el pago.
               </p>
               <Button 
                 variant="gaming" 
                 onClick={() => setReservationTicket(null)}
+                className="w-full md:w-auto"
               >
                 Hacer Nueva Reserva
               </Button>
@@ -289,8 +300,8 @@ const Index = () => {
 
             <TabsContent value="equipos" className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-primary">Estado de Equipos</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary">Estado de Equipos</h2>
+                <p className="text-muted-foreground text-sm md:text-base">
                   Selecciona un equipo disponible para hacer tu reserva
                 </p>
               </div>
@@ -322,8 +333,8 @@ const Index = () => {
 
             <TabsContent value="reservar" className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-primary">Nueva Reserva</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary">Nueva Reserva</h2>
+                <p className="text-muted-foreground text-sm md:text-base">
                   Completa el formulario y sube tu comprobante de transferencia
                 </p>
               </div>

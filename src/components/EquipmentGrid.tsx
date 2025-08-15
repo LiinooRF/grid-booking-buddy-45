@@ -167,7 +167,7 @@ const EquipmentGrid = ({
           {title}
         </h3>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {items.map(renderEquipmentCard)}
       </div>
     </div>
@@ -175,8 +175,8 @@ const EquipmentGrid = ({
 
   return (
     <div className="space-y-8">
-      {renderEquipmentSection(pcs, 'PCs Gaming', '💻')}
-      {renderEquipmentSection(consoles, 'Consolas', '🎮')}
+      {renderEquipmentSection(pcs, 'PCs Gaming', '')}
+      {renderEquipmentSection(consoles, 'Consolas', '')}
     </div>
   );
 };
