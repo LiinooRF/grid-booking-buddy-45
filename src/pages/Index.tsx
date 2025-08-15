@@ -7,7 +7,7 @@ import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
 import { isOperatingHours, formatOperatingHours, getRemainingTimeToClose, sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
-import { Gamepad2, Users, Settings, Clock, AlertCircle } from "lucide-react";
+import { Gamepad2, Users, Settings, Clock, AlertCircle, MessageCircle, Mail } from "lucide-react";
 
 // Mock data - In real app this would come from API
 const mockEquipment = [
@@ -432,6 +432,37 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-primary">¿Necesitas ayuda?</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
+              <a 
+                href="https://wa.me/56978414767" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-green-500 hover:text-green-400 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>WhatsApp: +56 9 7841 4767</span>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <a 
+                href="mailto:TheGridChile@gmail.com"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                <span>TheGridChile@gmail.com</span>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Gaming Grid - Tu destino gamer en Chile
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
