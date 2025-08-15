@@ -32,13 +32,16 @@ interface AdminPanelProps {
   onExtendTime: (id: string, minutes: number) => void;
   onLogin: (password: string) => void;
   isAuthenticated: boolean;
+  plans: any[];
+  onChangePlan: (reservationId: string, planId: string) => void;
 }
 
-const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated }: AdminPanelProps) => {
+const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, plans, onChangePlan }: AdminPanelProps) => {
   const { toast } = useToast();
   const [password, setPassword] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'confirmed' | 'cancelled'>('pending');
+  const [changingPlan, setChangingPlan] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,6 +227,32 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                 
                 <Button
                   variant="outline"
+                  onClick={() => setChangingPlan(changingPlan === reservation.id ? null : reservation.id)}
+                >
+                  Cambiar Plan
+                </Button>
+                
+                {changingPlan === reservation.id && (
+                  <div className="w-full mt-2">
+                    <select 
+                      className="w-full p-2 bg-gaming-bg border border-gaming-border rounded text-sm"
+                      onChange={(e) => {
+                        onChangePlan(reservation.id, e.target.value);
+                        setChangingPlan(null);
+                      }}
+                    >
+                      <option value="">Seleccionar nuevo plan</option>
+                      {plans.map(plan => (
+                        <option key={plan.id} value={plan.id}>
+                          {plan.name} - ${plan.price.toLocaleString()} CLP
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                <Button
+                  variant="outline"
                   onClick={() => handleExtendTime(reservation, 60)}
                 >
                   +1 hora
@@ -254,6 +283,32 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
             
             {reservation.status === 'arrived' && (
               <>
+                <Button
+                  variant="outline"
+                  onClick={() => setChangingPlan(changingPlan === reservation.id ? null : reservation.id)}
+                >
+                  Cambiar Plan
+                </Button>
+                
+                {changingPlan === reservation.id && (
+                  <div className="w-full mt-2">
+                    <select 
+                      className="w-full p-2 bg-gaming-bg border border-gaming-border rounded text-sm"
+                      onChange={(e) => {
+                        onChangePlan(reservation.id, e.target.value);
+                        setChangingPlan(null);
+                      }}
+                    >
+                      <option value="">Seleccionar nuevo plan</option>
+                      {plans.map(plan => (
+                        <option key={plan.id} value={plan.id}>
+                          {plan.name} - ${plan.price.toLocaleString()} CLP
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
                 <Button
                   variant="outline"
                   onClick={() => handleExtendTime(reservation, 60)}

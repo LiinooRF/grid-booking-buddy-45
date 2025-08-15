@@ -124,7 +124,9 @@ const Index = () => {
       planPrice: mockPlans.find(p => p.id === data.planId)?.price || 0,
       receiptUrl: URL.createObjectURL(data.receipt),
       status: 'pending' as const,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      startTime: data.startTime,
+      endTime: data.endTime
     };
     
     // Send Telegram notification
@@ -212,6 +214,30 @@ const Index = () => {
     });
   };
 
+  const handleChangePlan = (reservationId: string, newPlanId: string) => {
+    const newPlan = mockPlans.find(p => p.id === newPlanId);
+    if (!newPlan) return;
+
+    setReservations(prev => 
+      prev.map(r => {
+        if (r.id === reservationId) {
+          return {
+            ...r,
+            planName: newPlan.name + ' - ' + newPlan.includes,
+            planPrice: newPlan.price
+          };
+        }
+        return r;
+      })
+    );
+
+    toast({
+      title: "Plan actualizado",
+      description: `Plan cambiado a: ${newPlan.name}`,
+      variant: "default"
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
@@ -283,7 +309,7 @@ const Index = () => {
           </div>
         ) : (
           <Tabs defaultValue="equipos" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 bg-gaming-surface border-gaming-border">
+            <TabsList className="grid w-full grid-cols-2 bg-gaming-surface border-gaming-border">
               <TabsTrigger value="equipos" className="flex items-center gap-2">
                 <Gamepad2 className="h-4 w-4" />
                 Equipos
@@ -291,10 +317,6 @@ const Index = () => {
               <TabsTrigger value="reservar" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Reservar
-              </TabsTrigger>
-              <TabsTrigger value="admin" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Admin
               </TabsTrigger>
             </TabsList>
 
@@ -358,23 +380,57 @@ const Index = () => {
                 />
               </div>
             </TabsContent>
-
-            <TabsContent value="admin" className="space-y-6">
-              <div className="max-w-6xl mx-auto">
-                <AdminPanel
-                  reservations={reservations}
-                  onConfirm={handleReservationConfirm}
-                  onCancel={handleReservationCancel}
-                  onMarkArrived={handleMarkArrived}
-                  onRelease={handleRelease}
-                  onExtendTime={handleExtendTime}
-                  onLogin={handleAdminLogin}
-                  isAuthenticated={isAdminAuthenticated}
-                />
-              </div>
-            </TabsContent>
           </Tabs>
         )}
+
+        {/* Admin Panel - Discrete Access */}
+        <div className="fixed bottom-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const adminPanel = document.getElementById('admin-panel');
+              if (adminPanel) {
+                adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+              }
+            }}
+            className="opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Hidden Admin Panel */}
+        <div id="admin-panel" style={{ display: 'none' }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gaming-surface border-gaming-border rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-primary">Panel de Administración</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    document.getElementById('admin-panel')!.style.display = 'none';
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+              <AdminPanel
+                reservations={reservations}
+                onConfirm={handleReservationConfirm}
+                onCancel={handleReservationCancel}
+                onMarkArrived={handleMarkArrived}
+                onRelease={handleRelease}
+                onExtendTime={handleExtendTime}
+                onLogin={handleAdminLogin}
+                isAuthenticated={isAdminAuthenticated}
+                plans={mockPlans}
+                onChangePlan={handleChangePlan}
+              />
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
