@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
@@ -23,6 +24,28 @@ const mockEquipment = [
 
 // Hourly pricing: 2000 pesos per hour
 const HOURLY_RATE = 2000;
+
+// Current plan prices for reference
+const PLAN_PRICES = {
+  "Gaming Time": [
+    { name: "1 Hora", price: 5000, includes: "Lounge access" },
+    { name: "3 Horas", price: 10000, includes: "Lounge access" },
+    { name: "Day Pass", price: 20000, includes: "12-hour access (12–12)" }
+  ],
+  "Booster Packs": [
+    { name: "Starter Boost", price: 15000, includes: "5 Hours" },
+    { name: "XP Pack", price: 26000, includes: "10 Hours" },
+    { name: "Level Up", price: 50000, includes: "20 Hours" },
+    { name: "Elite Pass", price: 110000, includes: "50 Hours" }
+  ],
+  "Combos": [
+    { name: "Gamer Snack Pack", price: 7000, includes: "1 Hour + Snack + Drink/Coffee" },
+    { name: "XP Boost", price: 12000, includes: "3 Hours + Snack + Drink" },
+    { name: "Duo Pack", price: 14000, includes: "2 Hours + Snack + Drink c/u (2 players)" },
+    { name: "Full Day Fuel", price: 25000, includes: "Day Pass + 2 Snacks + 2 Drinks + 1 Refill" },
+    { name: "Power Boost Pack", price: 13500, includes: "3 Hours + Snack + Coffee" }
+  ]
+};
 
 interface Reservation {
   id: string;
@@ -327,6 +350,52 @@ const Index = () => {
             </TabsContent>
           </Tabs>
         )}
+
+        {/* Plans and Pricing Section */}
+        <div className="mt-12 max-w-6xl mx-auto">
+          <Card className="bg-gaming-surface border-gaming-border">
+            <CardHeader>
+              <CardTitle className="text-center text-2xl text-primary">Planes Disponibles en el Local</CardTitle>
+              <p className="text-center text-muted-foreground">
+                Reserva por horas (2.000 CLP/hora) y elige tu plan final en el local. El monto pagado se descuenta del plan elegido.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {Object.entries(PLAN_PRICES).map(([category, plans]) => (
+                  <div key={category} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-primary border-b border-gaming-border pb-2">
+                      {category}
+                    </h3>
+                    <div className="space-y-3">
+                      {plans.map((plan, index) => (
+                        <Card key={index} className="bg-gaming-bg border-gaming-border">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-medium">{plan.name}</h4>
+                              <span className="text-primary font-bold">${plan.price.toLocaleString()}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{plan.includes}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
+                <h4 className="font-semibold text-primary mb-2">¿Cómo funciona?</h4>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Reserva pagando 2.000 CLP por cada hora que necesites</li>
+                  <li>• Tienes 15 minutos para llegar una vez confirmada tu reserva</li>
+                  <li>• En el local, elige el plan que prefieras</li>
+                  <li>• Lo que pagaste en la reserva se descuenta del plan final</li>
+                  <li>• Si no vienes, te reembolsamos el dinero</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Admin Panel - Discrete Access */}
         <div className="fixed bottom-4 right-4">

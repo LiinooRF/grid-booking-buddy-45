@@ -63,6 +63,40 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }:
     return slots;
   };
 
+  const getMaxHoursForTime = (startTime: string, selectedDate: string) => {
+    if (!startTime) return 12;
+    
+    const [startHour] = startTime.split(':').map(Number);
+    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+    const currentHour = new Date().getHours();
+    
+    // If it's today and the time has already passed, return 0
+    if (isToday && currentHour >= startHour) {
+      return 0;
+    }
+    
+    // Calculate hours until closing (12AM = 24, but we use 0 for midnight)
+    let hoursUntilClose;
+    if (startHour === 0) { // If starting at midnight
+      hoursUntilClose = 0;
+    } else if (startHour >= 12) { // PM hours
+      hoursUntilClose = 24 - startHour;
+    } else { // AM hours (shouldn't happen in our case, but just in case)
+      hoursUntilClose = 24 - startHour;
+    }
+    
+    return Math.min(hoursUntilClose, 12);
+  };
+
+  const getAvailableHours = () => {
+    const maxHours = getMaxHoursForTime(formData.startTime, formData.reservationDate);
+    const hours = [];
+    for (let i = 1; i <= maxHours; i++) {
+      hours.push(i);
+    }
+    return hours;
+  };
+
   const calculateEndTime = (startTime: string, hours: number) => {
     if (!startTime || !hours) return '';
     
@@ -98,6 +132,17 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }:
       toast({
         title: "Campos requeridos",
         description: "Por favor completa todos los campos y sube el comprobante",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate time restrictions
+    const maxHours = getMaxHoursForTime(formData.startTime, formData.reservationDate);
+    if (formData.hours > maxHours) {
+      toast({
+        title: "Horario no disponible",
+        description: `Solo puedes reservar máximo ${maxHours} ${maxHours === 1 ? 'hora' : 'horas'} desde las ${formData.startTime}`,
         variant: "destructive"
       });
       return;
@@ -275,13 +320,18 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }:
                   <SelectValue placeholder="Selecciona cantidad de horas" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((hour) => (
+                  {getAvailableHours().map((hour) => (
                     <SelectItem key={hour} value={hour.toString()}>
                       {hour} {hour === 1 ? 'hora' : 'horas'} - ${(hour * hourlyRate).toLocaleString()} CLP
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {formData.startTime && getMaxHoursForTime(formData.startTime, formData.reservationDate) === 0 && (
+                <p className="text-sm text-destructive">
+                  Esta hora ya no está disponible para hoy
+                </p>
+              )}
             </div>
             {formData.startTime && formData.hours && (
               <div className="text-sm text-muted-foreground">
