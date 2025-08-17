@@ -4,33 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, CreditCard, Clock, Users } from "lucide-react";
 
-interface Plan {
-  id: string;
-  category: string;
-  name: string;
-  includes: string;
-  price: number;
-}
-
 interface Equipment {
+  id: string;
   code: string;
-  name: string;
   type: 'PC' | 'CONSOLE';
-  status: string;
+  name: string;
+  status: 'available' | 'occupied' | 'reserved_pending' | 'reserved_confirmed';
 }
 
 interface ReservationFormProps {
-  plans: Plan[];
   equipment: Equipment[];
   selectedEquipment?: string;
   onSubmit: (data: any) => void;
+  hourlyRate: number;
 }
 
-const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: ReservationFormProps) => {
+const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }: ReservationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
@@ -38,16 +30,13 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     phone: '',
     email: '',
     equipmentCode: selectedEquipment || '',
-    planId: '',
+    reservationDate: new Date().toISOString().split('T')[0],
     startTime: '',
-    endTime: '',
+    hours: 1,
     receipt: null as File | null
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const availableEquipment = equipment.filter(eq => eq.status === 'available');
-  const selectedPlan = plans.find(p => p.id === formData.planId);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,34 +63,14 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     return slots;
   };
 
-  const calculateEndTime = (startTime: string, planId: string) => {
-    if (!startTime || !planId) return '';
+  const calculateEndTime = (startTime: string, hours: number) => {
+    if (!startTime || !hours) return '';
     
-    const plan = plans.find(p => p.id === planId);
-    if (!plan) return '';
-    
-    const [hours, minutes] = startTime.split(':').map(Number);
+    const [startHour, startMin] = startTime.split(':').map(Number);
     const startDate = new Date();
-    startDate.setHours(hours, minutes, 0, 0);
+    startDate.setHours(startHour, startMin, 0, 0);
     
-    let durationHours = 0;
-    if (plan.name.includes('1 Hour')) durationHours = 1;
-    else if (plan.name.includes('3 Hours')) durationHours = 3;
-    else if (plan.name.includes('Day Pass')) durationHours = 12;
-    else if (plan.name.includes('5 Hours')) durationHours = 5;
-    else if (plan.name.includes('10 Hours')) durationHours = 10;
-    else if (plan.name.includes('20 Hours')) durationHours = 20;
-    else if (plan.name.includes('50 Hours')) durationHours = 50;
-    else if (plan.name.includes('2 Hours')) durationHours = 2;
-    else durationHours = 1;
-    
-    const endDate = new Date(startDate.getTime() + durationHours * 60 * 60 * 1000);
-    
-    // If end time goes past midnight, cap at midnight
-    if (endDate.getHours() < 12 && endDate.getDate() !== startDate.getDate()) {
-      return "00:00";
-    }
-    
+    const endDate = new Date(startDate.getTime() + (hours * 60 * 60 * 1000));
     return `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
   };
 
@@ -125,20 +94,10 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     e.preventDefault();
     
     if (!formData.fullName || !formData.alias || !formData.phone || !formData.email || 
-        !formData.equipmentCode || !formData.planId || !formData.startTime || !formData.receipt) {
+        !formData.equipmentCode || !formData.reservationDate || !formData.startTime || !formData.receipt || !formData.hours) {
       toast({
         title: "Campos requeridos",
-        description: "Por favor completa todos los campos, selecciona horario y sube el comprobante",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const endTime = calculateEndTime(formData.startTime, formData.planId);
-    if (!isTimeSlotAvailable(formData.startTime, endTime, formData.equipmentCode)) {
-      toast({
-        title: "Horario no válido",
-        description: "El horario seleccionado no está disponible o está fuera del horario de operación",
+        description: "Por favor completa todos los campos y sube el comprobante",
         variant: "destructive"
       });
       return;
@@ -147,10 +106,15 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     setIsSubmitting(true);
     
     try {
-      await onSubmit(formData);
+      const endTime = calculateEndTime(formData.startTime, formData.hours);
+      await onSubmit({
+        ...formData,
+        endTime
+      });
+      
       toast({
         title: "Reserva enviada",
-        description: "Tu reserva está en revisión. Te contactaremos pronto.",
+        description: "Tu reserva ha sido enviada correctamente",
         variant: "default"
       });
       
@@ -161,15 +125,15 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
         phone: '',
         email: '',
         equipmentCode: '',
-        planId: '',
+        reservationDate: new Date().toISOString().split('T')[0],
         startTime: '',
-        endTime: '',
+        hours: 1,
         receipt: null
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo enviar la reserva. Intenta nuevamente.",
+        description: "Hubo un error al enviar la reserva",
         variant: "destructive"
       });
     } finally {
@@ -177,11 +141,7 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
     }
   };
 
-  const groupedPlans = plans.reduce((acc, plan) => {
-    if (!acc[plan.category]) acc[plan.category] = [];
-    acc[plan.category].push(plan);
-    return acc;
-  }, {} as Record<string, Plan[]>);
+  const totalPrice = formData.hours * hourlyRate;
 
   return (
     <Card className="bg-gaming-surface border-gaming-border">
@@ -195,150 +155,165 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Info */}
-          <div className="grid grid-cols-1 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nombre Completo *</Label>
-              <Input
-                id="fullName"
-                value={formData.fullName}
-                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                placeholder="Tu nombre completo"
-                className="bg-gaming-bg border-gaming-border"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="alias">Usuario Gaming *</Label>
-              <Input
-                id="alias"
-                value={formData.alias}
-                onChange={(e) => setFormData(prev => ({ ...prev, alias: e.target.value }))}
-                placeholder="Tu alias en el cyber"
-                className="bg-gaming-bg border-gaming-border"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="+56 9 1234 5678"
-                className="bg-gaming-bg border-gaming-border"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="tu@email.com"
-                className="bg-gaming-bg border-gaming-border"
-              />
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-primary">Información Personal</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nombre Completo</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                  placeholder="Tu nombre completo"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="alias">Tu alias en el cyber</Label>
+                <Input
+                  id="alias"
+                  type="text"
+                  value={formData.alias}
+                  onChange={(e) => setFormData({...formData, alias: e.target.value})}
+                  placeholder="Si no tienes, solo coloca tu nombre y te reservamos uno"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="+56 9 1234 5678"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="tu@email.com"
+                  required
+                />
+              </div>
             </div>
           </div>
 
           {/* Equipment Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="equipment">Equipo *</Label>
-            <Select 
-              value={formData.equipmentCode} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, equipmentCode: value }))}
-            >
-              <SelectTrigger className="bg-gaming-bg border-gaming-border">
-                <SelectValue placeholder="Selecciona un equipo disponible" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableEquipment.map((eq) => (
-                  <SelectItem key={eq.code} value={eq.code}>
-                    {eq.code} - {eq.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Time Selection */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-primary">Selección de Equipo</h3>
             <div className="space-y-2">
-              <Label htmlFor="startTime">Hora de Inicio *</Label>
-              <Select 
-                value={formData.startTime} 
-                onValueChange={(value) => {
-                  setFormData(prev => ({ 
-                    ...prev, 
-                    startTime: value,
-                    endTime: calculateEndTime(value, prev.planId)
-                  }))
-                }}
+              <Label htmlFor="equipmentCode">Equipo</Label>
+              <Select
+                value={formData.equipmentCode}
+                onValueChange={(value) => setFormData({...formData, equipmentCode: value})}
               >
-                <SelectTrigger className="bg-gaming-bg border-gaming-border">
-                  <SelectValue placeholder="Selecciona hora de inicio" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un equipo disponible" />
                 </SelectTrigger>
                 <SelectContent>
-                  {generateTimeSlots().map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
+                  {equipment.filter(eq => eq.status === 'available').map((eq) => (
+                    <SelectItem key={eq.code} value={eq.code}>
+                      {eq.code} - {eq.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="endTime">Hora de Fin</Label>
-              <Input
-                id="endTime"
-                value={formData.endTime || calculateEndTime(formData.startTime, formData.planId)}
-                readOnly
-                placeholder="Se calcula automáticamente"
-                className="bg-gaming-bg border-gaming-border"
-              />
-            </div>
           </div>
 
-          {/* Plan Selection */}
+          {/* Date and Time Selection */}
           <div className="space-y-4">
-            <Label>Plan de Gaming *</Label>
-            <div className="grid gap-4">
-              {Object.entries(groupedPlans).map(([category, categoryPlans]) => (
-                <div key={category} className="space-y-2">
-                  <h3 className="text-lg font-semibold text-primary">{category}</h3>
-                  <div className="grid gap-2">
-                    {categoryPlans.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                          formData.planId === plan.id 
-                            ? 'border-primary bg-primary/10 ring-2 ring-primary/30' 
-                            : 'border-gaming-border bg-gaming-bg hover:border-gaming-accent'
-                        }`}
-                        onClick={() => setFormData(prev => ({ 
-                          ...prev, 
-                          planId: plan.id,
-                          endTime: calculateEndTime(prev.startTime, plan.id)
-                        }))}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{plan.name}</h4>
-                            <p className="text-sm text-muted-foreground">{plan.includes}</p>
-                          </div>
-                          <Badge variant="outline" className="text-primary">
-                            ${plan.price.toLocaleString()} CLP
-                          </Badge>
-                        </div>
-                      </div>
+            <h3 className="text-lg font-semibold text-primary">Fecha y Horario</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="reservationDate">Fecha de reserva</Label>
+                <Input
+                  id="reservationDate"
+                  type="date"
+                  value={formData.reservationDate}
+                  onChange={(e) => setFormData({...formData, reservationDate: e.target.value})}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startTime">Hora de inicio</Label>
+                <Select
+                  value={formData.startTime}
+                  onValueChange={(value) => setFormData({...formData, startTime: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona hora de inicio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateTimeSlots().map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
                     ))}
-                  </div>
-                </div>
-              ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="hours">Cantidad de horas</Label>
+              <Select
+                value={formData.hours.toString()}
+                onValueChange={(value) => setFormData({...formData, hours: parseInt(value)})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona cantidad de horas" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((hour) => (
+                    <SelectItem key={hour} value={hour.toString()}>
+                      {hour} {hour === 1 ? 'hora' : 'horas'} - ${(hour * hourlyRate).toLocaleString()} CLP
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {formData.startTime && formData.hours && (
+              <div className="text-sm text-muted-foreground">
+                Horario reservado: {formData.startTime} - {calculateEndTime(formData.startTime, formData.hours)}
+              </div>
+            )}
+          </div>
+
+          {/* Price Summary */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-primary">Resumen de Reserva</h3>
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Horas reservadas:</span>
+                    <span>{formData.hours} {formData.hours === 1 ? 'hora' : 'horas'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Precio por hora:</span>
+                    <span>${hourlyRate.toLocaleString()} CLP</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                    <span>Total a pagar:</span>
+                    <span className="text-primary">${totalPrice.toLocaleString()} CLP</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Este monto se descuenta del plan final que elijas en el local. Si no vienes, se reembolsa.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Payment Info */}
@@ -358,19 +333,17 @@ const ReservationForm = ({ plans, equipment, selectedEquipment, onSubmit }: Rese
                 <p><strong>Número:</strong> 90278363871</p>
               </div>
               
-              {selectedPlan && (
-                <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
-                  <p className="font-semibold text-primary">
-                    Total a transferir: ${selectedPlan.price.toLocaleString()} CLP
-                  </p>
-                </div>
-              )}
+              <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
+                <p className="font-semibold text-primary">
+                  Total a transferir: ${totalPrice.toLocaleString()} CLP
+                </p>
+              </div>
             </CardContent>
           </Card>
 
           {/* Receipt Upload */}
           <div className="space-y-2">
-            <Label htmlFor="receipt">Comprobante de Transferencia *</Label>
+            <Label htmlFor="receipt">Comprobante de Transferencia</Label>
             <div className="border-2 border-dashed border-gaming-border rounded-lg p-6 text-center">
               <input
                 id="receipt"

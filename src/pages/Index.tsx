@@ -6,8 +6,8 @@ import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
-import { isOperatingHours, formatOperatingHours, getRemainingTimeToClose, sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
-import { Gamepad2, Users, Settings, Clock, AlertCircle, MessageCircle, Mail } from "lucide-react";
+import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
+import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 
 // Mock data - In real app this would come from API
 const mockEquipment = [
@@ -21,25 +21,8 @@ const mockEquipment = [
   { id: '8', code: 'CON2', type: 'CONSOLE' as const, name: 'PlayStation 5', status: 'reserved_pending' as const }
 ];
 
-const mockPlans = [
-  // Gaming Time
-  { id: '1', category: 'Gaming Time', name: '1 Hour', includes: 'Lounge access', price: 5000 },
-  { id: '2', category: 'Gaming Time', name: '3 Hours', includes: 'Lounge access', price: 10000 },
-  { id: '3', category: 'Gaming Time', name: 'Day Pass', includes: '12-hour access (12–12)', price: 20000 },
-  
-  // Booster Packs
-  { id: '4', category: 'Booster Packs', name: 'Starter Boost', includes: '5 Hours', price: 15000 },
-  { id: '5', category: 'Booster Packs', name: 'XP Pack', includes: '10 Hours', price: 26000 },
-  { id: '6', category: 'Booster Packs', name: 'Level Up', includes: '20 Hours', price: 50000 },
-  { id: '7', category: 'Booster Packs', name: 'Elite Pass', includes: '50 Hours', price: 110000 },
-  
-  // Combos
-  { id: '8', category: 'Combos', name: 'Gamer Snack Pack', includes: '1 Hour + Snack + Drink/Coffee', price: 7000 },
-  { id: '9', category: 'Combos', name: 'XP Boost', includes: '3 Hours + Snack + Drink', price: 12000 },
-  { id: '10', category: 'Combos', name: 'Duo Pack', includes: '2 Hours + Snack + Drink c/u (2 players)', price: 14000 },
-  { id: '11', category: 'Combos', name: 'Full Day Fuel', includes: 'Day Pass + 2 Snacks + 2 Drinks + 1 Refill', price: 25000 },
-  { id: '12', category: 'Combos', name: 'Power Boost Pack', includes: '3 Hours + Snack + Coffee', price: 13500 }
-];
+// Hourly pricing: 2000 pesos per hour
+const HOURLY_RATE = 2000;
 
 interface Reservation {
   id: string;
@@ -48,11 +31,12 @@ interface Reservation {
   phone: string;
   email: string;
   equipmentCode: string;
-  planName: string;
-  planPrice: number;
+  hours: number;
+  totalPrice: number;
   receiptUrl: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
+  reservationDate: string;
   startTime?: string;
   endTime?: string;
 }
@@ -65,11 +49,14 @@ const mockReservations: Reservation[] = [
     phone: '+56 9 8765 4321',
     email: 'carlos@email.com',
     equipmentCode: 'PC2',
-    planName: '3 Hours - Lounge access',
-    planPrice: 10000,
+    hours: 3,
+    totalPrice: 6000,
     receiptUrl: '/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png',
     status: 'pending',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    reservationDate: new Date().toISOString().split('T')[0],
+    startTime: '14:00',
+    endTime: '17:00'
   }
 ];
 
@@ -79,15 +66,6 @@ const Index = () => {
   const [reservations, setReservations] = useState(mockReservations);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(isOperatingHours());
-
-  // Check operating hours every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsOpen(isOperatingHours());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.code);
@@ -99,16 +77,6 @@ const Index = () => {
   };
 
   const handleReservationSubmit = async (data: any) => {
-    // Check if cyber is open
-    if (!isOpen) {
-      toast({
-        title: "Cyber cerrado",
-        description: `Horario de atención: ${formatOperatingHours()}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
     // Simulate API call
     const ticketNumber = `GG${Date.now().toString().slice(-6)}`;
     setReservationTicket(ticketNumber);
@@ -120,11 +88,12 @@ const Index = () => {
       phone: data.phone,
       email: data.email,
       equipmentCode: data.equipmentCode,
-      planName: mockPlans.find(p => p.id === data.planId)?.name + ' - ' + mockPlans.find(p => p.id === data.planId)?.includes || '',
-      planPrice: mockPlans.find(p => p.id === data.planId)?.price || 0,
+      hours: data.hours,
+      totalPrice: data.hours * HOURLY_RATE,
       receiptUrl: URL.createObjectURL(data.receipt),
       status: 'pending' as const,
       createdAt: new Date().toISOString(),
+      reservationDate: data.reservationDate,
       startTime: data.startTime,
       endTime: data.endTime
     };
@@ -214,17 +183,14 @@ const Index = () => {
     });
   };
 
-  const handleChangePlan = (reservationId: string, newPlanId: string) => {
-    const newPlan = mockPlans.find(p => p.id === newPlanId);
-    if (!newPlan) return;
-
+  const handleChangeHours = (reservationId: string, newHours: number) => {
     setReservations(prev => 
       prev.map(r => {
         if (r.id === reservationId) {
           return {
             ...r,
-            planName: newPlan.name + ' - ' + newPlan.includes,
-            planPrice: newPlan.price
+            hours: newHours,
+            totalPrice: newHours * HOURLY_RATE
           };
         }
         return r;
@@ -232,8 +198,8 @@ const Index = () => {
     );
 
     toast({
-      title: "Plan actualizado",
-      description: `Plan cambiado a: ${newPlan.name}`,
+      title: "Horas actualizadas",
+      description: `Reserva actualizada a ${newHours} ${newHours === 1 ? 'hora' : 'horas'}`,
       variant: "default"
     });
   };
@@ -260,20 +226,9 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-2 md:gap-4">
-              <div className="hidden md:flex operating-hours">
-                {isOpen ? (
-                  <>
-                    <Clock className="h-4 w-4 text-green-500" />
-                    <span className="text-green-500 text-sm">Abierto</span>
-                    <span className="text-xs">({getRemainingTimeToClose()})</span>
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="h-4 w-4 text-red-500" />
-                    <span className="text-red-500 text-sm">Cerrado</span>
-                    <span className="text-xs">({formatOperatingHours()})</span>
-                  </>
-                )}
+              <div className="hidden md:flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-sm text-muted-foreground">12PM - 12AM</span>
               </div>
               <Badge variant="outline" className="status-available text-xs">
                 {mockEquipment.filter(eq => eq.status === 'available').length} Disponibles
@@ -296,7 +251,7 @@ const Index = () => {
                 Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm md:text-base">
-                Tu reserva está en revisión. Nos pondremos en contacto contigo una vez confirmemos el pago.
+                Tu reserva está en revisión. Tienes 15 minutos para llegar una vez confirmada. El plan final se selecciona en el local y se descuenta del total pagado.
               </p>
               <Button 
                 variant="gaming" 
@@ -357,26 +312,16 @@ const Index = () => {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-primary">Nueva Reserva</h2>
                 <p className="text-muted-foreground text-sm md:text-base">
-                  Completa el formulario y sube tu comprobante de transferencia
+                  Reserva por horas (2.000 CLP/hora) - Horario: 12PM - 12AM
                 </p>
               </div>
               
-              {!isOpen && (
-                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center">
-                  <AlertCircle className="h-6 w-6 mx-auto mb-2 text-destructive" />
-                  <p className="text-destructive font-semibold">Cyber Cerrado</p>
-                  <p className="text-sm text-muted-foreground">
-                    Horario de atención: {formatOperatingHours()}
-                  </p>
-                </div>
-              )}
-              
               <div className="max-w-4xl mx-auto">
                 <ReservationForm
-                  plans={mockPlans}
                   equipment={mockEquipment}
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
+                  hourlyRate={HOURLY_RATE}
                 />
               </div>
             </TabsContent>
@@ -425,8 +370,8 @@ const Index = () => {
                 onExtendTime={handleExtendTime}
                 onLogin={handleAdminLogin}
                 isAuthenticated={isAdminAuthenticated}
-                plans={mockPlans}
-                onChangePlan={handleChangePlan}
+                onChangeHours={handleChangeHours}
+                hourlyRate={HOURLY_RATE}
               />
             </div>
           </div>
