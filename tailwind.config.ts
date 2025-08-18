@@ -60,12 +60,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				gaming: {
-					bg: 'hsl(var(--gaming-bg))',
-					surface: 'hsl(var(--gaming-surface))',
-					border: 'hsl(var(--gaming-border))',
-					glow: 'hsl(var(--gaming-glow))',
-					accent: 'hsl(var(--gaming-accent))'
+				cyber: {
+					bg: 'hsl(var(--cyber-bg))',
+					surface: 'hsl(var(--cyber-surface))',
+					border: 'hsl(var(--cyber-border))',
+					glow: 'hsl(var(--cyber-glow))',
+					accent: 'hsl(var(--cyber-accent))',
+					purple: 'hsl(var(--cyber-purple))',
+					pink: 'hsl(var(--cyber-pink))'
 				},
 				status: {
 					available: 'hsl(var(--status-available))',
