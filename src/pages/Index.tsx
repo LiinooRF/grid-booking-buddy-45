@@ -36,7 +36,7 @@ const PLAN_PRICES = {
     { name: "Starter Boost", price: 15000, includes: "5 Hours" },
     { name: "XP Pack", price: 26000, includes: "10 Hours" },
     { name: "Level Up", price: 50000, includes: "20 Hours" },
-    { name: "Elite Pass", price: 110000, includes: "50 Hours" }
+    { name: "Elite Pass", price: 90000, includes: "50 Hours" }
   ],
   "Combos": [
     { name: "Gamer Snack Pack", price: 7000, includes: "1 Hour + Snack + Drink/Coffee" },
@@ -472,7 +472,7 @@ const Index = () => {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              Gaming Grid - Avenida Francisco Bilbao 1449, Providencia.
+              Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
             </p>
           </div>
         </div>
