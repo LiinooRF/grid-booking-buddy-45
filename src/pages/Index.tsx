@@ -36,11 +36,11 @@ const mockEquipment = [
   { id: '1', code: 'PC-001', type: 'PC' as const, name: 'CYBER STATION ALPHA', status: 'available' as const },
   { id: '2', code: 'PC-002', type: 'PC' as const, name: 'CYBER STATION BETA', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'NEXUS_01' },
   { id: '3', code: 'PC-003', type: 'PC' as const, name: 'CYBER STATION GAMMA', status: 'available' as const },
-  { id: '4', code: 'PC-004', type: 'PC' as const, name: 'CYBER STATION DELTA', status: 'reserved' as const, occupiedUntil: '16:00', currentPlayer: 'MATRIX_X' },
+  { id: '4', code: 'PC-004', type: 'PC' as const, name: 'CYBER STATION DELTA', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'MATRIX_X' },
   { id: '5', code: 'PC-005', type: 'PC' as const, name: 'CYBER STATION EPSILON', status: 'available' as const },
   { id: '6', code: 'PC-006', type: 'PC' as const, name: 'CYBER STATION ZETA', status: 'available' as const },
   { id: '7', code: 'CON-001', type: 'CONSOLE' as const, name: 'NINTENDO SWITCH DOCK', status: 'available' as const },
-  { id: '8', code: 'CON-002', type: 'CONSOLE' as const, name: 'PLAYSTATION 5 NODE', status: 'pending' as const }
+  { id: '8', code: 'CON-002', type: 'CONSOLE' as const, name: 'PLAYSTATION 5 NODE', status: 'reserved_pending' as const }
 ];
 
 interface Reservation {
@@ -51,6 +51,8 @@ interface Reservation {
   email: string;
   equipmentCode: string;
   hours: number;
+  totalPrice: number;
+  receiptUrl: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
   reservationDate: string;
@@ -63,6 +65,8 @@ const Index = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("equipment");
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.code);
@@ -85,6 +89,8 @@ const Index = () => {
       email: data.email,
       equipmentCode: data.equipmentCode,
       hours: data.hours,
+      totalPrice: 0,
+      receiptUrl: '',
       status: 'pending',
       createdAt: new Date().toISOString(),
       reservationDate: data.reservationDate,
@@ -98,6 +104,85 @@ const Index = () => {
     toast({
       title: "RESERVA PROCESADA",
       description: "Tu reserva ha sido enviada para confirmación",
+      variant: "default"
+    });
+  };
+
+  const handleAdminLogin = (password: string) => {
+    if (password === 'admin123') {
+      setIsAdminAuthenticated(true);
+      toast({
+        title: "Acceso concedido",
+        description: "Bienvenido al panel de administración",
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Acceso denegado",
+        description: "Contraseña incorrecta",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleConfirmReservation = (id: string) => {
+    setReservations(prev => prev.map(r => 
+      r.id === id ? { ...r, status: 'confirmed' as const } : r
+    ));
+    toast({
+      title: "Reserva confirmada",
+      description: "La reserva ha sido confirmada exitosamente",
+      variant: "default"
+    });
+  };
+
+  const handleCancelReservation = (id: string) => {
+    setReservations(prev => prev.map(r => 
+      r.id === id ? { ...r, status: 'cancelled' as const } : r
+    ));
+    toast({
+      title: "Reserva cancelada",
+      description: "La reserva ha sido cancelada",
+      variant: "destructive"
+    });
+  };
+
+  const handleMarkArrived = (id: string) => {
+    setReservations(prev => prev.map(r => 
+      r.id === id ? { ...r, status: 'arrived' as const } : r
+    ));
+    toast({
+      title: "Cliente llegó",
+      description: "El estado ha sido actualizado",
+      variant: "default"
+    });
+  };
+
+  const handleRelease = (id: string) => {
+    // Logic to release equipment
+    toast({
+      title: "Equipo liberado",
+      description: "El equipo ha sido liberado",
+      variant: "default"
+    });
+  };
+
+  const handleExtendTime = (id: string, minutes: number) => {
+    // Logic to extend time
+    toast({
+      title: "Tiempo extendido",
+      description: `Se han agregado ${minutes} minutos`,
+      variant: "default"
+    });
+  };
+
+  const handleChangeHours = (reservationId: string, newHours: number) => {
+    setReservations(prev => prev.map(r => 
+      r.id === reservationId ? { ...r, hours: newHours } : r
+    ));
+    toast({
+      title: "Horas actualizadas",
+      description: "Las horas de la reserva han sido modificadas",
       variant: "default"
     });
   };
@@ -141,7 +226,18 @@ const Index = () => {
                     CONTROL PANEL
                   </DialogTitle>
                 </DialogHeader>
-                <AdminPanel />
+                <AdminPanel 
+                  reservations={reservations}
+                  onConfirm={handleConfirmReservation}
+                  onCancel={handleCancelReservation}
+                  onMarkArrived={handleMarkArrived}
+                  onRelease={handleRelease}
+                  onExtendTime={handleExtendTime}
+                  onLogin={handleAdminLogin}
+                  isAuthenticated={isAdminAuthenticated}
+                  onChangeHours={handleChangeHours}
+                  hourlyRate={2000}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -180,37 +276,117 @@ const Index = () => {
             </div>
           </section>
 
-          {/* Equipment Grid and Reservation */}
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="cyber-border">
+          {/* Main Content with Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="equipment" className="flex items-center gap-2">
+                <Gamepad2 className="h-4 w-4" />
+                Equipos
+              </TabsTrigger>
+              <TabsTrigger value="reservation" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Reservar
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="equipment" className="space-y-6">
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-primary">
+                        <Gamepad2 className="h-5 w-5" />
+                        ESTACIONES DISPONIBLES
+                      </CardTitle>
+                      <CardDescription>
+                        Hardware de elite con las últimas especificaciones
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <EquipmentGrid 
+                        equipment={mockEquipment}
+                        onSelect={handleEquipmentSelect}
+                        selectedEquipment={selectedEquipment}
+                      />
+                      {selectedEquipment && (
+                        <div className="mt-6 text-center">
+                          <Button 
+                            onClick={() => setActiveTab("reservation")}
+                            size="lg"
+                            className="animate-pulse"
+                          >
+                            CONTINUAR CON LA RESERVA
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Service Plans */}
+
+                  {/* Service Plans */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-primary">
+                        <Package className="h-5 w-5" />
+                        PLANES DISPONIBLES
+                      </CardTitle>
+                      <CardDescription>
+                        Precios de referencia - se eligen en el local
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4 text-sm">
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
+                          <p className="text-primary font-medium mb-2">⚡ SISTEMA DE RESERVAS:</p>
+                          <ul className="text-muted-foreground space-y-1 text-xs">
+                            <li>• Reservas gratuitas para asegurar tu lugar</li>
+                            <li>• Los planes se eligen al llegar al local</li>
+                            <li>• No se realizan pagos online</li>
+                            <li>• Límite de 15 minutos para llegar</li>
+                          </ul>
+                        </div>
+                        
+                        <Tabs defaultValue="Planes de Horas" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="Planes de Horas" className="text-xs">HORAS</TabsTrigger>
+                            <TabsTrigger value="Combos" className="text-xs">COMBOS</TabsTrigger>
+                            <TabsTrigger value="Adicionales" className="text-xs">EXTRAS</TabsTrigger>
+                          </TabsList>
+                          
+                          {Object.entries(servicePlans).map(([category, plans]) => (
+                            <TabsContent key={category} value={category} className="space-y-3">
+                              {plans.map((plan, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 rounded-lg border border-border/50 bg-card/20">
+                                  <div>
+                                    <p className="font-medium text-sm">{plan.name}</p>
+                                    <p className="text-xs text-muted-foreground">{plan.includes}</p>
+                                  </div>
+                                  <Badge variant="outline" className="text-primary">
+                                    ${plan.price.toLocaleString()}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </TabsContent>
+                          ))}
+                        </Tabs>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reservation" className="space-y-6">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary font-mono tracking-wider">
-                    <Gamepad2 className="h-5 w-5" />
-                    ESTACIONES DISPONIBLES
-                  </CardTitle>
-                  <CardDescription className="font-mono text-cyber-accent">
-                    Hardware de elite con las últimas especificaciones
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <EquipmentGrid 
-                    equipment={mockEquipment}
-                    onSelect={handleEquipmentSelect}
-                    selectedEquipment={selectedEquipment}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="space-y-6">
-              <Card className="cyber-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary font-mono tracking-wider">
+                  <CardTitle className="flex items-center gap-2 text-primary">
                     <Calendar className="h-5 w-5" />
                     RESERVAR ESTACIÓN
                   </CardTitle>
-                  <CardDescription className="font-mono text-cyber-accent">
+                  <CardDescription>
                     Asegura tu lugar en el cyber
                   </CardDescription>
                 </CardHeader>
@@ -219,61 +395,12 @@ const Index = () => {
                     equipment={mockEquipment}
                     selectedEquipment={selectedEquipment}
                     onSubmit={handleReservationSubmit}
+                    hourlyRate={2000}
                   />
                 </CardContent>
               </Card>
-
-              {/* Service Plans */}
-              <Card className="cyber-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary font-mono tracking-wider">
-                    <Package className="h-5 w-5" />
-                    PLANES DISPONIBLES
-                  </CardTitle>
-                  <CardDescription className="font-mono text-cyber-accent">
-                    Precios de referencia - se eligen en el local
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 text-sm">
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 cyber-glow">
-                      <p className="text-primary font-medium mb-2 font-mono">⚡ SISTEMA DE RESERVAS:</p>
-                      <ul className="text-muted-foreground space-y-1 text-xs font-mono">
-                        <li>• Reservas gratuitas para asegurar tu lugar</li>
-                        <li>• Los planes se eligen al llegar al local</li>
-                        <li>• No se realizan pagos online</li>
-                        <li>• Límite de 15 minutos para llegar</li>
-                      </ul>
-                    </div>
-                    
-                    <Tabs defaultValue="Planes de Horas" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 cyber-border">
-                        <TabsTrigger value="Planes de Horas" className="text-xs font-mono">HORAS</TabsTrigger>
-                        <TabsTrigger value="Combos" className="text-xs font-mono">COMBOS</TabsTrigger>
-                        <TabsTrigger value="Adicionales" className="text-xs font-mono">EXTRAS</TabsTrigger>
-                      </TabsList>
-                      
-                      {Object.entries(servicePlans).map(([category, plans]) => (
-                        <TabsContent key={category} value={category} className="space-y-3">
-                          {plans.map((plan, index) => (
-                            <div key={index} className="flex justify-between items-center p-3 rounded-lg border border-cyber-border/50 bg-cyber-surface/20">
-                              <div>
-                                <p className="font-medium text-sm font-mono">{plan.name}</p>
-                                <p className="text-xs text-muted-foreground font-mono">{plan.includes}</p>
-                              </div>
-                              <Badge variant="outline" className="text-primary font-mono cyber-glow">
-                                ${plan.price.toLocaleString()}
-                              </Badge>
-                            </div>
-                          ))}
-                        </TabsContent>
-                      ))}
-                    </Tabs>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Footer with Contact */}
