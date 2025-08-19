@@ -2,54 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CYBER GRID - Retro Cyberpunk Theme */
+/* Gaming Grid Design System - Dark theme with neon green accents inspired by the logo */
 
 @layer base {
   :root {
-    /* Base colors */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    
-    /* UI element colors */
-    --primary: 217 91% 60%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    
-    /* Status colors */
-    --status-available: 142 76% 36%;
-    --status-occupied: 0 84% 60%;
-    --status-pending: 45 93% 47%;
-    --status-reserved: 217 91% 60%;
-    
-    /* Border and input colors */
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212 95% 68%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Gaming Dark Theme */
+    --background: 220 13% 8%;
+    --foreground: 120 100% 95%;
 
-    /* Cyberpunk specific colors */
-    --cyber-bg: 222.2 84% 3.9%;
-    --cyber-surface: 217.2 32.6% 17.5%;
-    --cyber-border: 217 91% 60%;
-    --cyber-glow: 217 91% 60%;
-    --cyber-accent: 217 91% 60%;
-    --cyber-purple: 280 100% 60%;
-    --cyber-pink: 330 100% 70%;
+    --card: 220 13% 10%;
+    --card-foreground: 120 100% 95%;
+
+    --popover: 220 13% 10%;
+    --popover-foreground: 120 100% 95%;
+
+    /* Neon Green Primary (from logo) */
+    --primary: 127 100% 50%;
+    --primary-foreground: 220 13% 8%;
+
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 120 100% 95%;
+
+    --muted: 220 13% 12%;
+    --muted-foreground: 120 20% 65%;
+
+    --accent: 127 100% 45%;
+    --accent-foreground: 220 13% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 120 100% 95%;
+
+    --success: 127 100% 40%;
+    --success-foreground: 220 13% 8%;
+
+    --warning: 48 100% 50%;
+    --warning-foreground: 220 13% 8%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 15%;
+    --ring: 127 100% 50%;
+
+    /* Gaming specific colors */
+    --gaming-bg: 220 13% 6%;
+    --gaming-surface: 220 13% 12%;
+    --gaming-border: 220 13% 20%;
+    --gaming-glow: 127 100% 50%;
+    --gaming-accent: 127 80% 55%;
+
+    /* Equipment status colors */
+    --status-available: 127 100% 45%;
+    --status-occupied: 0 72% 51%;
+    --status-reserved: 48 100% 50%;
+    --status-pending: 220 20% 65%;
 
     --radius: 0.75rem;
 
@@ -115,113 +119,43 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    background: 
-      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-      linear-gradient(135deg, hsl(var(--background)), hsl(var(--card)));
-    min-height: 100vh;
+    @apply bg-background text-foreground font-mono;
+    background: linear-gradient(135deg, hsl(var(--gaming-bg)), hsl(var(--background)));
   }
 }
 
 @layer components {
-  /* Cyberpunk UI Components */
+  /* Clean Gaming UI Components - No Glow Effects */
   .equipment-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
   }
 
-  /* Cyberpunk glow effects */
-  .cyber-glow {
-    box-shadow: 
-      0 0 5px hsl(var(--primary) / 0.5),
-      0 0 10px hsl(var(--primary) / 0.3),
-      0 0 15px hsl(var(--primary) / 0.1);
-  }
-
-  .cyber-border {
-    border: 1px solid hsl(var(--border));
-    background: hsl(var(--card) / 0.95);
-    backdrop-filter: blur(10px);
-  }
-
-  /* Status indicators with cyberpunk styling */
+  /* Status indicators */
   .status-available {
-    @apply bg-status-available/20 border-status-available/60 text-status-available;
-    box-shadow: 0 0 10px hsl(var(--status-available) / 0.3);
+    @apply bg-green-500/20 border-green-500/50 text-green-400;
   }
 
   .status-occupied {
-    @apply bg-status-occupied/20 border-status-occupied/60 text-status-occupied;
-    box-shadow: 0 0 10px hsl(var(--status-occupied) / 0.3);
+    @apply bg-red-500/20 border-red-500/50 text-red-400;
   }
 
   .status-reserved {
-    @apply bg-status-reserved/20 border-status-reserved/60 text-status-reserved;
-    box-shadow: 0 0 10px hsl(var(--status-reserved) / 0.3);
+    @apply bg-yellow-500/20 border-yellow-500/50 text-yellow-400;
   }
 
   .status-pending {
-    @apply bg-status-pending/20 border-status-pending/60 text-status-pending;
-    box-shadow: 0 0 10px hsl(var(--status-pending) / 0.3);
+    @apply bg-gray-500/20 border-gray-500/50 text-gray-400;
   }
 
-  /* Cyber button effects */
-  .cyber-button {
-    @apply relative overflow-hidden;
-    background: linear-gradient(135deg, 
-      hsl(var(--primary) / 0.1), 
-      hsl(var(--primary) / 0.05));
-    border: 1px solid hsl(var(--primary) / 0.5);
-    transition: all 0.3s ease;
-  }
-
-  .cyber-button:hover {
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
-  }
-
-  .cyber-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-      transparent, 
-      hsl(var(--primary) / 0.2), 
-      transparent);
-    transition: left 0.5s ease;
-  }
-
-  .cyber-button:hover::before {
-    left: 100%;
+  /* Clean modern borders */
+  .modern-border {
+    @apply border border-gaming-border/60 hover:border-gaming-border transition-colors duration-300;
   }
 
   /* Operating hours indicator */
   .operating-hours {
     @apply text-sm text-muted-foreground flex items-center gap-2;
-  }
-
-  /* Scanline effect */
-  .scanlines {
-    position: relative;
-  }
-
-  .scanlines::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      transparent 50%,
-      hsl(var(--primary) / 0.03) 50%
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
   }
 }

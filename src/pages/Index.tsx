@@ -1,18 +1,38 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Settings, Calendar, Package, Coffee, Gamepad2, Zap, Trophy, Wifi, Star, MapPin, Phone, MessageCircle, Shield, Cpu } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
+import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 
-// Service plans (for local reference - no payments in reservation)
-const servicePlans = {
-  "Planes de Horas": [
+// Mock data - In real app this would come from API
+const mockEquipment = [
+  { id: '1', code: 'PC1', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '2', code: 'PC2', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'Player01' },
+  { id: '3', code: 'PC3', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '4', code: 'PC4', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'GamerX' },
+  { id: '5', code: 'PC5', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '6', code: 'PC6', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
+  { id: '7', code: 'CON1', type: 'CONSOLE' as const, name: 'Nintendo Switch', status: 'available' as const },
+  { id: '8', code: 'CON2', type: 'CONSOLE' as const, name: 'PlayStation 5', status: 'reserved_pending' as const }
+];
+
+// Hourly pricing: 2000 pesos per hour
+const HOURLY_RATE = 2000;
+
+// Current plan prices for reference
+const PLAN_PRICES = {
+  "Gaming Time": [
+    { name: "1 Hora", price: 5000, includes: "Lounge access" },
+    { name: "3 Horas", price: 10000, includes: "Lounge access" },
+    { name: "Day Pass", price: 20000, includes: "12-hour access (12–12)" }
+  ],
+  "Booster Packs": [
     { name: "Starter Boost", price: 15000, includes: "5 Hours" },
     { name: "XP Pack", price: 26000, includes: "10 Hours" },
     { name: "Level Up", price: 50000, includes: "20 Hours" },
@@ -20,28 +40,12 @@ const servicePlans = {
   ],
   "Combos": [
     { name: "Gamer Snack Pack", price: 7000, includes: "1 Hour + Snack + Drink/Coffee" },
-    { name: "Power Fuel", price: 12000, includes: "2 Hours + Energy Drink + Sandwich" },
-    { name: "All Night Pack", price: 25000, includes: "5 Hours + 2 Drinks + Pizza" }
-  ],
-  "Adicionales": [
-    { name: "Energy Drink", price: 2500, includes: "Monster, Red Bull, etc." },
-    { name: "Sandwich/Wrap", price: 4000, includes: "Varios sabores" },
-    { name: "Pizza Personal", price: 6000, includes: "Pepperoni, Hawaiana" },
-    { name: "Café Premium", price: 2000, includes: "Espresso, Americano, Latte" }
+    { name: "XP Boost", price: 12000, includes: "3 Hours + Snack + Drink" },
+    { name: "Duo Pack", price: 14000, includes: "2 Hours + Snack + Drink c/u (2 players)" },
+    { name: "Full Day Fuel", price: 25000, includes: "Day Pass + 2 Snacks + 2 Drinks + 1 Refill" },
+    { name: "Power Boost Pack", price: 13500, includes: "3 Hours + Snack + Coffee" }
   ]
 };
-
-// Mock equipment data
-const mockEquipment = [
-  { id: '1', code: 'PC-001', type: 'PC' as const, name: 'CYBER STATION ALPHA', status: 'available' as const },
-  { id: '2', code: 'PC-002', type: 'PC' as const, name: 'CYBER STATION BETA', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'NEXUS_01' },
-  { id: '3', code: 'PC-003', type: 'PC' as const, name: 'CYBER STATION GAMMA', status: 'available' as const },
-  { id: '4', code: 'PC-004', type: 'PC' as const, name: 'CYBER STATION DELTA', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'MATRIX_X' },
-  { id: '5', code: 'PC-005', type: 'PC' as const, name: 'CYBER STATION EPSILON', status: 'available' as const },
-  { id: '6', code: 'PC-006', type: 'PC' as const, name: 'CYBER STATION ZETA', status: 'available' as const },
-  { id: '7', code: 'CON-001', type: 'CONSOLE' as const, name: 'NINTENDO SWITCH DOCK', status: 'available' as const },
-  { id: '8', code: 'CON-002', type: 'CONSOLE' as const, name: 'PLAYSTATION 5 NODE', status: 'reserved_pending' as const }
-];
 
 interface Reservation {
   id: string;
@@ -60,28 +64,47 @@ interface Reservation {
   endTime?: string;
 }
 
+const mockReservations: Reservation[] = [
+  {
+    id: '1',
+    fullName: 'Carlos Mendoza',
+    alias: 'ProGamer99',
+    phone: '+56 9 8765 4321',
+    email: 'carlos@email.com',
+    equipmentCode: 'PC2',
+    hours: 3,
+    totalPrice: 6000,
+    receiptUrl: '/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png',
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    reservationDate: new Date().toISOString().split('T')[0],
+    startTime: '14:00',
+    endTime: '17:00'
+  }
+];
+
 const Index = () => {
   const { toast } = useToast();
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [reservationTicket, setReservationTicket] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("equipment");
+  const [reservations, setReservations] = useState(mockReservations);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [reservationTicket, setReservationTicket] = useState<string | null>(null);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.code);
     toast({
-      title: "ESTACIÓN SELECCIONADA",
+      title: "Equipo seleccionado",
       description: `${equipment.code} - ${equipment.name}`,
       variant: "default"
     });
   };
 
   const handleReservationSubmit = async (data: any) => {
-    const ticketNumber = `CG${Date.now().toString().slice(-6)}`;
+    // Simulate API call
+    const ticketNumber = `GG${Date.now().toString().slice(-6)}`;
     setReservationTicket(ticketNumber);
     
-    const newReservation: Reservation = {
+    const newReservation = {
       id: Date.now().toString(),
       fullName: data.fullName,
       alias: data.alias,
@@ -89,26 +112,33 @@ const Index = () => {
       email: data.email,
       equipmentCode: data.equipmentCode,
       hours: data.hours,
-      totalPrice: 0,
-      receiptUrl: '',
-      status: 'pending',
+      totalPrice: data.hours * HOURLY_RATE,
+      receiptUrl: URL.createObjectURL(data.receipt),
+      status: 'pending' as const,
       createdAt: new Date().toISOString(),
       reservationDate: data.reservationDate,
       startTime: data.startTime,
       endTime: data.endTime
     };
     
+    // Send Telegram notification
+    try {
+      await sendTelegramNotification(formatReservationNotification(newReservation));
+      toast({
+        title: "Notificación enviada",
+        description: "El administrador ha sido notificado por Telegram",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error("Error sending Telegram notification:", error);
+    }
+    
     setReservations(prev => [...prev, newReservation]);
     setSelectedEquipment('');
-    
-    toast({
-      title: "RESERVA PROCESADA",
-      description: "Tu reserva ha sido enviada para confirmación",
-      variant: "default"
-    });
   };
 
   const handleAdminLogin = (password: string) => {
+    // Simple password check - in real app this would be secure
     if (password === 'admin123') {
       setIsAdminAuthenticated(true);
       toast({
@@ -125,353 +155,328 @@ const Index = () => {
     }
   };
 
-  const handleConfirmReservation = (id: string) => {
-    setReservations(prev => prev.map(r => 
-      r.id === id ? { ...r, status: 'confirmed' as const } : r
-    ));
-    toast({
-      title: "Reserva confirmada",
-      description: "La reserva ha sido confirmada exitosamente",
-      variant: "default"
-    });
+  const handleReservationConfirm = (id: string) => {
+    setReservations(prev => 
+      prev.map(r => r.id === id ? { ...r, status: 'confirmed' as const } : r)
+    );
   };
 
-  const handleCancelReservation = (id: string) => {
-    setReservations(prev => prev.map(r => 
-      r.id === id ? { ...r, status: 'cancelled' as const } : r
-    ));
-    toast({
-      title: "Reserva cancelada",
-      description: "La reserva ha sido cancelada",
-      variant: "destructive"
-    });
+  const handleReservationCancel = (id: string) => {
+    setReservations(prev => 
+      prev.map(r => r.id === id ? { ...r, status: 'cancelled' as const } : r)
+    );
   };
 
   const handleMarkArrived = (id: string) => {
-    setReservations(prev => prev.map(r => 
-      r.id === id ? { ...r, status: 'arrived' as const } : r
-    ));
-    toast({
-      title: "Cliente llegó",
-      description: "El estado ha sido actualizado",
-      variant: "default"
-    });
+    setReservations(prev => 
+      prev.map(r => r.id === id ? { ...r, status: 'arrived' as const } : r)
+    );
   };
 
   const handleRelease = (id: string) => {
-    // Logic to release equipment
+    setReservations(prev => prev.filter(r => r.id !== id));
     toast({
       title: "Equipo liberado",
-      description: "El equipo ha sido liberado",
+      description: "El equipo ha sido liberado y está disponible",
       variant: "default"
     });
   };
 
   const handleExtendTime = (id: string, minutes: number) => {
-    // Logic to extend time
+    const hours = Math.floor(minutes / 60);
+    setReservations(prev => 
+      prev.map(r => {
+        if (r.id === id && r.endTime) {
+          const [endHours, endMins] = r.endTime.split(':').map(Number);
+          const endDate = new Date();
+          endDate.setHours(endHours, endMins, 0, 0);
+          endDate.setMinutes(endDate.getMinutes() + minutes);
+          
+          const newEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+          return { ...r, endTime: newEndTime };
+        }
+        return r;
+      })
+    );
+    
     toast({
       title: "Tiempo extendido",
-      description: `Se han agregado ${minutes} minutos`,
+      description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}`,
       variant: "default"
     });
   };
 
   const handleChangeHours = (reservationId: string, newHours: number) => {
-    setReservations(prev => prev.map(r => 
-      r.id === reservationId ? { ...r, hours: newHours } : r
-    ));
+    setReservations(prev => 
+      prev.map(r => {
+        if (r.id === reservationId) {
+          return {
+            ...r,
+            hours: newHours,
+            totalPrice: newHours * HOURLY_RATE
+          };
+        }
+        return r;
+      })
+    );
+
     toast({
       title: "Horas actualizadas",
-      description: "Las horas de la reserva han sido modificadas",
+      description: `Reserva actualizada a ${newHours} ${newHours === 1 ? 'hora' : 'horas'}`,
       variant: "default"
     });
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground scanlines">
+    <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-cyber-border bg-cyber-surface/95 backdrop-blur cyber-border">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <div className="relative">
+      <header className="border-b border-gaming-border bg-gaming-surface/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <img 
                 src="/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png" 
-                alt="Gaming Grid Logo" 
-                className="h-10 w-auto cyber-glow"
+                alt="Gaming Grid" 
+                className="h-10 w-auto"
               />
-              <div className="absolute inset-0 bg-primary/20 blur-sm -z-10"></div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-primary tracking-wider font-mono">
-                CYBER GRID
-              </h1>
-              <div className="operating-hours text-cyber-accent">
-                <Clock className="h-4 w-4" />
-                <span className="text-xs">ONLINE: 12PM - 12AM</span>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold">
+                  <span className="text-white">GAMING</span>{' '}
+                  <span className="text-primary">GRID</span>
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground">Sistema de Reservas</p>
               </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="cyber-button">
-                  <Shield className="h-4 w-4 mr-2" />
-                  ADMIN
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto cyber-border">
-                <DialogHeader>
-                  <DialogTitle className="text-primary font-mono tracking-wider">
-                    CONTROL PANEL
-                  </DialogTitle>
-                </DialogHeader>
-                <AdminPanel 
-                  reservations={reservations}
-                  onConfirm={handleConfirmReservation}
-                  onCancel={handleCancelReservation}
-                  onMarkArrived={handleMarkArrived}
-                  onRelease={handleRelease}
-                  onExtendTime={handleExtendTime}
-                  onLogin={handleAdminLogin}
-                  isAuthenticated={isAdminAuthenticated}
-                  onChangeHours={handleChangeHours}
-                  hourlyRate={2000}
-                />
-              </DialogContent>
-            </Dialog>
+            
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="hidden md:flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-sm text-muted-foreground">12PM - 12AM</span>
+              </div>
+              <Badge variant="outline" className="status-available text-xs">
+                {mockEquipment.filter(eq => eq.status === 'available').length} Disponibles
+              </Badge>
+              <Badge variant="outline" className="status-occupied text-xs">
+                {mockEquipment.filter(eq => eq.status === 'occupied').length} Ocupados
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-screen-2xl">
-        <div className="grid gap-8">
-          {/* Welcome Section */}
-          <section className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-primary mb-4 font-mono tracking-wider">
-              BIENVENIDO AL CYBER GRID
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-mono">
-              El cyber café más avanzado de Santiago. Hardware de elite, 
-              conexión ultra rápida y el ambiente perfecto para gamers.
-            </p>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <Badge variant="secondary" className="flex items-center gap-2 cyber-glow font-mono">
-                <Zap className="h-4 w-4" />
-                RTX 4070 SUPER
-              </Badge>
-              <Badge variant="secondary" className="flex items-center gap-2 cyber-glow font-mono">
-                <Cpu className="h-4 w-4" />
-                INTEL CORE I7
-              </Badge>
-              <Badge variant="secondary" className="flex items-center gap-2 cyber-glow font-mono">
-                <Wifi className="h-4 w-4" />
-                FIBRA ÓPTICA 1GB
-              </Badge>
-              <Badge variant="secondary" className="flex items-center gap-2 cyber-glow font-mono">
-                <Trophy className="h-4 w-4" />
-                MONITORES 144HZ
-              </Badge>
+      <main className="container mx-auto px-2 md:px-4 py-4 md:py-8">
+        {reservationTicket ? (
+          <div className="max-w-2xl mx-auto text-center space-y-6">
+            <div className="bg-gaming-surface border-gaming-border rounded-lg p-4 md:p-8">
+              <div className="text-4xl md:text-6xl mb-4">✓</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4">Reserva Enviada</h2>
+              <div className="text-lg md:text-xl mb-4">
+                Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
+              </div>
+              <p className="text-muted-foreground mb-6 text-sm md:text-base">
+                Tu reserva está en revisión. Tienes 15 minutos para llegar una vez confirmada. El plan final se selecciona en el local y se descuenta del total pagado.
+              </p>
+              <Button 
+                variant="gaming" 
+                onClick={() => setReservationTicket(null)}
+                className="w-full md:w-auto"
+              >
+                Hacer Nueva Reserva
+              </Button>
             </div>
-          </section>
-
-          {/* Main Content with Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="equipment" className="flex items-center gap-2">
+          </div>
+        ) : (
+          <Tabs defaultValue="equipos" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 bg-gaming-surface border-gaming-border">
+              <TabsTrigger value="equipos" className="flex items-center gap-2">
                 <Gamepad2 className="h-4 w-4" />
                 Equipos
               </TabsTrigger>
-              <TabsTrigger value="reservation" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+              <TabsTrigger value="reservar" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
                 Reservar
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="equipment" className="space-y-6">
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-primary">
-                        <Gamepad2 className="h-5 w-5" />
-                        ESTACIONES DISPONIBLES
-                      </CardTitle>
-                      <CardDescription>
-                        Hardware de elite con las últimas especificaciones
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <EquipmentGrid 
-                        equipment={mockEquipment}
-                        onSelect={handleEquipmentSelect}
-                        selectedEquipment={selectedEquipment}
-                      />
-                      {selectedEquipment && (
-                        <div className="mt-6 text-center">
-                          <Button 
-                            onClick={() => setActiveTab("reservation")}
-                            size="lg"
-                            className="animate-pulse"
-                          >
-                            CONTINUAR CON LA RESERVA
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+            <TabsContent value="equipos" className="space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary">Estado de Equipos</h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Selecciona un equipo disponible para hacer tu reserva
+                </p>
+              </div>
+              
+              <EquipmentGrid
+                equipment={mockEquipment}
+                onSelect={handleEquipmentSelect}
+                selectedEquipment={selectedEquipment}
+              />
+              
+              {selectedEquipment && (
+                <div className="text-center">
+                  <Button variant="gaming" size="lg" onClick={() => {
+                    const reservarTab = document.querySelector('[data-state="inactive"][value="reservar"]') as HTMLElement;
+                    if (reservarTab) {
+                      reservarTab.click();
+                    } else {
+                      // Fallback: trigger tab change via state
+                      const tabsContainer = document.querySelector('[role="tablist"]');
+                      const reservarButton = tabsContainer?.querySelector('[value="reservar"]') as HTMLElement;
+                      reservarButton?.click();
+                    }
+                  }}>
+                    Continuar con Reserva
+                  </Button>
                 </div>
-                
-                <div className="space-y-6">
-                  {/* Service Plans */}
+              )}
+            </TabsContent>
 
-                  {/* Service Plans */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-primary">
-                        <Package className="h-5 w-5" />
-                        PLANES DISPONIBLES
-                      </CardTitle>
-                      <CardDescription>
-                        Precios de referencia - se eligen en el local
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4 text-sm">
-                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5">
-                          <p className="text-primary font-medium mb-2">⚡ SISTEMA DE RESERVAS:</p>
-                          <ul className="text-muted-foreground space-y-1 text-xs">
-                            <li>• Reservas gratuitas para asegurar tu lugar</li>
-                            <li>• Los planes se eligen al llegar al local</li>
-                            <li>• No se realizan pagos online</li>
-                            <li>• Límite de 15 minutos para llegar</li>
-                          </ul>
-                        </div>
-                        
-                        <Tabs defaultValue="Planes de Horas" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="Planes de Horas" className="text-xs">HORAS</TabsTrigger>
-                            <TabsTrigger value="Combos" className="text-xs">COMBOS</TabsTrigger>
-                            <TabsTrigger value="Adicionales" className="text-xs">EXTRAS</TabsTrigger>
-                          </TabsList>
-                          
-                          {Object.entries(servicePlans).map(([category, plans]) => (
-                            <TabsContent key={category} value={category} className="space-y-3">
-                              {plans.map((plan, index) => (
-                                <div key={index} className="flex justify-between items-center p-3 rounded-lg border border-border/50 bg-card/20">
-                                  <div>
-                                    <p className="font-medium text-sm">{plan.name}</p>
-                                    <p className="text-xs text-muted-foreground">{plan.includes}</p>
-                                  </div>
-                                  <Badge variant="outline" className="text-primary">
-                                    ${plan.price.toLocaleString()}
-                                  </Badge>
-                                </div>
-                              ))}
-                            </TabsContent>
-                          ))}
-                        </Tabs>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+            <TabsContent value="reservar" className="space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary">Nueva Reserva</h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Reserva por horas (2.000 CLP/hora) - Horario: 12PM - 12AM
+                </p>
+              </div>
+              
+              <div className="max-w-4xl mx-auto">
+                <ReservationForm
+                  equipment={mockEquipment}
+                  selectedEquipment={selectedEquipment}
+                  onSubmit={handleReservationSubmit}
+                  hourlyRate={HOURLY_RATE}
+                />
               </div>
             </TabsContent>
-
-            <TabsContent value="reservation" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary">
-                    <Calendar className="h-5 w-5" />
-                    RESERVAR ESTACIÓN
-                  </CardTitle>
-                  <CardDescription>
-                    Asegura tu lugar en el cyber
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ReservationForm 
-                    equipment={mockEquipment}
-                    selectedEquipment={selectedEquipment}
-                    onSubmit={handleReservationSubmit}
-                    hourlyRate={2000}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
+        )}
+
+        {/* Plans and Pricing Section */}
+        <div className="mt-12 max-w-6xl mx-auto">
+          <Card className="bg-gaming-surface border-gaming-border">
+            <CardHeader>
+              <CardTitle className="text-center text-2xl text-primary">Planes Disponibles en el Local</CardTitle>
+              <p className="text-center text-muted-foreground">
+                Reserva por horas (2.000 CLP/hora) y elige tu plan final en el local. El monto pagado se descuenta del plan elegido.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {Object.entries(PLAN_PRICES).map(([category, plans]) => (
+                  <div key={category} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-primary border-b border-gaming-border pb-2">
+                      {category}
+                    </h3>
+                    <div className="space-y-3">
+                      {plans.map((plan, index) => (
+                        <Card key={index} className="bg-gaming-bg border-gaming-border">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-medium">{plan.name}</h4>
+                              <span className="text-primary font-bold">${plan.price.toLocaleString()}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{plan.includes}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
+                <h4 className="font-semibold text-primary mb-2">¿Cómo funciona?</h4>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Reserva pagando 2.000 CLP por cada hora que necesites</li>
+                  <li>• Tienes 15 minutos para llegar una vez confirmada tu reserva</li>
+                  <li>• En el local, elige el plan que prefieras</li>
+                  <li>• Lo que pagaste en la reserva se descuenta del plan final</li>
+                  <li>• Si no vienes, te reembolsamos el dinero</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Footer with Contact */}
-        <div className="mt-16 pt-8 border-t border-cyber-border/40">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-primary flex items-center gap-2 font-mono tracking-wider">
-                <Star className="h-5 w-5" />
-                ¿NECESITAS AYUDA?
-              </h3>
-              <p className="text-muted-foreground text-sm font-mono">
-                ¿Tienes dudas sobre nuestros servicios o necesitas ayuda con tu reserva? 
-                Contáctanos y te ayudaremos de inmediato.
-              </p>
+        {/* Admin Panel - Discrete Access */}
+        <div className="fixed bottom-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const adminPanel = document.getElementById('admin-panel');
+              if (adminPanel) {
+                adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+              }
+            }}
+            className="opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Hidden Admin Panel */}
+        <div id="admin-panel" style={{ display: 'none' }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gaming-surface border-gaming-border rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-primary">Panel de Administración</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    document.getElementById('admin-panel')!.style.display = 'none';
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+              <AdminPanel
+                reservations={reservations}
+                onConfirm={handleReservationConfirm}
+                onCancel={handleReservationCancel}
+                onMarkArrived={handleMarkArrived}
+                onRelease={handleRelease}
+                onExtendTime={handleExtendTime}
+                onLogin={handleAdminLogin}
+                isAuthenticated={isAdminAuthenticated}
+                onChangeHours={handleChangeHours}
+                hourlyRate={HOURLY_RATE}
+              />
             </div>
-            
-            <div className="space-y-3">
-              <a 
-                href="https://wa.me/56978414767" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border border-success/30 bg-success/5 hover:bg-success/10 transition-colors group cyber-border"
-              >
-                <MessageCircle className="h-5 w-5 text-success group-hover:scale-110 transition-transform" />
-                <div>
-                  <p className="font-medium text-success font-mono">WHATSAPP</p>
-                  <p className="text-sm text-muted-foreground font-mono">+56 9 7841 4767</p>
-                </div>
-              </a>
-              
-              <a 
-                href="mailto:TheGridChile@gmail.com"
-                className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors group cyber-border"
-              >
-                <Phone className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <div>
-                  <p className="font-medium text-primary font-mono">EMAIL</p>
-                  <p className="text-sm text-muted-foreground font-mono">TheGridChile@gmail.com</p>
-                </div>
-              </a>
-            </div>
-            <p className="text-xs text-muted-foreground font-mono">
-              CYBER GRID - Antonio Varas 1347, LOCAL 106, Providencia.
-            </p>
           </div>
         </div>
       </main>
 
-      {/* Reservation Success Modal */}
-      {reservationTicket && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full cyber-border p-6 text-center space-y-4">
-            <div className="text-4xl cyber-glow">⚡</div>
-            <h2 className="text-2xl font-bold text-primary font-mono tracking-wider">
-              RESERVA PROCESADA
-            </h2>
-            <div className="text-lg font-mono">
-              TICKET: <span className="text-primary cyber-glow">{reservationTicket}</span>
+      {/* Footer */}
+      <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-primary">¿Necesitas ayuda?</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
+              <a 
+                href="https://wa.me/56978414767" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-green-500 hover:text-green-400 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>WhatsApp: +56 9 7841 4767</span>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <a 
+                href="mailto:TheGridChile@gmail.com"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                <span>TheGridChile@gmail.com</span>
+              </a>
             </div>
-            <p className="text-muted-foreground text-sm font-mono">
-              Tu reserva está en proceso. Serás contactado para confirmación.
+            <p className="text-xs text-muted-foreground">
+              Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
             </p>
-            <Button 
-              onClick={() => setReservationTicket(null)}
-              className="cyber-button w-full font-mono"
-            >
-              NUEVA RESERVA
-            </Button>
           </div>
         </div>
-      )}
+      </footer>
     </div>
   );
 };
