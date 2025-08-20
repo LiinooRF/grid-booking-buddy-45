@@ -413,9 +413,10 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 onClick={() => window.location.href = 'https://gaminggrid.cl'}
-                className="text-sm"
+                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
               >
-                ← Página Principal
+                <span className="hidden md:inline">← Página Principal</span>
+                <span className="md:hidden">←</span>
               </Button>
               <div className="hidden md:flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
@@ -447,7 +448,7 @@ const Index = () => {
               <Button 
                 variant="gaming" 
                 onClick={() => setReservationTicket(null)}
-                className="w-full md:w-auto"
+                className="w-full md:w-auto text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
               >
                 Hacer Nueva Reserva
               </Button>
@@ -499,13 +500,14 @@ const Index = () => {
                       Equipo seleccionado: <span className="font-medium text-primary">{selectedEquipment}</span>
                     </p>
                   </div>
-                  <div className="flex gap-4 justify-center">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center">
                     <Button 
                       variant="outline"
                       onClick={() => {
                         setSelectedEquipment('');
                         setCurrentTab('equipos');
                       }}
+                      className="w-full sm:w-auto text-sm"
                     >
                       Cambiar Equipo
                     </Button>
@@ -513,6 +515,7 @@ const Index = () => {
                       variant="gaming" 
                       size="lg"
                       onClick={() => setCurrentTab("reservar")}
+                      className="w-full sm:w-auto"
                     >
                       Continuar con Reserva
                     </Button>
@@ -534,9 +537,10 @@ const Index = () => {
                     setSelectedEquipment('');
                     setCurrentTab('equipos');
                   }}
-                  className="mt-2"
+                  className="mt-2 text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-9"
                 >
-                  ← Volver a Equipos
+                  <span className="hidden md:inline">← Volver a Equipos</span>
+                  <span className="md:hidden">← Volver</span>
                 </Button>
               </div>
               
