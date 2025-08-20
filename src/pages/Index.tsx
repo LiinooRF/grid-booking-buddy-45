@@ -86,6 +86,7 @@ const mockReservations: Reservation[] = [
 const Index = () => {
   const { toast } = useToast();
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
+  const [currentTab, setCurrentTab] = useState<string>('equipos');
   const [reservations, setReservations] = useState(mockReservations);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
@@ -286,7 +287,11 @@ const Index = () => {
             </div>
           </div>
         ) : (
-          <Tabs defaultValue="equipos" className="space-y-6">
+          <Tabs 
+            value={selectedEquipment ? "reservar" : currentTab} 
+            onValueChange={setCurrentTab}
+            className="space-y-6"
+          >
             <TabsList className="grid w-full grid-cols-2 bg-gaming-surface border-gaming-border">
               <TabsTrigger value="equipos" className="flex items-center gap-2">
                 <Gamepad2 className="h-4 w-4" />
@@ -314,17 +319,11 @@ const Index = () => {
               
               {selectedEquipment && (
                 <div className="text-center">
-                  <Button variant="gaming" size="lg" onClick={() => {
-                    const reservarTab = document.querySelector('[data-state="inactive"][value="reservar"]') as HTMLElement;
-                    if (reservarTab) {
-                      reservarTab.click();
-                    } else {
-                      // Fallback: trigger tab change via state
-                      const tabsContainer = document.querySelector('[role="tablist"]');
-                      const reservarButton = tabsContainer?.querySelector('[value="reservar"]') as HTMLElement;
-                      reservarButton?.click();
-                    }
-                  }}>
+                  <Button 
+                    variant="gaming" 
+                    size="lg"
+                    onClick={() => setCurrentTab("reservar")}
+                  >
                     Continuar con Reserva
                   </Button>
                 </div>
@@ -335,7 +334,7 @@ const Index = () => {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-primary">Nueva Reserva</h2>
                 <p className="text-muted-foreground text-sm md:text-base">
-                  Reserva por horas (2.000 CLP/hora) - Horario: 12PM - 12AM
+                  ¡Reserva GRATIS! - Horario: 12PM - 12AM
                 </p>
               </div>
               
@@ -356,9 +355,9 @@ const Index = () => {
           <Card className="bg-gaming-surface border-gaming-border">
             <CardHeader>
               <CardTitle className="text-center text-2xl text-primary">Planes Disponibles en el Local</CardTitle>
-              <p className="text-center text-muted-foreground">
-                Reserva por horas (2.000 CLP/hora) y elige tu plan final en el local. El monto pagado se descuenta del plan elegido.
-              </p>
+                <p className="text-center text-muted-foreground">
+                  Las reservas son gratuitas. Elige tu plan al llegar al local.
+                </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -386,11 +385,10 @@ const Index = () => {
               <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
                 <h4 className="font-semibold text-primary mb-2">¿Cómo funciona?</h4>
                 <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Reserva pagando 2.000 CLP por cada hora que necesites</li>
+                  <li>• Haz tu reserva gratuita seleccionando el equipo y horario</li>
                   <li>• Tienes 15 minutos para llegar una vez confirmada tu reserva</li>
-                  <li>• En el local, elige el plan que prefieras</li>
-                  <li>• Lo que pagaste en la reserva se descuenta del plan final</li>
-                  <li>• Si no vienes, te reembolsamos el dinero</li>
+                  <li>• En el local, elige el plan que prefieras y paga directamente</li>
+                  <li>• ¡Disfruta tu experiencia gaming!</li>
                 </ul>
               </div>
             </CardContent>
