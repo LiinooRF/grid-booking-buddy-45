@@ -48,7 +48,57 @@ const Index = () => {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
 
-  // Cargar equipos reales de Supabase
+  // Cargar reservas desde Supabase
+  const loadReservations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select(`
+          id,
+          user_name,
+          user_phone,
+          equipment_id,
+          start_time,
+          end_time,
+          hours,
+          status,
+          ticket_number,
+          notes,
+          created_at,
+          equipment:equipment_id (name)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Mapear a formato del frontend
+      const mappedReservations: Reservation[] = data.map(r => ({
+        id: r.id,
+        fullName: r.user_name,
+        alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
+        phone: r.user_phone,
+        email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
+        equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
+        hours: r.hours,
+        status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
+        createdAt: r.created_at,
+        reservationDate: r.start_time?.split('T')[0] || new Date().toISOString().split('T')[0],
+        startTime: r.start_time?.split('T')[1]?.slice(0, 5),
+        endTime: r.end_time?.split('T')[1]?.slice(0, 5)
+      }));
+      
+      setReservations(mappedReservations);
+    } catch (error) {
+      console.error('Error cargando reservas:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las reservas",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Cargar equipos y reservas al inicio
   useEffect(() => {
     const loadEquipment = async () => {
       try {
@@ -84,6 +134,7 @@ const Index = () => {
     };
 
     loadEquipment();
+    loadReservations();
   }, []);
 
   const handleEquipmentSelect = (equipment: any) => {
@@ -203,22 +254,85 @@ const Index = () => {
     }
   };
 
-  const handleReservationConfirm = (id: string) => {
-    setReservations(prev => 
-      prev.map(r => r.id === id ? { ...r, status: 'confirmed' as const } : r)
-    );
+  const handleReservationConfirm = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'confirmed' })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setReservations(prev => 
+        prev.map(r => r.id === id ? { ...r, status: 'confirmed' as const } : r)
+      );
+      
+      toast({
+        title: "Reserva confirmada",
+        description: "La reserva ha sido confirmada exitosamente",
+      });
+    } catch (error) {
+      console.error('Error confirmando reserva:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo confirmar la reserva",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleReservationCancel = (id: string) => {
-    setReservations(prev => 
-      prev.map(r => r.id === id ? { ...r, status: 'cancelled' as const } : r)
-    );
+  const handleReservationCancel = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setReservations(prev => 
+        prev.map(r => r.id === id ? { ...r, status: 'cancelled' as const } : r)
+      );
+      
+      toast({
+        title: "Reserva cancelada",
+        description: "La reserva ha sido cancelada",
+      });
+    } catch (error) {
+      console.error('Error cancelando reserva:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo cancelar la reserva",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleMarkArrived = (id: string) => {
-    setReservations(prev => 
-      prev.map(r => r.id === id ? { ...r, status: 'arrived' as const } : r)
-    );
+  const handleMarkArrived = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'arrived' })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setReservations(prev => 
+        prev.map(r => r.id === id ? { ...r, status: 'arrived' as const } : r)
+      );
+      
+      toast({
+        title: "Cliente marcado como llegado",
+        description: "El estado ha sido actualizado",
+      });
+    } catch (error) {
+      console.error('Error marcando llegada:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo marcar la llegada",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleRelease = (id: string) => {
