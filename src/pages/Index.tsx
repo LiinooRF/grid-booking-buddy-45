@@ -112,9 +112,9 @@ const Index = () => {
         // Mapear a formato del frontend
         const mappedEquipment: Equipment[] = data.map(eq => ({
           id: eq.id,
-          code: eq.id.slice(0, 8), // Primeros 8 chars del UUID como código
+          code: eq.name, // Usar el nombre como código visible
           name: eq.name,
-          type: (eq.type === 'PS5' || eq.type === 'Xbox') ? 'CONSOLE' : 'PC' as 'PC' | 'CONSOLE',
+          type: (eq.type === 'CONSOLE') ? 'CONSOLE' : 'PC',
           status: eq.status === 'available' ? 'available' : 
                  eq.status === 'occupied' ? 'occupied' : 'available',
           description: eq.description || undefined
