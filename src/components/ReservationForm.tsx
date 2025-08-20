@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Users } from "lucide-react";
+import { Upload, CreditCard, Clock, Users } from "lucide-react";
 
 interface Equipment {
   id: string;
@@ -19,9 +19,10 @@ interface ReservationFormProps {
   equipment: Equipment[];
   selectedEquipment?: string;
   onSubmit: (data: any) => void;
+  hourlyRate: number;
 }
 
-const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: ReservationFormProps) => {
+const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }: ReservationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
@@ -31,11 +32,26 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
     equipmentCode: selectedEquipment || '',
     reservationDate: new Date().toISOString().split('T')[0],
     startTime: '',
-    hours: 1
+    hours: 1,
+    receipt: null as File | null
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Archivo muy grande",
+          description: "El archivo debe ser menor a 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setFormData(prev => ({ ...prev, receipt: file }));
+    }
+  };
 
   const generateTimeSlots = () => {
     const slots = [];
@@ -112,10 +128,10 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
     e.preventDefault();
     
     if (!formData.fullName || !formData.alias || !formData.phone || !formData.email || 
-        !formData.equipmentCode || !formData.reservationDate || !formData.startTime || !formData.hours) {
+        !formData.equipmentCode || !formData.reservationDate || !formData.startTime || !formData.receipt || !formData.hours) {
       toast({
         title: "Campos requeridos",
-        description: "Por favor completa todos los campos",
+        description: "Por favor completa todos los campos y sube el comprobante",
         variant: "destructive"
       });
       return;
@@ -156,7 +172,8 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
         equipmentCode: '',
         reservationDate: new Date().toISOString().split('T')[0],
         startTime: '',
-        hours: 1
+        hours: 1,
+        receipt: null
       });
     } catch (error) {
       toast({
@@ -169,7 +186,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
     }
   };
 
-  
+  const totalPrice = formData.hours * hourlyRate;
 
   return (
     <Card className="bg-gaming-surface border-gaming-border">
@@ -305,7 +322,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
                 <SelectContent>
                   {getAvailableHours().map((hour) => (
                     <SelectItem key={hour} value={hour.toString()}>
-                      {hour} {hour === 1 ? 'hora' : 'horas'}
+                      {hour} {hour === 1 ? 'hora' : 'horas'} - ${(hour * hourlyRate).toLocaleString()} CLP
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -323,10 +340,10 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
             )}
           </div>
 
-          {/* Reservation Summary */}
+          {/* Price Summary */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-primary">Resumen de Reserva</h3>
-            <Card className="bg-primary/5 border-primary/20">
+            <Card>
               <CardContent className="p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -334,19 +351,67 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
                     <span>{formData.hours} {formData.hours === 1 ? 'hora' : 'horas'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Equipo:</span>
-                    <span>{formData.equipmentCode || 'No seleccionado'}</span>
+                    <span>Precio por hora:</span>
+                    <span>${hourlyRate.toLocaleString()} CLP</span>
                   </div>
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
-                    <span>Costo:</span>
-                    <span className="text-primary">GRATUITO</span>
+                    <span>Total a pagar:</span>
+                    <span className="text-primary">${totalPrice.toLocaleString()} CLP</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Reserva sin costo. Pagas únicamente el plan que elijas en el local.
+                    Este monto se descuenta del plan final que elijas en el local. Si no vienes, se reembolsa.
                   </p>
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Payment Info */}
+          <Card className="bg-gaming-bg border-gaming-border">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <CreditCard className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Información de Pago</h3>
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <p><strong>Método:</strong> Transferencia Bancaria</p>
+                <p><strong>Titular:</strong> Gaming Grid</p>
+                <p><strong>Banco:</strong> Banco Estado</p>
+                <p><strong>RUT:</strong> 78.204.783-8</p>
+                <p><strong>Tipo:</strong> Cuenta Vista</p>
+                <p><strong>Número:</strong> 90278363871</p>
+              </div>
+              
+              <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
+                <p className="font-semibold text-primary">
+                  Total a transferir: ${totalPrice.toLocaleString()} CLP
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Receipt Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="receipt">Comprobante de Transferencia</Label>
+            <div className="border-2 border-dashed border-gaming-border rounded-lg p-6 text-center">
+              <input
+                id="receipt"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <label htmlFor="receipt" className="cursor-pointer">
+                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {formData.receipt ? formData.receipt.name : "Haz clic para subir tu comprobante"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Imagen hasta 5MB (JPG, PNG, etc.)
+                </p>
+              </label>
+            </div>
           </div>
 
           <Button 

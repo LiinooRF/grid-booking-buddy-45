@@ -73,11 +73,10 @@ const EquipmentGrid = ({
       <Card 
         key={eq.id}
         className={cn(
-          "cursor-pointer transition-all duration-500 hover:scale-[1.05] hover:shadow-lg",
+          "cursor-pointer transition-all duration-300 hover:scale-[1.02]",
           config.bgClass,
-          isSelected && "ring-2 ring-primary scale-[1.03] shadow-xl animate-pulse",
-          eq.status === 'available' && "modern-border hover:bg-primary/5",
-          "transform hover:rotate-1"
+          isSelected && "ring-2 ring-primary",
+          eq.status === 'available' && "modern-border"
         )}
         onClick={() => handleSelect(eq)}
       >

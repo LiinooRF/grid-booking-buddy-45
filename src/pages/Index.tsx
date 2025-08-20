@@ -112,9 +112,9 @@ const Index = () => {
       email: data.email,
       equipmentCode: data.equipmentCode,
       hours: data.hours,
-      totalPrice: 0, // Free reservations
-      receiptUrl: '',
-      status: 'confirmed' as const, // Auto-confirm free reservations
+      totalPrice: data.hours * HOURLY_RATE,
+      receiptUrl: URL.createObjectURL(data.receipt),
+      status: 'pending' as const,
       createdAt: new Date().toISOString(),
       reservationDate: data.reservationDate,
       startTime: data.startTime,
@@ -274,7 +274,7 @@ const Index = () => {
                 Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm md:text-base">
-                Tu reserva ha sido confirmada. Tienes 15 minutos para llegar. El plan final se selecciona en el local.
+                Tu reserva está en revisión. Tienes 15 minutos para llegar una vez confirmada. El plan final se selecciona en el local y se descuenta del total pagado.
               </p>
               <Button 
                 variant="gaming" 
@@ -302,54 +302,40 @@ const Index = () => {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-primary">Estado de Equipos</h2>
                 <p className="text-muted-foreground text-sm md:text-base">
-                  Selecciona un equipo disponible para hacer tu reserva gratuita
+                  Selecciona un equipo disponible para hacer tu reserva
                 </p>
               </div>
               
-              <Tabs value="equipos" onValueChange={(value) => {
-                if (value === "reservar") {
-                  const reservarTab = document.querySelector('[value="reservar"]') as HTMLElement;
-                  if (reservarTab) {
-                    reservarTab.click();
-                  }
-                }
-              }}>
-                <EquipmentGrid
-                  equipment={mockEquipment}
-                  onSelect={handleEquipmentSelect}
-                  selectedEquipment={selectedEquipment}
-                />
-                
-                {selectedEquipment && (
-                  <div className="text-center animate-fade-in">
-                    <Tabs defaultValue="equipos">
-                      <TabsList className="hidden" />
-                      <Button 
-                        variant="gaming" 
-                        size="lg" 
-                        onClick={() => {
-                          // Find parent tabs component and switch to reservar tab
-                          const parentTabsList = document.querySelector('[role="tablist"]');
-                          const reservarButton = parentTabsList?.querySelector('[value="reservar"]') as HTMLElement;
-                          if (reservarButton) {
-                            reservarButton.click();
-                          }
-                        }}
-                        className="animate-pulse hover:animate-none"
-                      >
-                        Continuar con Reserva
-                      </Button>
-                    </Tabs>
-                  </div>
-                )}
-              </Tabs>
+              <EquipmentGrid
+                equipment={mockEquipment}
+                onSelect={handleEquipmentSelect}
+                selectedEquipment={selectedEquipment}
+              />
+              
+              {selectedEquipment && (
+                <div className="text-center">
+                  <Button variant="gaming" size="lg" onClick={() => {
+                    const reservarTab = document.querySelector('[data-state="inactive"][value="reservar"]') as HTMLElement;
+                    if (reservarTab) {
+                      reservarTab.click();
+                    } else {
+                      // Fallback: trigger tab change via state
+                      const tabsContainer = document.querySelector('[role="tablist"]');
+                      const reservarButton = tabsContainer?.querySelector('[value="reservar"]') as HTMLElement;
+                      reservarButton?.click();
+                    }
+                  }}>
+                    Continuar con Reserva
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="reservar" className="space-y-6">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-primary">Nueva Reserva</h2>
                 <p className="text-muted-foreground text-sm md:text-base">
-                  Reserva gratuita - Horario: 12PM - 12AM
+                  Reserva por horas (2.000 CLP/hora) - Horario: 12PM - 12AM
                 </p>
               </div>
               
@@ -358,6 +344,7 @@ const Index = () => {
                   equipment={mockEquipment}
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
+                  hourlyRate={HOURLY_RATE}
                 />
               </div>
             </TabsContent>
@@ -370,7 +357,7 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="text-center text-2xl text-primary">Planes Disponibles en el Local</CardTitle>
               <p className="text-center text-muted-foreground">
-                Reserva gratuita y elige tu plan final en el local.
+                Reserva por horas (2.000 CLP/hora) y elige tu plan final en el local. El monto pagado se descuenta del plan elegido.
               </p>
             </CardHeader>
             <CardContent>
@@ -399,11 +386,11 @@ const Index = () => {
               <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
                 <h4 className="font-semibold text-primary mb-2">¿Cómo funciona?</h4>
                 <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Reserva gratuita, solo necesitas tus datos</li>
+                  <li>• Reserva pagando 2.000 CLP por cada hora que necesites</li>
                   <li>• Tienes 15 minutos para llegar una vez confirmada tu reserva</li>
                   <li>• En el local, elige el plan que prefieras</li>
-                  <li>• Pagas únicamente lo que consumas</li>
-                  <li>• Si no vienes, no hay problema</li>
+                  <li>• Lo que pagaste en la reserva se descuenta del plan final</li>
+                  <li>• Si no vienes, te reembolsamos el dinero</li>
                 </ul>
               </div>
             </CardContent>
