@@ -35,10 +35,9 @@ interface AdminPanelProps {
   onLogin: (password: string) => void;
   isAuthenticated: boolean;
   onChangeHours: (reservationId: string, newHours: number) => void;
-  hourlyRate: number;
 }
 
-const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, onChangeHours, hourlyRate }: AdminPanelProps) => {
+const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, onChangeHours }: AdminPanelProps) => {
   const { toast } = useToast();
   const [password, setPassword] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);

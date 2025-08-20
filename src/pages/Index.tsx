@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 
-// Mock data - In real app this would come from API
 const mockEquipment = [
   { id: '1', code: 'PC1', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
   { id: '2', code: 'PC2', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'Player01' },
@@ -21,31 +20,6 @@ const mockEquipment = [
   { id: '7', code: 'CON1', type: 'CONSOLE' as const, name: 'Nintendo Switch', status: 'available' as const },
   { id: '8', code: 'CON2', type: 'CONSOLE' as const, name: 'PlayStation 5', status: 'reserved_pending' as const }
 ];
-
-// Hourly pricing: 2000 pesos per hour
-const HOURLY_RATE = 2000;
-
-// Current plan prices for reference
-const PLAN_PRICES = {
-  "Gaming Time": [
-    { name: "1 Hora", price: 5000, includes: "Lounge access" },
-    { name: "3 Horas", price: 10000, includes: "Lounge access" },
-    { name: "Day Pass", price: 20000, includes: "12-hour access (12–12)" }
-  ],
-  "Booster Packs": [
-    { name: "Starter Boost", price: 15000, includes: "5 Hours" },
-    { name: "XP Pack", price: 26000, includes: "10 Hours" },
-    { name: "Level Up", price: 50000, includes: "20 Hours" },
-    { name: "Elite Pass", price: 90000, includes: "50 Hours" }
-  ],
-  "Combos": [
-    { name: "Gamer Snack Pack", price: 7000, includes: "1 Hour + Snack + Drink/Coffee" },
-    { name: "XP Boost", price: 12000, includes: "3 Hours + Snack + Drink" },
-    { name: "Duo Pack", price: 14000, includes: "2 Hours + Snack + Drink c/u (2 players)" },
-    { name: "Full Day Fuel", price: 25000, includes: "Day Pass + 2 Snacks + 2 Drinks + 1 Refill" },
-    { name: "Power Boost Pack", price: 13500, includes: "3 Hours + Snack + Coffee" }
-  ]
-};
 
 interface Reservation {
   id: string;
@@ -242,6 +216,14 @@ const Index = () => {
               </div>
             </div>
             
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = 'https://gaminggrid.cl'}
+              className="text-sm"
+            >
+              ← Página Principal
+            </Button>
+            
             <div className="flex items-center gap-2 md:gap-4">
               <div className="hidden md:flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
@@ -336,57 +318,12 @@ const Index = () => {
                   equipment={mockEquipment}
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
-                  hourlyRate={HOURLY_RATE}
                 />
               </div>
             </TabsContent>
           </Tabs>
         )}
 
-        {/* Plans and Pricing Section */}
-        <div className="mt-12 max-w-6xl mx-auto">
-          <Card className="bg-gaming-surface border-gaming-border">
-            <CardHeader>
-              <CardTitle className="text-center text-2xl text-primary">Planes Disponibles en el Local</CardTitle>
-                <p className="text-center text-muted-foreground">
-                  Las reservas son gratuitas. Elige tu plan al llegar al local.
-                </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {Object.entries(PLAN_PRICES).map(([category, plans]) => (
-                  <div key={category} className="space-y-4">
-                    <h3 className="text-lg font-semibold text-primary border-b border-gaming-border pb-2">
-                      {category}
-                    </h3>
-                    <div className="space-y-3">
-                      {plans.map((plan, index) => (
-                        <Card key={index} className="bg-gaming-bg border-gaming-border">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-medium">{plan.name}</h4>
-                              <span className="text-primary font-bold">${plan.price.toLocaleString()}</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{plan.includes}</p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
-                <h4 className="font-semibold text-primary mb-2">¿Cómo funciona?</h4>
-                <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Haz tu reserva gratuita seleccionando el equipo y horario</li>
-                  <li>• Tienes 15 minutos para llegar una vez confirmada tu reserva</li>
-                  <li>• En el local, elige el plan que prefieras y paga directamente</li>
-                  <li>• ¡Disfruta tu experiencia gaming!</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Admin Panel - Discrete Access */}
         <div className="fixed bottom-4 right-4">
@@ -431,7 +368,6 @@ const Index = () => {
                 onLogin={handleAdminLogin}
                 isAuthenticated={isAdminAuthenticated}
                 onChangeHours={handleChangeHours}
-                hourlyRate={HOURLY_RATE}
               />
             </div>
           </div>

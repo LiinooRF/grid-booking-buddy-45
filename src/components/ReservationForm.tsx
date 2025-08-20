@@ -19,10 +19,9 @@ interface ReservationFormProps {
   equipment: Equipment[];
   selectedEquipment?: string;
   onSubmit: (data: any) => void;
-  hourlyRate: number;
 }
 
-const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }: ReservationFormProps) => {
+const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: ReservationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
@@ -170,7 +169,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, hourlyRate }:
     }
   };
 
-  const totalPrice = formData.hours * hourlyRate;
+  
 
   return (
     <Card className="bg-gaming-surface border-gaming-border">
