@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      equipment: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          created_at: string
+          end_time: string
+          equipment_id: string
+          hours: number
+          id: string
+          notes: string | null
+          start_time: string
+          status: string
+          ticket_number: string
+          updated_at: string
+          user_name: string
+          user_phone: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          equipment_id: string
+          hours: number
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string
+          ticket_number: string
+          updated_at?: string
+          user_name: string
+          user_phone: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          equipment_id?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string
+          ticket_number?: string
+          updated_at?: string
+          user_name?: string
+          user_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
