@@ -63,8 +63,10 @@ export const formatReservationNotification = (reservation: any): string => {
          `📱 Teléfono: ${reservation.phone}\n` +
          `📧 Email: ${reservation.email}\n` +
          `🖥️ Equipo: ${reservation.equipmentCode}\n` +
-         `⏰ Plan: ${reservation.planName}\n` +
-         `💰 Total: $${reservation.planPrice.toLocaleString()} CLP\n` +
-         `📄 Estado: Pendiente de revisión\n\n` +
-         `🔍 Revisa el comprobante en el panel de administración.`;
+         `⏰ Horario: ${reservation.startTime} - ${reservation.endTime}\n` +
+         `🕐 Duración: ${reservation.hours} ${reservation.hours === 1 ? 'hora' : 'horas'}\n` +
+         `📅 Fecha: ${reservation.reservationDate}\n` +
+         `💚 Reserva GRATUITA\n` +
+         `📄 Estado: Pendiente de confirmación\n\n` +
+         `🔍 Revisa los detalles en el panel de administración.`;
 };
