@@ -88,7 +88,7 @@ const EquipmentGrid = ({
               ) : (
                 <Gamepad2 className="h-5 w-5 text-primary" />
               )}
-              <span className="font-bold text-primary">{eq.code}</span>
+              <span className="font-bold text-primary">{eq.name}</span>
             </div>
             <Badge variant="outline" className={config.className}>
               {config.label}
