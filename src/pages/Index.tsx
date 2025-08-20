@@ -55,8 +55,6 @@ interface Reservation {
   email: string;
   equipmentCode: string;
   hours: number;
-  totalPrice: number;
-  receiptUrl: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
   reservationDate: string;
@@ -73,8 +71,6 @@ const mockReservations: Reservation[] = [
     email: 'carlos@email.com',
     equipmentCode: 'PC2',
     hours: 3,
-    totalPrice: 6000,
-    receiptUrl: '/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png',
     status: 'pending',
     createdAt: new Date().toISOString(),
     reservationDate: new Date().toISOString().split('T')[0],
@@ -113,8 +109,6 @@ const Index = () => {
       email: data.email,
       equipmentCode: data.equipmentCode,
       hours: data.hours,
-      totalPrice: data.hours * HOURLY_RATE,
-      receiptUrl: URL.createObjectURL(data.receipt),
       status: 'pending' as const,
       createdAt: new Date().toISOString(),
       reservationDate: data.reservationDate,
@@ -213,8 +207,7 @@ const Index = () => {
         if (r.id === reservationId) {
           return {
             ...r,
-            hours: newHours,
-            totalPrice: newHours * HOURLY_RATE
+            hours: newHours
           };
         }
         return r;

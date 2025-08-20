@@ -18,8 +18,6 @@ interface Reservation {
   email: string;
   equipmentCode: string;
   hours: number;
-  totalPrice: number;
-  receiptUrl: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
   reservationDate: string;
@@ -103,18 +101,10 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
   const confirmedReservations = filteredReservations.filter(r => r.status === 'confirmed' || r.status === 'arrived');
   const cancelledReservations = filteredReservations.filter(r => r.status === 'cancelled');
 
-  // Statistics
-  const totalRevenue = reservations
-    .filter(r => r.status === 'confirmed' || r.status === 'arrived')
-    .reduce((sum, r) => sum + r.totalPrice, 0);
-  
+  // Statistics  
   const todayReservations = reservations.filter(r => 
     r.reservationDate === new Date().toISOString().split('T')[0]
   );
-
-  const todayRevenue = todayReservations
-    .filter(r => r.status === 'confirmed' || r.status === 'arrived')
-    .reduce((sum, r) => sum + r.totalPrice, 0);
 
   const equipmentUsage = reservations
     .filter(r => r.status === 'confirmed' || r.status === 'arrived')
@@ -125,7 +115,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
 
   const exportData = () => {
     const csvContent = [
-      ['Fecha', 'Cliente', 'Alias', 'Teléfono', 'Email', 'Equipo', 'Horas', 'Precio', 'Estado', 'Hora Inicio', 'Hora Fin'].join(','),
+      ['Fecha', 'Cliente', 'Alias', 'Teléfono', 'Email', 'Equipo', 'Horas', 'Estado', 'Hora Inicio', 'Hora Fin'].join(','),
       ...filteredReservations.map(r => [
         r.reservationDate,
         r.fullName,
@@ -134,7 +124,6 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
         r.email,
         r.equipmentCode,
         r.hours,
-        r.totalPrice,
         r.status,
         r.startTime || '',
         r.endTime || ''
@@ -182,7 +171,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
 
         <TabsContent value="dashboard" className="space-y-6">
           {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="pt-6 text-center">
                 <div className="text-2xl font-bold text-primary">{pendingReservations.length}</div>
@@ -201,12 +190,6 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                 <div className="text-sm text-muted-foreground">Activas</div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold text-primary">${totalRevenue.toLocaleString()}</div>
-                <div className="text-sm text-muted-foreground">Ingresos Total</div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Today's Summary */}
@@ -222,10 +205,6 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                 <div className="flex justify-between">
                   <span>Reservas:</span>
                   <span className="font-bold">{todayReservations.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Ingresos:</span>
-                  <span className="font-bold text-primary">${todayRevenue.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Pendientes:</span>
@@ -304,8 +283,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                       <TableHead>Contacto</TableHead>
                       <TableHead>Equipo</TableHead>
                       <TableHead>Fecha/Hora</TableHead>
-                      <TableHead>Horas/Precio</TableHead>
-                      <TableHead>Comprobante</TableHead>
+                      <TableHead>Horas</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -346,20 +324,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                         <TableCell>
                           <div className="space-y-1">
                             <div className="font-medium">{reservation.hours}h</div>
-                            <div className="text-primary font-bold">
-                              ${reservation.totalPrice.toLocaleString()}
-                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedReceipt(selectedReceipt === reservation.receiptUrl ? null : reservation.receiptUrl)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver
-                          </Button>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
@@ -408,7 +373,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                       <TableHead>Contacto</TableHead>
                       <TableHead>Equipo</TableHead>
                       <TableHead>Fecha/Hora</TableHead>
-                      <TableHead>Horas/Precio</TableHead>
+                      <TableHead>Horas</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
@@ -470,9 +435,6 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                                   ))}
                                 </SelectContent>
                               </Select>
-                            </div>
-                            <div className="text-primary font-bold">
-                              ${reservation.totalPrice.toLocaleString()}
                             </div>
                           </div>
                         </TableCell>
@@ -597,7 +559,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                     <TableHead>Cliente</TableHead>
                     <TableHead>Equipo</TableHead>
                     <TableHead>Fecha/Hora</TableHead>
-                    <TableHead>Horas/Precio</TableHead>
+                    <TableHead>Horas</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Creada</TableHead>
                   </TableRow>
@@ -627,9 +589,6 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                       <TableCell>
                         <div>
                           <div>{reservation.hours}h</div>
-                          <div className="text-primary font-bold">
-                            ${reservation.totalPrice.toLocaleString()}
-                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
