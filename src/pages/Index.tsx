@@ -8,6 +8,7 @@ import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
+import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 
 const mockEquipment = [
@@ -71,7 +72,6 @@ const Index = () => {
   };
 
   const handleReservationSubmit = async (data: any) => {
-    // Simulate API call
     const ticketNumber = `GG${Date.now().toString().slice(-6)}`;
     setReservationTicket(ticketNumber);
     
@@ -90,9 +90,52 @@ const Index = () => {
       endTime: data.endTime
     };
     
-    // Send Telegram notification
+    // 🆕 NUEVO: Guardar en Supabase (pero manteniendo tu sistema funcionando)
     try {
-      await sendTelegramNotification(formatReservationNotification(newReservation));
+      // Buscar equipo en la base de datos (por ahora buscamos por nombre)
+      const { data: equipmentData } = await supabase
+        .from('equipment')
+        .select('id')
+        .eq('name', data.equipmentCode)
+        .single();
+
+      if (equipmentData) {
+        // Guardar la reserva en Supabase
+        await supabase.from('reservations').insert([{
+          equipment_id: equipmentData.id,
+          user_name: data.fullName,
+          user_phone: data.phone,
+          start_time: `${data.reservationDate}T${data.startTime}:00`,
+          end_time: `${data.reservationDate}T${data.endTime}:00`,
+          hours: data.hours,
+          status: 'pending',
+          ticket_number: ticketNumber,
+          notes: `Alias: ${data.alias}, Email: ${data.email}`
+        }]);
+        
+        console.log('✅ Reserva guardada en Supabase');
+      }
+    } catch (error) {
+      console.error('Error guardando en Supabase:', error);
+      // No importa si falla, tu sistema sigue funcionando
+    }
+    
+    // Send Telegram notification (usando el bot de Supabase)
+    try {
+      await supabase.functions.invoke('telegram-bot', {
+        body: {
+          action: 'new_reservation',
+          reservation: {
+            ...newReservation,
+            equipment_name: data.equipmentCode,
+            user_name: data.fullName,
+            ticket_number: ticketNumber,
+            start_time: `${data.reservationDate}T${data.startTime}:00`,
+            end_time: `${data.reservationDate}T${data.endTime}:00`
+          }
+        }
+      });
+      
       toast({
         title: "Notificación enviada",
         description: "El administrador ha sido notificado por Telegram",
@@ -100,6 +143,12 @@ const Index = () => {
       });
     } catch (error) {
       console.error("Error sending Telegram notification:", error);
+      // Fallback al método anterior si falla
+      try {
+        await sendTelegramNotification(formatReservationNotification(newReservation));
+      } catch (fallbackError) {
+        console.error("Fallback notification failed:", fallbackError);
+      }
     }
     
     setReservations(prev => [...prev, newReservation]);
