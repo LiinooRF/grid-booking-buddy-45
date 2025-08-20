@@ -216,15 +216,14 @@ const Index = () => {
               </div>
             </div>
             
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = 'https://gaminggrid.cl'}
-              className="text-sm"
-            >
-              ← Página Principal
-            </Button>
-            
             <div className="flex items-center gap-2 md:gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = 'https://gaminggrid.cl'}
+                className="text-sm"
+              >
+                ← Página Principal
+              </Button>
               <div className="hidden md:flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-sm text-muted-foreground">12PM - 12AM</span>
@@ -263,7 +262,7 @@ const Index = () => {
           </div>
         ) : (
           <Tabs 
-            value={selectedEquipment ? "reservar" : currentTab} 
+            value={currentTab} 
             onValueChange={setCurrentTab}
             className="space-y-6"
           >
@@ -272,7 +271,11 @@ const Index = () => {
                 <Gamepad2 className="h-4 w-4" />
                 Equipos
               </TabsTrigger>
-              <TabsTrigger value="reservar" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="reservar" 
+                className="flex items-center gap-2"
+                disabled={!selectedEquipment}
+              >
                 <Users className="h-4 w-4" />
                 Reservar
               </TabsTrigger>
@@ -293,14 +296,30 @@ const Index = () => {
               />
               
               {selectedEquipment && (
-                <div className="text-center">
-                  <Button 
-                    variant="gaming" 
-                    size="lg"
-                    onClick={() => setCurrentTab("reservar")}
-                  >
-                    Continuar con Reserva
-                  </Button>
+                <div className="text-center space-y-4">
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Equipo seleccionado: <span className="font-medium text-primary">{selectedEquipment}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-4 justify-center">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedEquipment('');
+                        setCurrentTab('equipos');
+                      }}
+                    >
+                      Cambiar Equipo
+                    </Button>
+                    <Button 
+                      variant="gaming" 
+                      size="lg"
+                      onClick={() => setCurrentTab("reservar")}
+                    >
+                      Continuar con Reserva
+                    </Button>
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -311,6 +330,17 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm md:text-base">
                   ¡Reserva GRATIS! - Horario: 12PM - 12AM
                 </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedEquipment('');
+                    setCurrentTab('equipos');
+                  }}
+                  className="mt-2"
+                >
+                  ← Volver a Equipos
+                </Button>
               </div>
               
               <div className="max-w-4xl mx-auto">
