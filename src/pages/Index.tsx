@@ -11,16 +11,17 @@ import { sendTelegramNotification, formatReservationNotification } from "@/lib/t
 import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 
-const mockEquipment = [
-  { id: '1', code: 'PC1', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
-  { id: '2', code: 'PC2', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'occupied' as const, occupiedUntil: '15:30', currentPlayer: 'Player01' },
-  { id: '3', code: 'PC3', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
-  { id: '4', code: 'PC4', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'reserved_confirmed' as const, occupiedUntil: '16:00', currentPlayer: 'GamerX' },
-  { id: '5', code: 'PC5', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
-  { id: '6', code: 'PC6', type: 'PC' as const, name: 'Gaming PC RTX 5070', status: 'available' as const },
-  { id: '7', code: 'CON1', type: 'CONSOLE' as const, name: 'Nintendo Switch', status: 'available' as const },
-  { id: '8', code: 'CON2', type: 'CONSOLE' as const, name: 'PlayStation 5', status: 'reserved_pending' as const }
-];
+// 🆕 REAL: Cargar equipos desde Supabase
+interface Equipment {
+  id: string;
+  code: string;
+  name: string;
+  type: 'PC' | 'CONSOLE';
+  status: 'available' | 'occupied' | 'reserved_confirmed' | 'reserved_pending';
+  description?: string;
+  occupiedUntil?: string;
+  currentPlayer?: string;
+}
 
 interface Reservation {
   id: string;
@@ -37,30 +38,53 @@ interface Reservation {
   endTime?: string;
 }
 
-const mockReservations: Reservation[] = [
-  {
-    id: '1',
-    fullName: 'Carlos Mendoza',
-    alias: 'ProGamer99',
-    phone: '+56 9 8765 4321',
-    email: 'carlos@email.com',
-    equipmentCode: 'PC2',
-    hours: 3,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    reservationDate: new Date().toISOString().split('T')[0],
-    startTime: '14:00',
-    endTime: '17:00'
-  }
-];
-
 const Index = () => {
   const { toast } = useToast();
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loadingEquipment, setLoadingEquipment] = useState(true);
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<string>('equipos');
-  const [reservations, setReservations] = useState(mockReservations);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
+
+  // Cargar equipos reales de Supabase
+  useEffect(() => {
+    const loadEquipment = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('equipment')
+          .select('*')
+          .order('created_at');
+        
+        if (error) throw error;
+        
+        // Mapear a formato del frontend
+        const mappedEquipment: Equipment[] = data.map(eq => ({
+          id: eq.id,
+          code: eq.id.slice(0, 8), // Primeros 8 chars del UUID como código
+          name: eq.name,
+          type: (eq.type === 'PS5' || eq.type === 'Xbox') ? 'CONSOLE' : 'PC' as 'PC' | 'CONSOLE',
+          status: eq.status === 'available' ? 'available' : 
+                 eq.status === 'occupied' ? 'occupied' : 'available',
+          description: eq.description || undefined
+        }));
+        
+        setEquipment(mappedEquipment);
+      } catch (error) {
+        console.error('Error cargando equipos:', error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los equipos",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingEquipment(false);
+      }
+    };
+
+    loadEquipment();
+  }, []);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.code);
@@ -90,19 +114,15 @@ const Index = () => {
       endTime: data.endTime
     };
     
-    // 🆕 NUEVO: Guardar en Supabase (pero manteniendo tu sistema funcionando)
+    // 🆕 NUEVO: Guardar en Supabase
     try {
-      // Buscar equipo en la base de datos (por ahora buscamos por nombre)
-      const { data: equipmentData } = await supabase
-        .from('equipment')
-        .select('id')
-        .eq('name', data.equipmentCode)
-        .single();
-
-      if (equipmentData) {
+      // Buscar equipo por código (los primeros 8 chars del ID)
+      const selectedEquipment = equipment.find(eq => eq.name === data.equipmentCode);
+      
+      if (selectedEquipment) {
         // Guardar la reserva en Supabase
-        await supabase.from('reservations').insert([{
-          equipment_id: equipmentData.id,
+        const { error } = await supabase.from('reservations').insert([{
+          equipment_id: selectedEquipment.id,
           user_name: data.fullName,
           user_phone: data.phone,
           start_time: `${data.reservationDate}T${data.startTime}:00`,
@@ -113,11 +133,21 @@ const Index = () => {
           notes: `Alias: ${data.alias}, Email: ${data.email}`
         }]);
         
+        if (error) throw error;
         console.log('✅ Reserva guardada en Supabase');
+        
+        toast({
+          title: "Reserva guardada",
+          description: "Tu reserva se ha guardado correctamente",
+        });
       }
     } catch (error) {
       console.error('Error guardando en Supabase:', error);
-      // No importa si falla, tu sistema sigue funcionando
+      toast({
+        title: "Error",
+        description: "Error al guardar la reserva, pero el ticket es válido",
+        variant: "destructive"
+      });
     }
     
     // Send Telegram notification (usando el bot de Supabase)
@@ -278,10 +308,10 @@ const Index = () => {
                 <span className="text-sm text-muted-foreground">12PM - 12AM</span>
               </div>
               <Badge variant="outline" className="status-available text-xs">
-                {mockEquipment.filter(eq => eq.status === 'available').length} Disponibles
+                {equipment.filter(eq => eq.status === 'available').length} Disponibles
               </Badge>
               <Badge variant="outline" className="status-occupied text-xs">
-                {mockEquipment.filter(eq => eq.status === 'occupied').length} Ocupados
+                {equipment.filter(eq => eq.status === 'occupied').length} Ocupados
               </Badge>
             </div>
           </div>
@@ -338,11 +368,15 @@ const Index = () => {
                 </p>
               </div>
               
-              <EquipmentGrid
-                equipment={mockEquipment}
-                onSelect={handleEquipmentSelect}
-                selectedEquipment={selectedEquipment}
-              />
+              {loadingEquipment ? (
+                <div className="text-center py-8">Cargando equipos...</div>
+              ) : (
+                <EquipmentGrid
+                  equipment={equipment}
+                  onSelect={handleEquipmentSelect}
+                  selectedEquipment={selectedEquipment}
+                />
+              )}
               
               {selectedEquipment && (
                 <div className="text-center space-y-4">
@@ -394,7 +428,7 @@ const Index = () => {
               
               <div className="max-w-4xl mx-auto">
                 <ReservationForm
-                  equipment={mockEquipment}
+                  equipment={equipment}
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
                 />
