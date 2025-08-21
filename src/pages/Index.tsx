@@ -210,6 +210,7 @@ const Index = () => {
       await supabase.functions.invoke('telegram-bot', {
         body: {
           action: 'new_reservation',
+          adminChatId: '-4947999909',
           reservation: {
             ...newReservation,
             equipment_name: data.equipmentCode,

@@ -107,6 +107,33 @@ serve(async (req) => {
     console.log('Telegram response:', telegramData);
 
     if (!telegramData.ok) {
+      // Intento de fallback para supergrupos: prefijar -100 si da "chat not found"
+      if (
+        typeof chatId === 'string' &&
+        !chatId.startsWith('-100') &&
+        (telegramData.description || '').toLowerCase().includes('chat not found')
+      ) {
+        const fallbackChatId = `-100${chatId.replace('-', '')}`;
+        console.warn('Reintentando con fallbackChatId:', fallbackChatId);
+        const retryResponse = await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: fallbackChatId,
+            text: message,
+            parse_mode: 'Markdown',
+          }),
+        });
+        const retryData = await retryResponse.json();
+        console.log('Retry status:', retryResponse.status, 'Retry response:', retryData);
+        if (retryData?.ok) {
+          return new Response(
+            JSON.stringify({ success: true, message: 'Notificación enviada con fallback', telegram_response: retryData }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
       console.error('Telegram API Error Details:', {
         error_code: telegramData.error_code,
         description: telegramData.description,

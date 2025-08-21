@@ -228,6 +228,7 @@ const Index = () => {
         const { error: telegramError } = await supabase.functions.invoke('telegram-bot', {
           body: {
             action: 'new_reservation',
+            adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: selectedEq.name,
@@ -296,6 +297,7 @@ const Index = () => {
         await supabase.functions.invoke('telegram-bot', {
           body: {
             action: 'confirm_reservation',
+            adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
@@ -337,6 +339,7 @@ const Index = () => {
         await supabase.functions.invoke('telegram-bot', {
           body: {
             action: 'cancel_reservation',
+            adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name,
@@ -376,6 +379,7 @@ const Index = () => {
         await supabase.functions.invoke('telegram-bot', {
           body: {
             action: 'user_arrived',
+            adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
@@ -414,6 +418,7 @@ const Index = () => {
         await supabase.functions.invoke('telegram-bot', {
           body: {
             action: 'session_completed',
+            adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
