@@ -236,7 +236,8 @@ const Index = () => {
       }
     }
     
-    setReservations(prev => [...prev, newReservation]);
+    // Actualizar lista desde Supabase para asegurar IDs válidos
+    await loadReservations();
     setSelectedEquipment('');
   };
 
