@@ -442,16 +442,30 @@ const Index = () => {
               <div className="text-lg md:text-xl mb-4">
                 Ticket: <span className="font-mono text-primary">{reservationTicket}</span>
               </div>
-              <p className="text-muted-foreground mb-6 text-sm md:text-base">
-                Tu reserva está en revisión. Tienes 15 minutos para llegar una vez confirmada. El plan final se selecciona en el local y se descuenta del total pagado.
+              <p className="text-muted-foreground mb-4 text-sm md:text-base">
+                Tu reserva está en revisión. Tienes 15 minutos para llegar una vez confirmada.
               </p>
-              <Button 
-                variant="gaming" 
-                onClick={() => setReservationTicket(null)}
-                className="w-full md:w-auto text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
-              >
-                Hacer Nueva Reserva
-              </Button>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <p className="text-blue-200 text-sm md:text-base">
+                  💡 <strong>Importante:</strong> Después del pago, revisa el estado de tu reserva en la sección "Estado" para ver si fue confirmada y poder presentarte en el local.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentTab('estado')}
+                  className="w-full sm:w-auto text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
+                >
+                  Ver Estado de Reserva
+                </Button>
+                <Button 
+                  variant="gaming" 
+                  onClick={() => setReservationTicket(null)}
+                  className="w-full sm:w-auto text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
+                >
+                  Hacer Nueva Reserva
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
@@ -460,7 +474,7 @@ const Index = () => {
             onValueChange={setCurrentTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-2 bg-gaming-surface border-gaming-border">
+            <TabsList className="grid w-full grid-cols-3 bg-gaming-surface border-gaming-border">
               <TabsTrigger value="equipos" className="flex items-center gap-2">
                 <Gamepad2 className="h-4 w-4" />
                 Equipos
@@ -472,6 +486,10 @@ const Index = () => {
               >
                 <Users className="h-4 w-4" />
                 Reservar
+              </TabsTrigger>
+              <TabsTrigger value="estado" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Estado
               </TabsTrigger>
             </TabsList>
 
@@ -550,6 +568,80 @@ const Index = () => {
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
                 />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="estado" className="space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-primary">Estado de tu Reserva</h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Consulta el estado de tu reserva después de realizar el pago
+                </p>
+              </div>
+              
+              <div className="max-w-4xl mx-auto">
+                <Card className="bg-gaming-surface border-gaming-border">
+                  <CardHeader>
+                    <CardTitle className="text-primary flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Buscar Reserva
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="searchTicket" className="text-sm font-medium">Número de Ticket</label>
+                        <input
+                          id="searchTicket"
+                          type="text"
+                          placeholder="Ej: GG123456"
+                          className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="searchPhone" className="text-sm font-medium">Teléfono</label>
+                        <input
+                          id="searchPhone"
+                          type="tel"
+                          placeholder="+56 9 1234 5678"
+                          className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
+                        />
+                      </div>
+                    </div>
+                    <Button variant="gaming" className="w-full md:w-auto">
+                      Buscar Reserva
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Información de estados */}
+                <Card className="bg-primary/5 border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="text-primary">Estados de Reserva</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <span className="font-medium">Pendiente:</span>
+                      <span className="text-muted-foreground">Reserva enviada, esperando confirmación del admin</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="font-medium">Confirmada:</span>
+                      <span className="text-muted-foreground">Reserva aprobada, puedes presentarte en el local</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                      <span className="font-medium">Activa:</span>
+                      <span className="text-muted-foreground">Sesión iniciada, jugando actualmente</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span className="font-medium">Cancelada:</span>
+                      <span className="text-muted-foreground">Reserva cancelada por el admin o por no presentarse</span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
           </Tabs>
