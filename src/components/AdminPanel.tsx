@@ -320,11 +320,9 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="font-medium">{reservation.hours}h</div>
-                          </div>
-                        </TableCell>
+                         <TableCell>
+                           <div className="font-medium">{reservation.hours}h</div>
+                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button

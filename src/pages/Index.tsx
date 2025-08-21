@@ -447,13 +447,16 @@ const Index = () => {
               </p>
               <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
                 <p className="text-blue-200 text-sm md:text-base">
-                  💡 <strong>Importante:</strong> Después del pago, revisa el estado de tu reserva en la sección "Estado" para ver si fue confirmada y poder presentarte en el local.
+                  💡 <strong>Importante:</strong> Revisa el estado de tu reserva en la sección "Estado" para ver si fue confirmada y poder presentarte en el local.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
                   variant="outline" 
-                  onClick={() => setCurrentTab('estado')}
+                  onClick={() => {
+                    setCurrentTab('estado');
+                    setReservationTicket(null);
+                  }}
                   className="w-full sm:w-auto text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
                 >
                   Ver Estado de Reserva
@@ -575,7 +578,7 @@ const Index = () => {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-3xl font-bold text-primary">Estado de tu Reserva</h2>
                 <p className="text-muted-foreground text-sm md:text-base">
-                  Consulta el estado de tu reserva después de realizar el pago
+                  Consulta el estado de tu reserva usando tu email
                 </p>
               </div>
               
@@ -588,22 +591,13 @@ const Index = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <label htmlFor="searchTicket" className="text-sm font-medium">Número de Ticket</label>
+                        <label htmlFor="searchEmail" className="text-sm font-medium">Email</label>
                         <input
-                          id="searchTicket"
-                          type="text"
-                          placeholder="Ej: GG123456"
-                          className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="searchPhone" className="text-sm font-medium">Teléfono</label>
-                        <input
-                          id="searchPhone"
-                          type="tel"
-                          placeholder="+56 9 1234 5678"
+                          id="searchEmail"
+                          type="email"
+                          placeholder="tu@email.com"
                           className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
                         />
                       </div>
