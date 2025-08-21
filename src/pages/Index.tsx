@@ -47,6 +47,9 @@ const Index = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
+  const [searchEmail, setSearchEmail] = useState('');
+  const [userReservations, setUserReservations] = useState<Reservation[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Cargar reservas desde Supabase
   const loadReservations = async () => {
@@ -388,6 +391,82 @@ const Index = () => {
     });
   };
 
+  // Función para buscar reservas por email
+  const handleSearchReservations = async () => {
+    if (!searchEmail.trim()) {
+      toast({
+        title: "Email requerido",
+        description: "Por favor ingresa tu email para buscar reservas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select(`
+          id,
+          user_name,
+          user_phone,
+          equipment_id,
+          start_time,
+          end_time,
+          hours,
+          status,
+          ticket_number,
+          notes,
+          created_at,
+          equipment:equipment_id (name)
+        `)
+        .ilike('notes', `%${searchEmail}%`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mappedReservations: Reservation[] = data.map(r => ({
+        id: r.id,
+        fullName: r.user_name,
+        alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
+        phone: r.user_phone,
+        email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
+        equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
+        hours: r.hours,
+        status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
+        createdAt: r.created_at,
+        reservationDate: r.start_time?.split('T')[0] || new Date().toISOString().split('T')[0],
+        startTime: r.start_time?.split('T')[1]?.slice(0, 5),
+        endTime: r.end_time?.split('T')[1]?.slice(0, 5)
+      }));
+
+      setUserReservations(mappedReservations);
+      
+      if (mappedReservations.length === 0) {
+        toast({
+          title: "No se encontraron reservas",
+          description: "No hay reservas asociadas a este email",
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Reservas encontradas",
+          description: `Se encontraron ${mappedReservations.length} reserva(s)`,
+          variant: "default"
+        });
+      }
+    } catch (error) {
+      console.error('Error buscando reservas:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las reservas",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
@@ -593,21 +672,77 @@ const Index = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label htmlFor="searchEmail" className="text-sm font-medium">Email</label>
-                        <input
-                          id="searchEmail"
-                          type="email"
-                          placeholder="tu@email.com"
-                          className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
-                        />
-                      </div>
-                    </div>
-                    <Button variant="gaming" className="w-full md:w-auto">
-                      Buscar Reserva
-                    </Button>
+                       <div className="space-y-2">
+                         <label htmlFor="searchEmail" className="text-sm font-medium">Email</label>
+                         <input
+                           id="searchEmail"
+                           type="email"
+                           value={searchEmail}
+                           onChange={(e) => setSearchEmail(e.target.value)}
+                           onKeyPress={(e) => e.key === 'Enter' && handleSearchReservations()}
+                           placeholder="tu@email.com"
+                           className="w-full px-3 py-2 border border-gaming-border rounded-md bg-background"
+                         />
+                       </div>
+                     </div>
+                     <Button 
+                       variant="gaming" 
+                       className="w-full md:w-auto"
+                       onClick={handleSearchReservations}
+                       disabled={isSearching}
+                     >
+                       {isSearching ? 'Buscando...' : 'Buscar Reserva'}
+                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Mostrar resultados de búsqueda */}
+                {userReservations.length > 0 && (
+                  <Card className="bg-gaming-surface border-gaming-border mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-primary">Tus Reservas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {userReservations.map((reservation) => (
+                          <div key={reservation.id} className="border border-gaming-border rounded-lg p-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{reservation.equipmentCode}</span>
+                                  <Badge 
+                                    variant={
+                                      reservation.status === 'confirmed' ? 'default' :
+                                      reservation.status === 'arrived' ? 'secondary' :
+                                      reservation.status === 'pending' ? 'outline' : 'destructive'
+                                    }
+                                  >
+                                    {reservation.status === 'pending' && '⏳ Pendiente'}
+                                    {reservation.status === 'confirmed' && '✅ Confirmada'}
+                                    {reservation.status === 'arrived' && '🎮 Activa'}
+                                    {reservation.status === 'cancelled' && '❌ Cancelada'}
+                                  </Badge>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  <div>📅 {reservation.reservationDate}</div>
+                                  {reservation.startTime && reservation.endTime && (
+                                    <div>🕐 {reservation.startTime} - {reservation.endTime} ({reservation.hours}h)</div>
+                                  )}
+                                  <div>👤 {reservation.fullName} ({reservation.alias})</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-muted-foreground">
+                                  Creada: {new Date(reservation.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Información de estados */}
                 <Card className="bg-primary/5 border-primary/30">

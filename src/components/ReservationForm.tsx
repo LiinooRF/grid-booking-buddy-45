@@ -114,7 +114,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       
       if (error) {
         console.error('Error consultando reservas:', error);
-        return [];
+        return generateTimeSlots(); // Fallback a todos los slots si hay error
       }
       
       // Generar todos los slots de tiempo posibles
@@ -126,6 +126,8 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         
         // Verificar si este slot está ocupado por alguna reserva
         const isOccupied = reservations?.some(reservation => {
+          if (!reservation.start_time || !reservation.end_time) return false;
+          
           const startTime = new Date(reservation.start_time);
           const endTime = new Date(reservation.end_time);
           const slotTime = new Date(`${date}T${slot}:00`);
