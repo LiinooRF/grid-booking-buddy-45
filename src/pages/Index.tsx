@@ -207,8 +207,10 @@ const Index = () => {
     
     // Send Telegram notification (usando el bot de Supabase)
     try {
-      await supabase.functions.invoke('telegram-bot', {
-        body: {
+      fetch('http://173.212.212.147:3001/telegram-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           action: 'new_reservation',
           adminChatId: '-4947999909',
           reservation: {
@@ -219,8 +221,8 @@ const Index = () => {
             start_time: `${data.reservationDate}T${data.startTime}:00`,
             end_time: `${data.reservationDate}T${data.endTime}:00`
           }
-        }
-      });
+        })
+      }).catch(error => console.error('Error notificación Telegram:', error));
       
       toast({
         title: "Notificación enviada",

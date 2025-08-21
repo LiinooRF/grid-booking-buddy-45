@@ -1,141 +1,109 @@
 #!/bin/bash
 
-# Script de actualización automática para Gaming Grid
-# Uso: bash update-server.sh
+# Script para actualizar servidor en VPS
+# IP del VPS: 173.212.212.147
+
+echo "🚀 Actualizando servidor en VPS..."
 
 # Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuración
-PROJECT_DIR="/var/www/reservas"
-BACKUP_DIR="/var/www/reservas-backup-$(date +%Y%m%d_%H%M%S)"
-SERVICE_NAME="gaming-grid" # Cambia esto por el nombre de tu servicio PM2 si usas PM2
+# Variables
+VPS_IP="173.212.212.147"
+VPS_USER="root"  # Cambia por tu usuario
+PROJECT_PATH="/var/www/reservas"
+BOT_PATH="/var/www/telegram-bot-server"
 
-echo -e "${BLUE}🚀 Iniciando actualización de Gaming Grid...${NC}"
+echo -e "${YELLOW}Conectando a VPS ${VPS_IP}...${NC}"
 
-# Función para logging
-log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+# Función para ejecutar comandos en el VPS
+run_remote() {
+    ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "$1"
 }
 
-error() {
-    echo -e "${RED}[ERROR] $1${NC}"
+# Función para copiar archivos al VPS
+copy_to_vps() {
+    scp -o StrictHostKeyChecking=no -r "$1" $VPS_USER@$VPS_IP:"$2"
 }
 
-warning() {
-    echo -e "${YELLOW}[WARNING] $1${NC}"
-}
+echo -e "${YELLOW}1. Actualizando aplicación web...${NC}"
+# Aquí puedes agregar comandos para subir tu aplicación web compilada
+# copy_to_vps "./dist/*" "$PROJECT_PATH/"
 
-# Verificar que el directorio existe
-if [ ! -d "$PROJECT_DIR" ]; then
-    error "El directorio $PROJECT_DIR no existe"
-    exit 1
-fi
+echo -e "${YELLOW}2. Actualizando servidor del bot de Telegram...${NC}"
+# Copiar servidor del bot
+copy_to_vps "./telegram-bot-server" "/var/www/"
 
-# Cambiar al directorio del proyecto
-cd "$PROJECT_DIR" || exit 1
+echo -e "${YELLOW}3. Instalando dependencias del bot...${NC}"
+run_remote "cd $BOT_PATH && npm install"
 
-log "📁 Directorio actual: $(pwd)"
+echo -e "${YELLOW}4. Reiniciando servidor del bot...${NC}"
+# Detener proceso anterior si existe
+run_remote "pkill -f 'node server.js' || true"
 
-# Verificar que es un repositorio git
-if [ ! -d ".git" ]; then
-    error "Este no es un repositorio git. Inicializa git primero."
-    exit 1
-fi
-
-# Crear backup
-log "💾 Creando backup en $BACKUP_DIR"
-cp -r "$PROJECT_DIR" "$BACKUP_DIR"
-
-# Verificar el estado del repositorio
-log "📊 Verificando estado del repositorio..."
-git status
-
-# Guardar cambios locales si existen
-if ! git diff-index --quiet HEAD --; then
-    warning "Hay cambios locales. Guardándolos..."
-    git stash push -m "Auto-stash antes de actualización $(date)"
-fi
-
-# Hacer pull de los cambios
-log "⬇️ Obteniendo últimos cambios..."
-if git pull origin main; then
-    log "✅ Cambios obtenidos exitosamente"
+# Iniciar con PM2 si está disponible
+if run_remote "command -v pm2 > /dev/null"; then
+    echo -e "${GREEN}Usando PM2 para gestionar el proceso...${NC}"
+    run_remote "cd $BOT_PATH && pm2 restart telegram-bot || pm2 start server.js --name telegram-bot"
 else
-    error "❌ Error al obtener cambios"
-    log "🔄 Restaurando backup..."
-    rm -rf "$PROJECT_DIR"
-    mv "$BACKUP_DIR" "$PROJECT_DIR"
+    echo -e "${YELLOW}PM2 no encontrado, iniciando en background...${NC}"
+    run_remote "cd $BOT_PATH && nohup node server.js > bot.log 2>&1 &"
+fi
+
+echo -e "${YELLOW}5. Verificando estado del servidor...${NC}"
+sleep 2
+if run_remote "curl -s http://localhost:3001/health | grep -q 'OK'"; then
+    echo -e "${GREEN}✅ Servidor del bot funcionando correctamente${NC}"
+else
+    echo -e "${RED}❌ Error: El servidor del bot no responde${NC}"
+    echo -e "${YELLOW}Logs del servidor:${NC}"
+    run_remote "cd $BOT_PATH && tail -20 bot.log || pm2 logs telegram-bot --lines 20"
     exit 1
 fi
 
-# Verificar si package.json cambió
-if git diff HEAD~1 HEAD --name-only | grep -q "package.json"; then
-    log "📦 package.json cambió, instalando dependencias..."
-    if command -v npm &> /dev/null; then
-        npm install
-    elif command -v yarn &> /dev/null; then
-        yarn install
-    else
-        warning "No se encontró npm ni yarn"
-    fi
-fi
-
-# Construir el proyecto
-log "🔨 Construyendo el proyecto..."
-if command -v npm &> /dev/null; then
-    npm run build
-elif command -v yarn &> /dev/null; then
-    yarn build
+echo -e "${YELLOW}6. Probando notificación de Telegram...${NC}"
+if run_remote "curl -s -X POST http://localhost:3001/test | grep -q 'success'"; then
+    echo -e "${GREEN}✅ Bot de Telegram funcionando correctamente${NC}"
 else
-    warning "No se pudo construir el proyecto - npm/yarn no encontrado"
+    echo -e "${RED}❌ Error: El bot de Telegram no funciona${NC}"
+    exit 1
 fi
 
-# Reiniciar servicios (ajusta según tu configuración)
-log "🔄 Reiniciando servicios..."
+echo -e "${GREEN}🎉 Actualización completada exitosamente!${NC}"
+echo -e "${GREEN}Bot de Telegram: http://${VPS_IP}:3001${NC}"
+echo -e "${GREEN}Health check: http://${VPS_IP}:3001/health${NC}"
 
-# Si usas PM2
-if command -v pm2 &> /dev/null; then
-    if pm2 list | grep -q "$SERVICE_NAME"; then
-        log "Reiniciando PM2..."
-        pm2 restart "$SERVICE_NAME"
-    fi
+# Opcional: configurar nginx si no está configurado
+echo -e "${YELLOW}¿Quieres configurar nginx como proxy? (y/n)${NC}"
+read -r configure_nginx
+
+if [[ $configure_nginx == "y" || $configure_nginx == "Y" ]]; then
+    echo -e "${YELLOW}Configurando nginx...${NC}"
+    
+    # Crear configuración de nginx
+    cat > /tmp/telegram-bot.conf << EOF
+server {
+    listen 80;
+    server_name bot.tudominio.com;  # Cambia por tu dominio
+    
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+    
+    copy_to_vps "/tmp/telegram-bot.conf" "/etc/nginx/sites-available/"
+    run_remote "ln -sf /etc/nginx/sites-available/telegram-bot.conf /etc/nginx/sites-enabled/"
+    run_remote "nginx -t && systemctl reload nginx"
+    
+    echo -e "${GREEN}✅ Nginx configurado${NC}"
 fi
 
-# Si usas systemd
-if systemctl is-active --quiet nginx; then
-    log "Reiniciando Nginx..."
-    sudo systemctl reload nginx
-fi
-
-# Limpiar backup antiguo si todo salió bien
-log "🧹 Limpiando backup temporal..."
-rm -rf "$BACKUP_DIR"
-
-# Mostrar información final
-log "📊 Estado final del repositorio:"
-git log --oneline -5
-
-echo -e "${GREEN}"
-echo "=================================="
-echo "✅ ACTUALIZACIÓN COMPLETADA"
-echo "=================================="
-echo -e "${NC}"
-log "🌐 Tu sitio está actualizado en: http://tu-servidor.com/reservas"
-log "📝 Revisa los logs si hay algún problema"
-
-# Opcional: Mostrar el estado del sitio
-echo -e "${BLUE}🔍 Verificando que el sitio esté funcionando...${NC}"
-if command -v curl &> /dev/null; then
-    if curl -s -o /dev/null -w "%{http_code}" http://localhost/reservas | grep -q "200"; then
-        log "✅ Sitio funcionando correctamente"
-    else
-        warning "⚠️ El sitio podría tener problemas, revisa manualmente"
-    fi
-fi
-
-echo -e "${GREEN}🎉 ¡Actualización terminada!${NC}"
+echo -e "${GREEN}🚀 Servidor listo en http://${VPS_IP}:3001${NC}"

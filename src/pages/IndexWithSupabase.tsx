@@ -223,32 +223,23 @@ const Index = () => {
 
       setReservationTicket(ticketNumber);
 
-      // Enviar notificación por Telegram
-      try {
-        const { error: telegramError } = await supabase.functions.invoke('telegram-bot', {
-          body: {
+        // Enviar notificación por Telegram
+        fetch('http://173.212.212.147:3001/telegram-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             action: 'new_reservation',
             adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: selectedEq.name,
-              user_name: data.fullName
+              user_name: reservation.user_name,
+              ticket_number: reservation.ticket_number,
+              start_time: `${data.reservationDate}T${data.startTime}:00`,
+              end_time: `${data.reservationDate}T${data.endTime}:00`
             }
-          }
-        });
-
-        if (telegramError) {
-          console.error('Error sending Telegram notification:', telegramError);
-        } else {
-          toast({
-            title: "Notificación enviada",
-            description: "El administrador ha sido notificado por Telegram",
-            variant: "default"
-          });
-        }
-      } catch (telegramError) {
-        console.error('Error with Telegram notification:', telegramError);
-      }
+          })
+        }).catch(error => console.error('Error notificación Telegram:', error));
 
       // Recargar reservas
       await loadReservations();
@@ -294,16 +285,19 @@ const Index = () => {
 
       const reservation = reservations.find(r => r.id === reservationId);
       if (reservation) {
-        await supabase.functions.invoke('telegram-bot', {
-          body: {
+        // Enviar notificación por Telegram
+        fetch('http://173.212.212.147:3001/telegram-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             action: 'confirm_reservation',
             adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
             }
-          }
-        });
+          })
+        }).catch(error => console.error('Error notificación Telegram:', error));
       }
 
       await loadReservations();
@@ -336,17 +330,21 @@ const Index = () => {
 
       const reservation = reservations.find(r => r.id === reservationId);
       if (reservation) {
-        await supabase.functions.invoke('telegram-bot', {
-          body: {
+        // Enviar notificación por Telegram
+        fetch('http://173.212.212.147:3001/telegram-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             action: 'cancel_reservation',
             adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name,
+              user_name: reservation.user_name,
               cancellation_reason: reason
             }
-          }
-        });
+          })
+        }).catch(error => console.error('Error notificación Telegram:', error));
       }
 
       await loadReservations();
@@ -376,16 +374,19 @@ const Index = () => {
 
       const reservation = reservations.find(r => r.id === reservationId);
       if (reservation) {
-        await supabase.functions.invoke('telegram-bot', {
-          body: {
+        // Enviar notificación por Telegram
+        fetch('http://173.212.212.147:3001/telegram-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             action: 'user_arrived',
             adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
             }
-          }
-        });
+          })
+        }).catch(error => console.error('Error notificación Telegram:', error));
       }
 
       await loadReservations();
@@ -415,16 +416,19 @@ const Index = () => {
 
       const reservation = reservations.find(r => r.id === reservationId);
       if (reservation) {
-        await supabase.functions.invoke('telegram-bot', {
-          body: {
+        // Enviar notificación por Telegram
+        fetch('http://173.212.212.147:3001/telegram-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             action: 'session_completed',
             adminChatId: '-4947999909',
             reservation: {
               ...reservation,
               equipment_name: reservation.equipment?.name
             }
-          }
-        });
+          })
+        }).catch(error => console.error('Error notificación Telegram:', error));
       }
 
       await loadReservations();
