@@ -144,6 +144,9 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       const allSlots = generateTimeSlots();
       const availableSlots = [];
       
+      console.log(`🔍 Verificando disponibilidad para ${equipmentCode} el ${date}`);
+      console.log('📋 Reservas encontradas:', reservations?.length || 0);
+      
       for (const slot of allSlots) {
         const [slotHour] = slot.split(':').map(Number);
         
@@ -155,7 +158,11 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
           const endTime = new Date(reservation.end_time);
           const slotTime = new Date(`${date}T${slot}:00`);
           
-          return slotTime >= startTime && slotTime < endTime;
+          const occupied = slotTime >= startTime && slotTime < endTime;
+          if (occupied) {
+            console.log(`❌ Slot ${slot} ocupado por reserva ${reservation.start_time} - ${reservation.end_time}`);
+          }
+          return occupied;
         });
         
         // Solo agregar slots que no estén ocupados y estén en horario de operación
@@ -164,6 +171,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         }
       }
       
+      console.log(`✅ Slots disponibles para ${equipmentCode}:`, availableSlots);
       return availableSlots;
     } catch (error) {
       console.error('Error verificando disponibilidad:', error);
@@ -174,6 +182,11 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
   // Actualizar slots disponibles cuando cambie el equipo o fecha
   useEffect(() => {
     const updateAvailableSlots = async () => {
+      if (!formData.equipmentCode || !formData.reservationDate) {
+        setAvailableSlots([]);
+        return;
+      }
+      
       const slots = await checkAvailability(formData.equipmentCode, formData.reservationDate);
       setAvailableSlots(slots);
       
@@ -182,9 +195,9 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         setFormData(prev => ({ ...prev, startTime: '', hours: 1 }));
       }
     };
-    
+
     updateAvailableSlots();
-  }, [formData.equipmentCode, formData.reservationDate]);
+  }, [formData.equipmentCode, formData.reservationDate, existingReservations]);
 
   const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
     if (!startTime || !hours || !equipmentCode || !availableSlots.length) return false;

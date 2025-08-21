@@ -666,6 +666,7 @@ const Index = () => {
               <div className="max-w-4xl mx-auto">
                 <ErrorBoundary fallback={<div className="p-4 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">No se pudo cargar el formulario de reserva. Intenta volver a la pestaña "Equipos" y reintentar.</div>}>
                   <ReservationForm
+                    key={`${selectedEquipment}-${reservations.length}`}
                     equipment={equipment}
                     selectedEquipment={selectedEquipment}
                     onSubmit={handleReservationSubmit}
