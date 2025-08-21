@@ -31,7 +31,7 @@ serve(async (req) => {
     }
 
     let message = '';
-    let chatId = adminChatId || '@gaming_grid_reservas'; // Canal por defecto
+    let chatId = adminChatId || '-4947999909'; // ID del grupo de Telegram
 
     switch (action) {
       case 'new_reservation':

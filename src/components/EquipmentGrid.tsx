@@ -9,6 +9,7 @@ interface Equipment {
   code: string;
   type: 'PC' | 'CONSOLE';
   name: string;
+  description?: string;
   status: 'available' | 'occupied' | 'reserved_pending' | 'reserved_confirmed';
   occupiedUntil?: string;
   currentPlayer?: string;
@@ -98,7 +99,7 @@ const EquipmentGrid = ({
         
         <CardContent className="space-y-3">
           <div className="text-sm text-muted-foreground">
-            <div className="font-medium">Código: {eq.code}</div>
+            <div className="font-medium">{eq.description || eq.code}</div>
             {eq.occupiedUntil && (
               <div className="flex items-center gap-1 mt-1">
                 <Clock className="h-3 w-3" />
