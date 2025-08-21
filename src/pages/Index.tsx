@@ -142,10 +142,10 @@ const Index = () => {
   }, []);
 
   const handleEquipmentSelect = (equipment: any) => {
-    setSelectedEquipment(equipment.code);
+    setSelectedEquipment(equipment.name);
     toast({
       title: "Equipo seleccionado",
-      description: `${equipment.code} - ${equipment.name}`,
+      description: `${equipment.name} - ${equipment.name}`,
       variant: "default"
     });
   };

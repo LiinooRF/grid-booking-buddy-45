@@ -118,7 +118,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     
     try {
       // Buscar el equipo por código
-      const selectedEquip = equipment.find(eq => eq.code === equipmentCode);
+      const selectedEquip = equipment.find(eq => eq.name === equipmentCode);
       if (!selectedEquip) return [];
       
       // Calcular inicio y fin del día en ISO (UTC) basados en hora local
@@ -376,8 +376,8 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                 </SelectTrigger>
                 <SelectContent>
                   {equipment.filter(eq => eq.status === 'available').map((eq) => (
-                    <SelectItem key={eq.code} value={eq.code}>
-                      {eq.name} - {eq.description || eq.code}
+                    <SelectItem key={eq.name} value={eq.name}>
+                      {eq.name} - {eq.description || eq.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
