@@ -224,14 +224,18 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(equipmentUsage).slice(0, 5).map(([equipment, hours]) => (
-                    <div key={equipment} className="flex justify-between items-center">
-                      <span>{equipment}</span>
-                      <Badge variant="outline">{hours}h</Badge>
-                    </div>
-                  ))}
-                </div>
+                 <div className="space-y-3">
+                   {Object.entries(equipmentUsage).length > 0 ? (
+                     Object.entries(equipmentUsage).slice(0, 5).map(([equipment, hours]) => (
+                       <div key={equipment} className="flex justify-between items-center">
+                         <span>{equipment}</span>
+                         <Badge variant="outline">{hours}h</Badge>
+                       </div>
+                     ))
+                   ) : (
+                     <div className="text-sm text-muted-foreground">No hay datos de uso disponibles</div>
+                   )}
+                 </div>
               </CardContent>
             </Card>
           </div>

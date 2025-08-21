@@ -162,22 +162,15 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
   }, [formData.equipmentCode, formData.reservationDate]);
 
   const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
-    if (!startTime || !hours || !equipmentCode) return false;
+    if (!startTime || !hours || !equipmentCode || !availableSlots.length) return false;
     
     // Verificar si el slot inicial está disponible
     if (!availableSlots.includes(startTime)) return false;
     
-    // Verificar si todos los slots necesarios están disponibles
-    const [startHour] = startTime.split(':').map(Number);
-    for (let i = 0; i < hours; i++) {
-      const checkHour = (startHour + i) % 24;
-      const checkTime = `${checkHour.toString().padStart(2, '0')}:00`;
-      if (!availableSlots.includes(checkTime)) {
-        return false;
-      }
-    }
-    
-    return true;
+    // Para simplificar, solo verificamos que el slot inicial esté disponible
+    // y que tengamos suficientes horas disponibles
+    const maxHours = getMaxHoursForTime(startTime, formData.reservationDate);
+    return hours <= maxHours;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -366,17 +359,17 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                     <SelectValue placeholder="Selecciona hora de inicio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableSlots.length > 0 ? (
-                      availableSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time} {availableSlots.includes(time) ? '✅' : '❌'}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="" disabled>
-                        No hay horarios disponibles
-                      </SelectItem>
-                    )}
+                     {availableSlots.length > 0 ? (
+                       availableSlots.map((time) => (
+                         <SelectItem key={time} value={time}>
+                           {time} ✅
+                         </SelectItem>
+                       ))
+                     ) : (
+                       <SelectItem value="" disabled>
+                         No hay horarios disponibles
+                       </SelectItem>
+                     )}
                   </SelectContent>
                 </Select>
               </div>
@@ -390,13 +383,19 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona cantidad de horas" />
                 </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableHours().map((hour) => (
-                      <SelectItem key={hour} value={hour.toString()}>
-                        {hour} {hour === 1 ? 'hora' : 'horas'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                   <SelectContent>
+                     {getAvailableHours().length > 0 ? (
+                       getAvailableHours().map((hour) => (
+                         <SelectItem key={hour} value={hour.toString()}>
+                           {hour} {hour === 1 ? 'hora' : 'horas'}
+                         </SelectItem>
+                       ))
+                     ) : (
+                       <SelectItem value="" disabled>
+                         No hay horas disponibles
+                       </SelectItem>
+                     )}
+                   </SelectContent>
               </Select>
               {formData.startTime && getMaxHoursForTime(formData.startTime, formData.reservationDate) === 0 && (
                 <p className="text-sm text-destructive">
