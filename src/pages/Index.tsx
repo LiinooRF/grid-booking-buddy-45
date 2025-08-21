@@ -570,6 +570,7 @@ const Index = () => {
                   equipment={equipment}
                   selectedEquipment={selectedEquipment}
                   onSubmit={handleReservationSubmit}
+                  existingReservations={reservations}
                 />
               </div>
             </TabsContent>

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, CreditCard, Clock, Users } from "lucide-react";
+import { Upload, CreditCard, Clock, Users, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Equipment {
   id: string;
@@ -19,9 +20,10 @@ interface ReservationFormProps {
   equipment: Equipment[];
   selectedEquipment?: string;
   onSubmit: (data: any) => void;
+  existingReservations?: any[];
 }
 
-const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: ReservationFormProps) => {
+const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReservations = [] }: ReservationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
@@ -35,6 +37,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
 
 
   const generateTimeSlots = () => {
@@ -92,17 +95,86 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
     return `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  const isTimeSlotAvailable = (startTime: string, endTime: string, equipmentCode: string) => {
-    // This would check against existing reservations in a real app
-    // For now, we'll just validate the time range
-    if (!startTime || !endTime) return false;
+  // Verificar disponibilidad real consultando reservas existentes
+  const checkAvailability = async (equipmentCode: string, date: string) => {
+    if (!equipmentCode || !date) return [];
     
+    try {
+      // Buscar el equipo por código
+      const selectedEquip = equipment.find(eq => eq.code === equipmentCode);
+      if (!selectedEquip) return [];
+      
+      // Consultar reservas confirmadas para este equipo en esta fecha
+      const { data: reservations, error } = await supabase
+        .from('reservations')
+        .select('start_time, end_time, hours')
+        .eq('equipment_id', selectedEquip.id)
+        .like('start_time', `${date}%`)
+        .in('status', ['confirmed', 'arrived']);
+      
+      if (error) {
+        console.error('Error consultando reservas:', error);
+        return [];
+      }
+      
+      // Generar todos los slots de tiempo posibles
+      const allSlots = generateTimeSlots();
+      const availableSlots = [];
+      
+      for (const slot of allSlots) {
+        const [slotHour] = slot.split(':').map(Number);
+        
+        // Verificar si este slot está ocupado por alguna reserva
+        const isOccupied = reservations?.some(reservation => {
+          const startTime = new Date(reservation.start_time);
+          const endTime = new Date(reservation.end_time);
+          const slotTime = new Date(`${date}T${slot}:00`);
+          
+          return slotTime >= startTime && slotTime < endTime;
+        });
+        
+        // Solo agregar slots que no estén ocupados y estén en horario de operación
+        if (!isOccupied && (slotHour >= 12 || slotHour === 0)) {
+          availableSlots.push(slot);
+        }
+      }
+      
+      return availableSlots;
+    } catch (error) {
+      console.error('Error verificando disponibilidad:', error);
+      return generateTimeSlots(); // Fallback a todos los slots
+    }
+  };
+  
+  // Actualizar slots disponibles cuando cambie el equipo o fecha
+  useEffect(() => {
+    const updateAvailableSlots = async () => {
+      const slots = await checkAvailability(formData.equipmentCode, formData.reservationDate);
+      setAvailableSlots(slots);
+      
+      // Si el horario seleccionado ya no está disponible, limpiarlo
+      if (formData.startTime && !slots.includes(formData.startTime)) {
+        setFormData(prev => ({ ...prev, startTime: '', hours: 1 }));
+      }
+    };
+    
+    updateAvailableSlots();
+  }, [formData.equipmentCode, formData.reservationDate]);
+
+  const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
+    if (!startTime || !hours || !equipmentCode) return false;
+    
+    // Verificar si el slot inicial está disponible
+    if (!availableSlots.includes(startTime)) return false;
+    
+    // Verificar si todos los slots necesarios están disponibles
     const [startHour] = startTime.split(':').map(Number);
-    const [endHour] = endTime.split(':').map(Number);
-    
-    // Validate operating hours
-    if (startHour < 12 || (endHour > 0 && endHour < 12 && endTime !== "00:00")) {
-      return false;
+    for (let i = 0; i < hours; i++) {
+      const checkHour = (startHour + i) % 24;
+      const checkTime = `${checkHour.toString().padStart(2, '0')}:00`;
+      if (!availableSlots.includes(checkTime)) {
+        return false;
+      }
     }
     
     return true;
@@ -127,6 +199,16 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
       toast({
         title: "Horario no disponible",
         description: `Solo puedes reservar máximo ${maxHours} ${maxHours === 1 ? 'hora' : 'horas'} desde las ${formData.startTime}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Verificar disponibilidad del horario seleccionado
+    if (!isTimeSlotAvailable(formData.startTime, formData.hours, formData.equipmentCode)) {
+      toast({
+        title: "Horario no disponible",
+        description: "El horario seleccionado ya está reservado. Por favor selecciona otro horario.",
         variant: "destructive"
       });
       return;
@@ -284,11 +366,17 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
                     <SelectValue placeholder="Selecciona hora de inicio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateTimeSlots().map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
+                    {availableSlots.length > 0 ? (
+                      availableSlots.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time} {availableSlots.includes(time) ? '✅' : '❌'}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        No hay horarios disponibles
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -314,6 +402,13 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit }: Reservation
                 <p className="text-sm text-destructive">
                   Esta hora ya no está disponible para hoy
                 </p>
+              )}
+              
+              {formData.equipmentCode && availableSlots.length === 0 && (
+                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>No hay horarios disponibles para este equipo en la fecha seleccionada</span>
+                </div>
               )}
             </div>
             {formData.startTime && formData.hours && (
