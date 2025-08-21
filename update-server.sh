@@ -40,6 +40,10 @@ copy_to_vps "./telegram-bot-server" "/var/www/"
 echo -e "${YELLOW}3. Instalando dependencias del bot...${NC}"
 run_remote "cd $BOT_PATH && npm install"
 
+# Abrir puerto 3001 en el firewall (si UFW está disponible)
+echo -e "${YELLOW}3.1 Abriendo puerto 3001 en el firewall...${NC}"
+run_remote "if command -v ufw > /dev/null; then ufw allow 3001/tcp || true; ufw allow OpenSSH || true; ufw reload || true; fi"
+
 echo -e "${YELLOW}4. Reiniciando servidor del bot...${NC}"
 # Detener proceso anterior si existe
 run_remote "pkill -f 'node server.js' || true"
