@@ -420,12 +420,12 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                         <TableCell>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">{reservation.hours}h</span>
+                              <span className="text-sm">{reservation.hours}h</span>
                               <Select
                                 value={reservation.hours.toString()}
                                 onValueChange={(value) => onChangeHours(reservation.id, parseInt(value))}
                               >
-                                <SelectTrigger className="w-20 h-8">
+                                <SelectTrigger className="w-16 h-7 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -461,6 +461,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                               size="sm"
                               onClick={() => onExtendTime(reservation.id, 60)}
                               title="Extender 1 hora"
+                              className="text-xs px-2"
                             >
                               +1h
                             </Button>
@@ -469,6 +470,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                               size="sm"
                               onClick={() => onExtendTime(reservation.id, 120)}
                               title="Extender 2 horas"
+                              className="text-xs px-2"
                             >
                               +2h
                             </Button>
@@ -477,6 +479,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                               size="sm"
                               onClick={() => onExtendTime(reservation.id, 180)}
                               title="Extender 3 horas"
+                              className="text-xs px-2"
                             >
                               +3h
                             </Button>

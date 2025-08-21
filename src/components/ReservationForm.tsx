@@ -142,36 +142,33 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       
       // Generar todos los slots de tiempo posibles
       const allSlots = generateTimeSlots();
-      const availableSlots = [];
+      const occupiedSlots = new Set<string>();
       
-      console.log(`🔍 Verificando disponibilidad para ${equipmentCode} el ${date}`);
-      console.log('📋 Reservas encontradas:', reservations?.length || 0);
-      
-      for (const slot of allSlots) {
-        const [slotHour] = slot.split(':').map(Number);
+      // Marcar todas las horas ocupadas por reservas existentes
+      reservations?.forEach(reservation => {
+        if (!reservation.start_time || !reservation.end_time) return;
         
-        // Verificar si este slot está ocupado por alguna reserva
-        const isOccupied = reservations?.some(reservation => {
-          if (!reservation.start_time || !reservation.end_time) return false;
-          
-          const startTime = new Date(reservation.start_time);
-          const endTime = new Date(reservation.end_time);
-          const slotTime = new Date(`${date}T${slot}:00`);
-          
-          const occupied = slotTime >= startTime && slotTime < endTime;
-          if (occupied) {
-            console.log(`❌ Slot ${slot} ocupado por reserva ${reservation.start_time} - ${reservation.end_time}`);
-          }
-          return occupied;
-        });
+        const startTime = new Date(reservation.start_time);
+        const endTime = new Date(reservation.end_time);
         
-        // Solo agregar slots que no estén ocupados y estén en horario de operación
-        if (!isOccupied && (slotHour >= 12 || slotHour === 0)) {
-          availableSlots.push(slot);
+        // Generar todas las horas ocupadas de esta reserva
+        let currentTime = new Date(startTime);
+        while (currentTime < endTime) {
+          const hour = currentTime.getHours();
+          const timeSlot = hour === 0 ? '00:00' : `${hour.toString().padStart(2, '0')}:00`;
+          occupiedSlots.add(timeSlot);
+          currentTime.setHours(currentTime.getHours() + 1);
         }
-      }
+      });
       
-      console.log(`✅ Slots disponibles para ${equipmentCode}:`, availableSlots);
+      // Filtrar slots disponibles: remover ocupados y mantener solo horario de operación
+      const availableSlots = allSlots.filter(slot => {
+        const [slotHour] = slot.split(':').map(Number);
+        const inOperatingHours = slotHour >= 12 || slotHour === 0;
+        const notOccupied = !occupiedSlots.has(slot);
+        return inOperatingHours && notOccupied;
+      });
+      
       return availableSlots;
     } catch (error) {
       console.error('Error verificando disponibilidad:', error);
