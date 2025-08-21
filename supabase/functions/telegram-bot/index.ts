@@ -98,7 +98,6 @@ serve(async (req) => {
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
-        parse_mode: 'Markdown',
       }),
     });
 
@@ -118,11 +117,10 @@ serve(async (req) => {
         const retryResponse = await fetch(telegramUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: fallbackChatId,
-            text: message,
-            parse_mode: 'Markdown',
-          }),
+            body: JSON.stringify({
+              chat_id: fallbackChatId,
+              text: message,
+            }),
         });
         const retryData = await retryResponse.json();
         console.log('Retry status:', retryResponse.status, 'Retry response:', retryData);
