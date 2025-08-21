@@ -368,7 +368,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                          </SelectItem>
                        ))
                      ) : (
-                       <SelectItem value="" disabled>
+                       <SelectItem value="no-slots" disabled>
                          No hay horarios disponibles
                        </SelectItem>
                      )}
@@ -393,9 +393,9 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                          </SelectItem>
                        ))
                      ) : (
-                       <SelectItem value="" disabled>
-                         No hay horas disponibles
-                       </SelectItem>
+                        <SelectItem value="no-hours" disabled>
+                          No hay horas disponibles
+                        </SelectItem>
                      )}
                    </SelectContent>
               </Select>
