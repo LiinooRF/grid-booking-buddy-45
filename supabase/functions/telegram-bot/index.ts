@@ -25,6 +25,8 @@ serve(async (req) => {
     
     console.log('Telegram bot action:', action);
     console.log('Reservation:', reservation);
+    console.log('TELEGRAM_BOT_TOKEN exists:', !!TELEGRAM_BOT_TOKEN);
+    console.log('Chat ID que se usará:', adminChatId || '-4947999909');
 
     if (!TELEGRAM_BOT_TOKEN) {
       throw new Error('TELEGRAM_BOT_TOKEN no configurado');
@@ -84,7 +86,11 @@ serve(async (req) => {
     }
 
     // Enviar mensaje a Telegram
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    console.log('Sending to Telegram URL:', telegramUrl.replace(TELEGRAM_BOT_TOKEN, 'HIDDEN_TOKEN'));
+    console.log('Payload:', { chat_id: chatId, text: message.substring(0, 100) + '...' });
+    
+    const telegramResponse = await fetch(telegramUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,9 +103,16 @@ serve(async (req) => {
     });
 
     const telegramData = await telegramResponse.json();
+    console.log('Telegram response status:', telegramResponse.status);
     console.log('Telegram response:', telegramData);
 
     if (!telegramData.ok) {
+      console.error('Telegram API Error Details:', {
+        error_code: telegramData.error_code,
+        description: telegramData.description,
+        chatId: chatId,
+        tokenValid: TELEGRAM_BOT_TOKEN?.length > 0
+      });
       throw new Error(`Error de Telegram: ${telegramData.description}`);
     }
 
