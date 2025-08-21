@@ -200,6 +200,18 @@ const Index = () => {
       }
     } catch (error) {
       console.error('Error guardando en Supabase:', error);
+      
+      // Check if it's an overlap error
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('OVERLAP_CONFLICT') || errorMessage.includes('se solapa')) {
+        toast({
+          title: "Horario no disponible",
+          description: "Ya existe una reserva para este horario. Por favor selecciona otro horario.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       toast({
         title: "Error",
         description: "Error al guardar la reserva, pero el ticket es válido",
