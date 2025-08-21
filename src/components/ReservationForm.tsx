@@ -111,7 +111,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         .select('start_time, end_time, hours')
         .eq('equipment_id', selectedEquip.id)
         .like('start_time', `${date}%`)
-        .in('status', ['confirmed', 'arrived']);
+        .in('status', ['pending', 'confirmed', 'arrived']);
       
       if (error) {
         console.error('Error consultando reservas:', error);

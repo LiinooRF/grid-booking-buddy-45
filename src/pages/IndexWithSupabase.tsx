@@ -102,7 +102,7 @@ const Index = () => {
       // Buscar si hay reservas activas para este equipo
       const activeReservation = reservations.find(res => 
         res.equipment_id === eq.id && 
-        (res.status === 'confirmed' || res.status === 'active')
+        (res.status === 'confirmed' || res.status === 'active' || res.status === 'pending')
       );
 
       let status: 'available' | 'occupied' | 'reserved_pending' | 'reserved_confirmed' = 'available';
@@ -110,7 +110,14 @@ const Index = () => {
       let currentPlayer = '';
 
       if (activeReservation) {
-        if (activeReservation.status === 'confirmed') {
+        if (activeReservation.status === 'pending') {
+          status = 'reserved_pending';
+          occupiedUntil = new Date(activeReservation.end_time).toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+          currentPlayer = activeReservation.user_name;
+        } else if (activeReservation.status === 'confirmed') {
           status = 'reserved_confirmed';
           occupiedUntil = new Date(activeReservation.end_time).toLocaleTimeString('es-ES', { 
             hour: '2-digit', 
@@ -127,14 +134,8 @@ const Index = () => {
         }
       }
 
-      // Verificar reservas pendientes
-      const pendingReservation = reservations.find(res => 
-        res.equipment_id === eq.id && res.status === 'pending'
-      );
-
-      if (pendingReservation && status === 'available') {
-        status = 'reserved_pending';
-      }
+      // Ya no necesitamos verificar reservas pendientes por separado
+      // porque ahora se manejan en activeReservation
 
       return {
         id: eq.id,
