@@ -13,6 +13,7 @@ interface Equipment {
   code: string;
   type: 'PC' | 'CONSOLE';
   name: string;
+  description?: string;
   status: 'available' | 'occupied' | 'reserved_pending' | 'reserved_confirmed';
 }
 
@@ -328,7 +329,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                 <SelectContent>
                   {equipment.filter(eq => eq.status === 'available').map((eq) => (
                     <SelectItem key={eq.code} value={eq.code}>
-                      {eq.code} - {eq.name}
+                      {eq.name} - {eq.description || eq.code}
                     </SelectItem>
                   ))}
                 </SelectContent>
