@@ -175,13 +175,15 @@ const Index = () => {
       const selectedEquipment = equipment.find(eq => eq.name === data.equipmentCode);
       
       if (selectedEquipment) {
-        // Guardar la reserva en Supabase
+        const startLocal = new Date(`${data.reservationDate}T${data.startTime}:00`);
+        const endLocal = new Date(`${data.reservationDate}T${data.endTime}:00`);
+
         const { error } = await supabase.from('reservations').insert([{
           equipment_id: selectedEquipment.id,
           user_name: data.fullName,
           user_phone: data.phone,
-          start_time: `${data.reservationDate}T${data.startTime}:00`,
-          end_time: `${data.reservationDate}T${data.endTime}:00`,
+          start_time: startLocal.toISOString(),
+          end_time: endLocal.toISOString(),
           hours: data.hours,
           status: 'pending',
           ticket_number: ticketNumber,

@@ -77,12 +77,28 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
   };
 
   const getAvailableHours = () => {
-    const maxHours = getMaxHoursForTime(formData.startTime, formData.reservationDate);
-    const hours = [];
-    for (let i = 1; i <= maxHours; i++) {
-      hours.push(i);
+    if (!formData.startTime) return [] as number[];
+
+    // Calcular horas contiguas disponibles desde la hora seleccionada
+    const slotsSet = new Set(availableSlots);
+    const [startHour] = formData.startTime.split(':').map(Number);
+
+    let contiguous = 0;
+    for (let i = 0; i < 12; i++) {
+      const nextHour = (startHour + i) % 24;
+      const timeStr = nextHour === 0 ? '00:00' : `${nextHour.toString().padStart(2, '0')}:00`;
+      if (slotsSet.has(timeStr)) {
+        contiguous++;
+      } else {
+        break;
+      }
     }
-    return hours;
+
+    // Limitar además por horario de cierre
+    const maxByClosing = getMaxHoursForTime(formData.startTime, formData.reservationDate);
+    const limit = Math.min(contiguous, maxByClosing);
+
+    return Array.from({ length: limit }, (_, i) => i + 1);
   };
 
   const calculateEndTime = (startTime: string, hours: number) => {
@@ -105,13 +121,19 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       const selectedEquip = equipment.find(eq => eq.code === equipmentCode);
       if (!selectedEquip) return [];
       
-      // Consultar reservas confirmadas para este equipo en esta fecha
+      // Calcular inicio y fin del día en ISO (UTC) basados en hora local
+      const dayStartLocal = new Date(`${date}T00:00:00`);
+      const nextDayLocal = new Date(`${date}T00:00:00`);
+      nextDayLocal.setDate(nextDayLocal.getDate() + 1);
+
+      // Consultar reservas para este equipo en el rango del día seleccionado
       const { data: reservations, error } = await supabase
         .from('reservations')
         .select('start_time, end_time, hours')
         .eq('equipment_id', selectedEquip.id)
-        .like('start_time', `${date}%`)
-        .in('status', ['pending', 'confirmed', 'arrived']);
+        .gte('start_time', dayStartLocal.toISOString())
+        .lt('start_time', nextDayLocal.toISOString())
+        .in('status', ['pending', 'confirmed', 'arrived', 'active']);
       
       if (error) {
         console.error('Error consultando reservas:', error);
@@ -166,14 +188,30 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
 
   const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
     if (!startTime || !hours || !equipmentCode || !availableSlots.length) return false;
-    
-    // Verificar si el slot inicial está disponible
+
+    // El slot inicial debe estar disponible
     if (!availableSlots.includes(startTime)) return false;
-    
-    // Para simplificar, solo verificamos que el slot inicial esté disponible
-    // y que tengamos suficientes horas disponibles
-    const maxHours = getMaxHoursForTime(startTime, formData.reservationDate);
-    return hours <= maxHours;
+
+    // Verificar horas contiguas disponibles desde el inicio
+    const slotsSet = new Set(availableSlots);
+    const [startHour] = startTime.split(':').map(Number);
+
+    let contiguous = 0;
+    for (let i = 0; i < hours; i++) {
+      const nextHour = (startHour + i) % 24;
+      const timeStr = nextHour === 0 ? '00:00' : `${nextHour.toString().padStart(2, '0')}:00`;
+      if (slotsSet.has(timeStr)) {
+        contiguous++;
+      } else {
+        break;
+      }
+    }
+
+    if (contiguous < hours) return false;
+
+    // Validar además contra horario de cierre
+    const maxByClosing = getMaxHoursForTime(startTime, formData.reservationDate);
+    return hours <= maxByClosing;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
