@@ -319,7 +319,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
             <div className="space-y-2">
               <Label htmlFor="equipmentCode">Equipo</Label>
               <Select
-                value={formData.equipmentCode}
+                value={formData.equipmentCode || undefined}
                 onValueChange={(value) => setFormData({...formData, equipmentCode: value})}
               >
                 <SelectTrigger>
@@ -354,7 +354,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
               <div className="space-y-2">
                 <Label htmlFor="startTime">Hora de inicio</Label>
                 <Select
-                  value={formData.startTime}
+                  value={formData.startTime || undefined}
                   onValueChange={(value) => setFormData({...formData, startTime: value})}
                 >
                   <SelectTrigger>

@@ -5,7 +5,7 @@ type ErrorBoundaryProps = {
   children: React.ReactNode;
 };
 
-type ErrorBoundaryState = { hasError: boolean };
+type ErrorBoundaryState = { hasError: boolean; error?: any };
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
@@ -18,15 +18,23 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: any, info: any) {
-    // Log for debugging
     console.error("UI error captured:", error, info);
+    this.setState({ error });
   }
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? (
-        <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
-          Ocurrió un error al mostrar esta sección. Intenta recargar la página.
+      return (
+        <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20 space-y-2">
+          {this.props.fallback ?? (
+            <div>Ocurrió un error al mostrar esta sección. Intenta recargar la página.</div>
+          )}
+          {this.state.error?.message && (
+            <details className="text-xs opacity-80">
+              <summary>Detalles del error</summary>
+              <pre className="mt-2 whitespace-pre-wrap">{String(this.state.error?.message)}</pre>
+            </details>
+          )}
         </div>
       );
     }
