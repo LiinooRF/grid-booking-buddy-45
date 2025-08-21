@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // 🆕 REAL: Cargar equipos desde Supabase
 interface Equipment {
@@ -645,12 +646,14 @@ const Index = () => {
               </div>
               
               <div className="max-w-4xl mx-auto">
-                <ReservationForm
-                  equipment={equipment}
-                  selectedEquipment={selectedEquipment}
-                  onSubmit={handleReservationSubmit}
-                  existingReservations={reservations}
-                />
+                <ErrorBoundary fallback={<div className="p-4 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">No se pudo cargar el formulario de reserva. Intenta volver a la pestaña "Equipos" y reintentar.</div>}>
+                  <ReservationForm
+                    equipment={equipment}
+                    selectedEquipment={selectedEquipment}
+                    onSubmit={handleReservationSubmit}
+                    existingReservations={reservations}
+                  />
+                </ErrorBoundary>
               </div>
             </TabsContent>
 
