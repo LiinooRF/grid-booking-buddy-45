@@ -142,13 +142,13 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         return generateTimeSlots(); // Fallback a todos los slots si hay error
       }
 
-      // Consultar bloqueos de eventos para este equipo en el rango del día seleccionado
+      // Consultar bloqueos de eventos que cruzan el día seleccionado
       const { data: eventBlocks } = await supabase
         .from('event_blocks')
         .select('start_time, end_time, title')
         .contains('equipment_ids', [selectedEquip.id])
-        .gte('start_time', dayStartLocal.toISOString())
-        .lt('end_time', nextDayLocal.toISOString());
+        .lte('start_time', nextDayLocal.toISOString())
+        .gte('end_time', dayStartLocal.toISOString());
       
       // Generar todos los slots de tiempo posibles
       const allSlots = generateTimeSlots();
@@ -183,7 +183,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         while (currentTime < endTime) {
           const hour = currentTime.getHours();
           const timeSlot = hour === 0 ? '00:00' : `${hour.toString().padStart(2, '0')}:00`;
-          occupiedSlots.add(timeSlot + '_event');
+          occupiedSlots.add(timeSlot);  // Bloquear directamente sin sufijo '_event'
           currentTime.setHours(currentTime.getHours() + 1);
         }
       });
@@ -194,10 +194,9 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       const availableSlots = allSlots.filter(slot => {
         const [slotHour] = slot.split(':').map(Number);
         const inOperatingHours = slotHour >= 12 && slotHour <= 23;
-        const notOccupiedByReservation = !occupiedSlots.has(slot);
-        const notOccupiedByEvent = !occupiedSlots.has(slot + '_event');
+        const notOccupied = !occupiedSlots.has(slot);
         const notPast = formData.reservationDate === todayStr ? slotHour > currentHour : true;
-        return inOperatingHours && notOccupiedByReservation && notOccupiedByEvent && notPast;
+        return inOperatingHours && notOccupied && notPast;
       });
       
       return availableSlots;

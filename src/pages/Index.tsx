@@ -252,12 +252,21 @@ const Index = () => {
     } catch (error) {
       console.error('Error guardando en Supabase:', error);
       
-      // Check if it's an overlap error
+      // Check if it's an overlap error or event conflict
       const errorMessage = error?.message || '';
       if (errorMessage.includes('OVERLAP_CONFLICT') || errorMessage.includes('se solapa')) {
         toast({
           title: "Horario no disponible",
           description: "Ya existe una reserva para este horario. Por favor selecciona otro horario.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (errorMessage.includes('EVENT_CONFLICT') || errorMessage.includes('evento')) {
+        toast({
+          title: "Horario no disponible - Evento",
+          description: "Hay un evento programado en este horario. Por favor selecciona otro horario.",
           variant: "destructive"
         });
         return;

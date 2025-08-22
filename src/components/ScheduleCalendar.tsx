@@ -84,12 +84,12 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
 
       if (reservationsError) throw reservationsError;
 
-      // Obtener bloqueos de eventos del día seleccionado
+      // Obtener bloqueos de eventos que cruzan el día seleccionado
       const { data: eventBlocksData, error: eventBlocksError } = await supabase
         .from("event_blocks")
         .select("*")
-        .gte("start_time", startOfSelectedDay.toISOString())
-        .lt("end_time", endOfSelectedDay.toISOString());
+        .lte("start_time", endOfSelectedDay.toISOString())
+        .gte("end_time", startOfSelectedDay.toISOString());
 
       if (eventBlocksError) throw eventBlocksError;
 
