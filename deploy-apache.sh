@@ -29,17 +29,22 @@ else
   $PM install
 fi
 
+echo "==> Preparando directorios en Apache"
+mkdir -p "$APACHE_DIR"
+
 echo "==> Compilando para /reservas/"
 VITE_BASE_PATH="/reservas/" $PM run build
 echo "==> Copiando build de reservas"
 rm -rf "$APACHE_DIR/reservas" 2>/dev/null || true
-cp -r "$REPO_DIR/dist" "$APACHE_DIR/reservas"
+mkdir -p "$APACHE_DIR/reservas"
+cp -r "$REPO_DIR/dist/." "$APACHE_DIR/reservas"
 
 echo "==> Compilando para /eventos/"
 VITE_BASE_PATH="/eventos/" $PM run build
 echo "==> Copiando build de eventos"
 rm -rf "$APACHE_DIR/eventos" 2>/dev/null || true
-cp -r "$REPO_DIR/dist" "$APACHE_DIR/eventos"
+mkdir -p "$APACHE_DIR/eventos"
+cp -r "$REPO_DIR/dist/." "$APACHE_DIR/eventos"
 
 echo "==> Configurando Apache para SPA y MIME"
 # Habilitar módulos necesarios (ignorar si ya están habilitados)

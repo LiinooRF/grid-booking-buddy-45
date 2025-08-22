@@ -33,17 +33,22 @@ fi
 echo "==> Habilitando módulos Apache"
 a2enmod rewrite mime headers >/dev/null 2>&1 || true
 
+echo "==> Preparando directorios en Apache"
+mkdir -p "$APACHE_DIR"
+
 echo "==> Compilando para /reservas/ con base correcta"
 VITE_BASE_PATH="/reservas/" $PM run build
 echo "==> Copiando build de reservas"
 rm -rf "$APACHE_DIR/reservas" 2>/dev/null || true
-cp -r "$REPO_DIR/dist" "$APACHE_DIR/reservas"
+mkdir -p "$APACHE_DIR/reservas"
+cp -r "$REPO_DIR/dist/." "$APACHE_DIR/reservas"
 
 echo "==> Compilando para /eventos/ con base correcta"
 VITE_BASE_PATH="/eventos/" $PM run build  
 echo "==> Copiando build de eventos"
 rm -rf "$APACHE_DIR/eventos" 2>/dev/null || true
-cp -r "$REPO_DIR/dist" "$APACHE_DIR/eventos"
+mkdir -p "$APACHE_DIR/eventos"
+cp -r "$REPO_DIR/dist/." "$APACHE_DIR/eventos"
 
 echo "==> Configurando Apache (.htaccess)"
 cat > "$APACHE_DIR/.htaccess" << 'EOF'
