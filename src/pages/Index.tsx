@@ -433,57 +433,143 @@ const Index = () => {
     }
   };
 
-  const handleRelease = (id: string) => {
-    setReservations(prev => prev.filter(r => r.id !== id));
-    toast({
-      title: "Equipo liberado",
-      description: "El equipo ha sido liberado y está disponible",
-      variant: "default"
-    });
+  const handleRelease = async (id: string) => {
+    try {
+      // Cambiar estado a 'cancelled' en Supabase para liberar el equipo
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Actualizar estado local
+      setReservations(prev => 
+        prev.map(r => r.id === id ? { ...r, status: 'cancelled' as const } : r)
+      );
+      
+      toast({
+        title: "Equipo liberado",
+        description: "El equipo ha sido liberado y está disponible",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error liberando equipo:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo liberar el equipo",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleExtendTime = (id: string, minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    setReservations(prev => 
-      prev.map(r => {
-        if (r.id === id && r.endTime) {
-          const [endHours, endMins] = r.endTime.split(':').map(Number);
-          const endDate = new Date();
-          endDate.setHours(endHours, endMins, 0, 0);
-          endDate.setMinutes(endDate.getMinutes() + minutes);
-          
-          const newEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
-          return { ...r, endTime: newEndTime };
-        }
-        return r;
-      })
-    );
-    
-    toast({
-      title: "Tiempo extendido",
-      description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}`,
-      variant: "default"
-    });
+  const handleExtendTime = async (id: string, minutes: number) => {
+    try {
+      const hours = Math.floor(minutes / 60);
+      const reservation = reservations.find(r => r.id === id);
+      
+      if (!reservation) {
+        toast({
+          title: "Error",
+          description: "Reserva no encontrada",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Calcular nueva hora de fin
+      const currentEndTime = new Date(`${reservation.reservationDate}T${reservation.endTime}:00`);
+      const newEndTime = new Date(currentEndTime.getTime() + (minutes * 60 * 1000));
+      
+      // Actualizar en Supabase
+      const { error } = await supabase
+        .from('reservations')
+        .update({ 
+          end_time: newEndTime.toISOString(),
+          hours: reservation.hours + hours 
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Actualizar estado local
+      const newEndTimeString = `${newEndTime.getHours().toString().padStart(2, '0')}:${newEndTime.getMinutes().toString().padStart(2, '0')}`;
+      setReservations(prev => 
+        prev.map(r => {
+          if (r.id === id) {
+            return { 
+              ...r, 
+              endTime: newEndTimeString,
+              hours: r.hours + hours
+            };
+          }
+          return r;
+        })
+      );
+      
+      toast({
+        title: "Tiempo extendido",
+        description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error extendiendo tiempo:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo extender el tiempo",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleChangeHours = (reservationId: string, newHours: number) => {
-    setReservations(prev => 
-      prev.map(r => {
-        if (r.id === reservationId) {
-          return {
-            ...r,
-            hours: newHours
-          };
-        }
-        return r;
-      })
-    );
+  const handleChangeHours = async (reservationId: string, newHours: number) => {
+    try {
+      const reservation = reservations.find(r => r.id === reservationId);
+      if (!reservation) return;
 
-    toast({
-      title: "Horas actualizadas",
-      description: `Reserva actualizada a ${newHours} ${newHours === 1 ? 'hora' : 'horas'}`,
-      variant: "default"
-    });
+      // Calcular nueva hora de fin basada en las nuevas horas
+      const startTime = new Date(`${reservation.reservationDate}T${reservation.startTime}:00`);
+      const newEndTime = new Date(startTime.getTime() + (newHours * 60 * 60 * 1000));
+      
+      // Actualizar en Supabase
+      const { error } = await supabase
+        .from('reservations')
+        .update({ 
+          hours: newHours,
+          end_time: newEndTime.toISOString()
+        })
+        .eq('id', reservationId);
+      
+      if (error) throw error;
+
+      // Actualizar estado local
+      const newEndTimeString = `${newEndTime.getHours().toString().padStart(2, '0')}:${newEndTime.getMinutes().toString().padStart(2, '0')}`;
+      setReservations(prev => 
+        prev.map(r => {
+          if (r.id === reservationId) {
+            return {
+              ...r,
+              hours: newHours,
+              endTime: newEndTimeString
+            };
+          }
+          return r;
+        })
+      );
+
+      toast({
+        title: "Horas actualizadas",
+        description: `Reserva actualizada a ${newHours} ${newHours === 1 ? 'hora' : 'horas'}`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error actualizando horas:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron actualizar las horas",
+        variant: "destructive"
+      });
+    }
   };
 
   // Funciones para manejo de mantenimiento y días cerrados
