@@ -210,12 +210,16 @@ const Index = () => {
         throw new Error('No se encontró el equipo seleccionado');
       }
 
+      // Calcular end_time correctamente sumando las horas
+      const startDateTime = new Date(`${data.reservationDate}T${data.startTime}:00`);
+      const endDateTime = new Date(startDateTime.getTime() + (data.hours * 60 * 60 * 1000));
+      
       const reservationData = {
         equipment_id: foundEquipment.id,
         user_name: data.fullName,
         user_phone: data.phone,
-        start_time: `${data.reservationDate}T${data.startTime}:00`,
-        end_time: `${data.reservationDate}T${data.endTime}:00`,
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
         hours: data.hours,
         status: 'pending',
         ticket_number: ticketNumber,
