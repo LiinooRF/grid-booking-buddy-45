@@ -38,13 +38,26 @@ server {
     root /var/www/reservas;
     index index.html;
 
+    # MIME types para archivos JavaScript (CRÍTICO)
+    location ~* \.js$ {
+        add_header Content-Type application/javascript;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ~* \.mjs$ {
+        add_header Content-Type application/javascript;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
     # Configuración SPA para React
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Optimización archivos estáticos
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+    # Optimización otros archivos estáticos
+    location ~* \.(css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
         access_log off;
@@ -91,6 +104,13 @@ EOF
 Options -MultiViews
 RewriteEngine On
 
+# MIME types correctos para JavaScript (CRÍTICO para módulos ES)
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType application/javascript .mjs
+    AddType text/css .css
+</IfModule>
+
 # Handle React Router routes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -118,7 +138,7 @@ RewriteRule ^ index.html [QSA,L]
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-XSS-Protection "1; mode=block"
     Header always set X-Content-Type-Options "nosniff"
-</IfModule>
+</IfModule></IfModule>
 EOF
 
         chmod 644 "$PROJECT_PATH/.htaccess"
