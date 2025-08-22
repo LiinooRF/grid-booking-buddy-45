@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,9 @@ import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
 import { supabase } from "@/integrations/supabase/client";
-import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
+import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar, LogOut, LogIn } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { User, Session } from '@supabase/supabase-js';
 
 // 🆕 REAL: Cargar equipos desde Supabase
 interface Equipment {
@@ -40,13 +42,16 @@ interface Reservation {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loadingEquipment, setLoadingEquipment] = useState(true);
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<string>('equipos');
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [reservationTicket, setReservationTicket] = useState<string | null>(null);
   const [searchEmail, setSearchEmail] = useState('');
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
@@ -102,7 +107,60 @@ const Index = () => {
     }
   };
 
-  // Cargar equipos y reservas al inicio
+  // Check admin role
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+      
+      if (error) {
+        setIsAdmin(false);
+        return false;
+      }
+      
+      setIsAdmin(true);
+      return true;
+    } catch (error) {
+      setIsAdmin(false);
+      return false;
+    }
+  };
+
+  // Authentication state management
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Check admin role when user is authenticated
+          await checkAdminRole(session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        await checkAdminRole(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load equipment and reservations on mount
   useEffect(() => {
     const loadEquipment = async () => {
       try {
@@ -138,8 +196,11 @@ const Index = () => {
     };
 
     loadEquipment();
-    loadReservations();
-  }, []);
+    // Only load reservations if user is admin
+    if (isAdmin) {
+      loadReservations();
+    }
+  }, [isAdmin]);
 
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.name);
@@ -258,20 +319,25 @@ const Index = () => {
     setSelectedEquipment('');
   };
 
-  const handleAdminLogin = (password: string) => {
-    // Simple password check - in real app this would be secure
-    if (password === 'admin123') {
-      setIsAdminAuthenticated(true);
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setReservations([]);
+      
       toast({
-        title: "Acceso concedido",
-        description: "Bienvenido al panel de administración",
-        variant: "default"
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente",
       });
-    } else {
+    } catch (error: any) {
       toast({
-        title: "Acceso denegado",
-        description: "Contraseña incorrecta",
-        variant: "destructive"
+        title: "Error",
+        description: error.message || "Error al cerrar sesión",
+        variant: "destructive",
       });
     }
   };
@@ -612,6 +678,34 @@ const Index = () => {
               <Badge variant="outline" className="status-occupied text-xs">
                 {equipment.filter(eq => eq.status === 'occupied').length} Ocupados
               </Badge>
+              
+              {/* Auth Controls */}
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground hidden md:inline">
+                    {user.email} {isAdmin && '(Admin)'}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="h-8 px-2"
+                  >
+                    <LogOut className="h-4 w-4 md:mr-1" />
+                    <span className="hidden md:inline">Cerrar Sesión</span>
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="h-8 px-2"
+                >
+                  <LogIn className="h-4 w-4 md:mr-1" />
+                  <span className="hidden md:inline">Admin</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -903,40 +997,42 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Hidden Admin Panel */}
-        <div id="admin-panel" style={{ display: 'none' }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gaming-surface border-gaming-border rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-primary">Panel de Administración</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    document.getElementById('admin-panel')!.style.display = 'none';
-                  }}
-                >
-                  ✕
-                </Button>
+        {/* Hidden Admin Panel - Only show if authenticated and admin */}
+        {isAdmin && (
+          <div id="admin-panel" style={{ display: 'none' }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gaming-surface border-gaming-border rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-primary">Panel de Administración</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      document.getElementById('admin-panel')!.style.display = 'none';
+                    }}
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <AdminPanel
+                  reservations={reservations}
+                  onConfirm={handleReservationConfirm}
+                  onCancel={handleReservationCancel}
+                  onMarkArrived={handleMarkArrived}
+                  onRelease={handleRelease}
+                  onExtendTime={handleExtendTime}
+                  onLogin={() => {}} // No longer needed
+                  isAuthenticated={true} // Always true when this renders
+                  onChangeHours={handleChangeHours}
+                  equipment={equipment}
+                  onToggleMaintenance={handleToggleMaintenance}
+                  onAddClosedDay={handleAddClosedDay}
+                  onRemoveClosedDay={handleRemoveClosedDay}
+                />
               </div>
-              <AdminPanel
-                reservations={reservations}
-                onConfirm={handleReservationConfirm}
-                onCancel={handleReservationCancel}
-                onMarkArrived={handleMarkArrived}
-                onRelease={handleRelease}
-                onExtendTime={handleExtendTime}
-                onLogin={handleAdminLogin}
-                isAuthenticated={isAdminAuthenticated}
-                onChangeHours={handleChangeHours}
-                equipment={equipment}
-                onToggleMaintenance={handleToggleMaintenance}
-                onAddClosedDay={handleAddClosedDay}
-                onRemoveClosedDay={handleRemoveClosedDay}
-              />
             </div>
           </div>
-        </div>
+        )}
       </main>
 
       {/* Footer */}
