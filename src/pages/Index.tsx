@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
+import ClosedPlatform from "@/components/ClosedPlatform";
 import { useToast } from "@/hooks/use-toast";
+import { useClosedDays } from "@/hooks/useClosedDays";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
@@ -41,6 +43,7 @@ interface Reservation {
 
 const Index = () => {
   const { toast } = useToast();
+  const { isClosedToday, closedReason, loading: closedLoading } = useClosedDays();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loadingEquipment, setLoadingEquipment] = useState(true);
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
@@ -51,6 +54,7 @@ const Index = () => {
   const [searchEmail, setSearchEmail] = useState('');
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showAdminAccess, setShowAdminAccess] = useState(false);
 
   // Cargar reservas desde Supabase
   const loadReservations = async () => {
@@ -571,6 +575,74 @@ const Index = () => {
       setIsSearching(false);
     }
   };
+
+  // Si está cargando la verificación de días cerrados, mostrar loading
+  if (closedLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gaming-dark via-gaming-surface to-gaming-dark flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Verificando disponibilidad...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si la plataforma está cerrada hoy, mostrar pantalla de cierre pero mantener acceso admin
+  if (isClosedToday) {
+    return (
+      <div>
+        <ClosedPlatform reason={closedReason} />
+        
+        {/* Admin Panel - Acceso discreto incluso cuando está cerrado */}
+        <div className="fixed bottom-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAdminAccess(!showAdminAccess)}
+            className="opacity-30 hover:opacity-100 transition-opacity"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Hidden Admin Panel */}
+        {showAdminAccess && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gaming-surface border-gaming-border rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-primary">Panel de Administración</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAdminAccess(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <AdminPanel
+                  reservations={reservations}
+                  onConfirm={handleReservationConfirm}
+                  onCancel={handleReservationCancel}
+                  onMarkArrived={handleMarkArrived}
+                  onRelease={handleRelease}
+                  onExtendTime={handleExtendTime}
+                  onLogin={handleAdminLogin}
+                  isAuthenticated={isAdminAuthenticated}
+                  onChangeHours={handleChangeHours}
+                  equipment={equipment}
+                  onToggleMaintenance={handleToggleMaintenance}
+                  onAddClosedDay={handleAddClosedDay}
+                  onRemoveClosedDay={handleRemoveClosedDay}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
