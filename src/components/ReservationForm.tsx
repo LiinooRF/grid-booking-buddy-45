@@ -163,12 +163,15 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         }
       });
       
-      // Filtrar slots disponibles: remover ocupados y mantener solo horario de operación
+      // Filtrar slots disponibles: remover ocupados, fuera de horario y horas pasadas si es hoy
+      const todayStr = new Date().toISOString().split('T')[0];
+      const currentHour = new Date().getHours();
       const availableSlots = allSlots.filter(slot => {
         const [slotHour] = slot.split(':').map(Number);
         const inOperatingHours = slotHour >= 12 && slotHour <= 23;
         const notOccupied = !occupiedSlots.has(slot);
-        return inOperatingHours && notOccupied;
+        const notPast = formData.reservationDate === todayStr ? slotHour > currentHour : true;
+        return inOperatingHours && notOccupied && notPast;
       });
       
       return availableSlots;

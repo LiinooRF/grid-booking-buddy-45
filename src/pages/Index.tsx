@@ -145,6 +145,20 @@ const Index = () => {
     loadReservations();
   }, []);
 
+  // Suscripción en tiempo real a reservas para actualizar el panel al instante
+  useEffect(() => {
+    const channel = supabase
+      .channel('reservations-panel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, async () => {
+        await loadReservations();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.name);
     toast({
@@ -180,7 +194,12 @@ const Index = () => {
       
       if (selectedEquipment) {
         const startLocal = new Date(`${data.reservationDate}T${data.startTime}:00`);
-        const endLocal = new Date(`${data.reservationDate}T${data.endTime}:00`);
+        let endLocal = new Date(`${data.reservationDate}T${data.endTime}:00`);
+
+        // Si el fin es menor o igual que el inicio (cruce de medianoche), mover fin al día siguiente
+        if (endLocal <= startLocal) {
+          endLocal.setDate(endLocal.getDate() + 1);
+        }
 
         const { error } = await supabase.from('reservations').insert([{
           equipment_id: selectedEquipment.id,
@@ -221,6 +240,7 @@ const Index = () => {
         description: "Error al guardar la reserva, pero el ticket es válido",
         variant: "destructive"
       });
+      return;
     }
     
     // Send Telegram notification (usando el edge function de Supabase)
