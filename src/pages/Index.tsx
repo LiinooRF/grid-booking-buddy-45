@@ -465,7 +465,7 @@ const Index = () => {
 
   const handleExtendTime = async (id: string, minutes: number) => {
     try {
-      const hours = Math.floor(minutes / 60);
+      const hours = Math.floor(Math.abs(minutes) / 60);
       const reservation = reservations.find(r => r.id === id);
       
       if (!reservation) {
@@ -480,6 +480,21 @@ const Index = () => {
       // Calcular nueva hora de fin
       const currentEndTime = new Date(`${reservation.reservationDate}T${reservation.endTime}:00`);
       const newEndTime = new Date(currentEndTime.getTime() + (minutes * 60 * 1000));
+      
+      // Si estamos reduciendo tiempo, verificar que no sea menor que la hora actual + 30 min
+      if (minutes < 0) {
+        const now = new Date();
+        const minAllowedEndTime = new Date(now.getTime() + (30 * 60 * 1000)); // 30 min desde ahora
+        
+        if (newEndTime < minAllowedEndTime) {
+          toast({
+            title: "No se puede reducir más",
+            description: "El tiempo mínimo debe ser 30 minutos desde ahora",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
       
       // Buscar el equipo por código para obtener el ID
       const selectedEquip = equipment.find(eq => eq.name === reservation.equipmentCode);
@@ -566,9 +581,12 @@ const Index = () => {
         })
       );
       
+      const isExtending = minutes > 0;
       toast({
-        title: "Tiempo extendido",
-        description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}. Las horas adicionales están ahora reservadas.`,
+        title: isExtending ? "Tiempo extendido" : "Tiempo reducido",
+        description: isExtending 
+          ? `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}. Las horas adicionales están ahora reservadas.`
+          : `${hours} ${hours === 1 ? 'hora reducida' : 'horas reducidas'}.`,
         variant: "default"
       });
     } catch (error) {
