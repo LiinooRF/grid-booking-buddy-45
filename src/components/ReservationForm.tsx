@@ -41,8 +41,44 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [closedDays, setClosedDays] = useState<any[]>([]);
-
-
+  const [eventBlocks, setEventBlocks] = useState<any[]>([]);
+  
+  // Cargar bloqueos de eventos cuando cambie equipo o fecha
+  useEffect(() => {
+    const fetchEventBlocks = async () => {
+      if (!formData.equipmentCode || !formData.reservationDate) {
+        setEventBlocks([]);
+        return;
+      }
+      
+      try {
+        const selectedEquip = equipment.find(eq => eq.name === formData.equipmentCode);
+        if (!selectedEquip) {
+          setEventBlocks([]);
+          return;
+        }
+        
+        const dayStart = new Date(`${formData.reservationDate}T00:00:00`);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+        
+        const { data } = await supabase
+          .from('event_blocks')
+          .select('*')
+          .contains('equipment_ids', [selectedEquip.id])
+          .lte('start_time', dayEnd.toISOString())
+          .gte('end_time', dayStart.toISOString());
+        
+        setEventBlocks(data || []);
+        console.log('🎯 Event blocks loaded for', formData.equipmentCode, formData.reservationDate, ':', data);
+      } catch (error) {
+        console.error('Error loading event blocks:', error);
+        setEventBlocks([]);
+      }
+    };
+    
+    fetchEventBlocks();
+  }, [formData.equipmentCode, formData.reservationDate, equipment]);
   const generateTimeSlots = () => {
     const slots: string[] = [];
     // De 12:00 a 23:00 (último inicio permitido)
@@ -219,10 +255,10 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     }
   };
   
-  // Actualizar slots cuando cambian equipo/fecha o lista de reservas
+  // Actualizar slots cuando cambian equipo/fecha, reservas o eventos
   useEffect(() => {
     updateAvailableSlots();
-  }, [formData.equipmentCode, formData.reservationDate, existingReservations]);
+  }, [formData.equipmentCode, formData.reservationDate, existingReservations, eventBlocks]);
 
   // Suscribirse a cambios en tiempo real para bloquear horarios inmediatamente
   useEffect(() => {

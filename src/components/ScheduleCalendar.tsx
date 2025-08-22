@@ -197,15 +197,6 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
       };
     }
 
-    // Verificar si el equipo está en mantenimiento
-    const eq = equipment.find((e) => e.id === equipmentId);
-    if (eq?.maintenance_mode) {
-      return {
-        status: "maintenance",
-        title: "Mantenimiento",
-      };
-    }
-
     return { status: "available" };
   };
 
@@ -215,8 +206,6 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
         return "bg-gaming-accent/20 border-gaming-accent text-gaming-accent font-medium";
       case "event":
         return "bg-red-500/90 text-white font-medium";
-      case "maintenance":
-        return "bg-yellow-500/90 text-black font-medium";
       case "available":
       default:
         return "bg-transparent border-gaming-border hover:bg-gaming-surface/50 transition-colors";
@@ -257,10 +246,6 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-500/90"></div>
             <span className="text-gaming-text">Evento</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-500/90"></div>
-            <span className="text-gaming-text">Mantenimiento</span>
           </div>
         </div>
 
@@ -309,14 +294,11 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
                             ? `Reservado por: ${cellData.user}`
                             : cellData.status === "event"
                             ? `Evento: ${cellData.title} - ${cellData.description || ""}`
-                            : cellData.status === "maintenance"
-                            ? "En mantenimiento"
                             : "Disponible"
                         }
                       >
                         {cellData.status === "reserved" && "R"}
                         {cellData.status === "event" && "E"}
-                        {cellData.status === "maintenance" && "M"}
                       </td>
                     );
                   })}
