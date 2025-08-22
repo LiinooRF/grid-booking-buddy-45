@@ -1,101 +1,77 @@
 import { NavLink } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Calendar, Home } from "lucide-react";
+import { Calendar, Home, Trophy } from "lucide-react";
 
 interface SiteHeaderProps {
   current: "home" | "reservas" | "eventos";
 }
 
 export function SiteHeader({ current }: SiteHeaderProps) {
+  const baseLink =
+    "px-4 py-2 rounded-md font-medium transition-all duration-200 hover-scale story-link";
+  const inactive = "text-white/90 hover:text-primary/90 hover:bg-primary/10";
+  const active =
+    "bg-primary text-black shadow-lg shadow-primary/25 ring-1 ring-primary/60";
+
   return (
-    <header className="border-b border-primary/20 bg-black/95 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-primary/10">
-      <div className="container mx-auto px-4 py-4">
+    <header className="border-b border-gaming-border bg-gaming-surface/50 backdrop-blur-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
         <nav className="flex items-center justify-between">
           {/* Brand */}
-          <NavLink to="/" className="flex items-center gap-4 hover:scale-105 transition-transform duration-200">
+          <NavLink
+            to="/"
+            className="flex items-center gap-4 hover-scale transition-transform"
+          >
             <img
               src="/lovable-uploads/4c96efc2-aefc-4592-918a-c87ffd48a6d7.png"
               alt="Gaming Grid"
-              className="h-12 w-auto"
+              className="h-10 w-auto"
             />
+            <div className="hidden sm:block">
+              <h1 className="text-lg md:text-xl font-bold">
+                <span className="text-white">GAMING</span>{" "}
+                <span className="text-primary">GRID</span>
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                {current === "reservas" ? "Sistema de Reservas" : "Eventos"}
+              </p>
+            </div>
           </NavLink>
 
           {/* Navigation */}
-          <div className="flex items-center gap-6">
-            <nav className="hidden md:flex items-center gap-1">
-              <NavLink to="/" className={({ isActive }) => 
-                `px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  isActive || current === "home" 
-                    ? "bg-primary text-black shadow-lg shadow-primary/25" 
-                    : "text-white hover:text-primary hover:bg-primary/10"
-                }`
-              }>
-                <Home className="h-4 w-4 inline mr-2" />
-                Inicio
-              </NavLink>
-              <NavLink to="/reservas" className={({ isActive }) => 
-                `px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  isActive || current === "reservas" 
-                    ? "bg-primary text-black shadow-lg shadow-primary/25" 
-                    : "text-white hover:text-primary hover:bg-primary/10"
-                }`
-              }>
-                <Calendar className="h-4 w-4 inline mr-2" />
-                Reservas
-              </NavLink>
-              <NavLink to="/eventos" className={({ isActive }) => 
-                `px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  isActive || current === "eventos" 
-                    ? "bg-primary text-black shadow-lg shadow-primary/25" 
-                    : "text-white hover:text-primary hover:bg-primary/10"
-                }`
-              }>
-                🏆 Eventos
-              </NavLink>
-            </nav>
-
-            {/* Mobile Navigation */}
-            <div className="flex md:hidden items-center gap-2">
-              <NavLink to="/" className={({ isActive }) => 
-                `p-2 rounded-lg transition-all duration-200 ${
-                  isActive || current === "home" 
-                    ? "bg-primary text-black" 
-                    : "text-white hover:text-primary"
-                }`
-              }>
-                <Home className="h-5 w-5" />
-              </NavLink>
-              <NavLink to="/reservas" className={({ isActive }) => 
-                `p-2 rounded-lg transition-all duration-200 ${
-                  isActive || current === "reservas" 
-                    ? "bg-primary text-black" 
-                    : "text-white hover:text-primary"
-                }`
-              }>
-                <Calendar className="h-5 w-5" />
-              </NavLink>
-              <NavLink to="/eventos" className={({ isActive }) => 
-                `p-2 rounded-lg transition-all duration-200 text-sm ${
-                  isActive || current === "eventos" 
-                    ? "bg-primary text-black" 
-                    : "text-white hover:text-primary"
-                }`
-              }>
-                🏆
-              </NavLink>
-            </div>
-
-            {/* CTA Button */}
-            <Button 
-              variant="outline" 
-              className="border-primary text-primary hover:bg-primary hover:text-black transition-all duration-200 hidden lg:flex"
-              onClick={() => window.open('https://gaminggrid.cl', '_blank')}
+          <div className="flex items-center gap-2 md:gap-3">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `${baseLink} ${isActive || current === "home" ? active : inactive}`
+              }
             >
-              Sitio Web
-            </Button>
+              <Home className="h-4 w-4 mr-2" /> Inicio
+            </NavLink>
+            <NavLink
+              to="/reservas"
+              className={({ isActive }) =>
+                `${baseLink} ${
+                  isActive || current === "reservas" ? active : inactive
+                }`
+              }
+            >
+              <Calendar className="h-4 w-4 mr-2" /> Reservas
+            </NavLink>
+            <NavLink
+              to="/eventos"
+              className={({ isActive }) =>
+                `${baseLink} ${
+                  isActive || current === "eventos" ? active : inactive
+                }`
+              }
+            >
+              <Trophy className="h-4 w-4 mr-2" /> Eventos
+            </NavLink>
           </div>
         </nav>
       </div>
+      {/* Accent bar */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-primary/0 via-primary/60 to-primary/0" />
     </header>
   );
 }
