@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Upload, CreditCard, Clock, Users, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { addDays } from 'date-fns';
 
 interface Equipment {
   id: string;
@@ -39,6 +40,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [closedDays, setClosedDays] = useState<any[]>([]);
 
 
   const generateTimeSlots = () => {
@@ -195,6 +197,21 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
 
     updateAvailableSlots();
   }, [formData.equipmentCode, formData.reservationDate, existingReservations]);
+
+  // Cargar días cerrados al inicio
+  useEffect(() => {
+    const fetchClosedDays = async () => {
+      const { data } = await supabase
+        .from('closed_days')
+        .select('*');
+      
+      if (data) {
+        setClosedDays(data);
+      }
+    };
+
+    fetchClosedDays();
+  }, []);
 
   const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
     if (!startTime || !hours || !equipmentCode || !availableSlots.length) return false;
@@ -395,8 +412,24 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                   id="reservationDate"
                   type="date"
                   value={formData.reservationDate}
-                  onChange={(e) => setFormData({...formData, reservationDate: e.target.value})}
                   min={new Date().toISOString().split('T')[0]}
+                  max={addDays(new Date(), 5).toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value;
+                    const isClosedDay = closedDays.some(cd => cd.date === selectedDate);
+                    
+                    if (isClosedDay) {
+                      const closedDay = closedDays.find(cd => cd.date === selectedDate);
+                      toast({
+                        title: "Día cerrado",
+                        description: `No se pueden hacer reservas este día: ${closedDay?.reason}`,
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    setFormData({...formData, reservationDate: selectedDate});
+                  }}
                   required
                 />
               </div>

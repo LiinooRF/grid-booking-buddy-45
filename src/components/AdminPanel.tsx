@@ -8,7 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Eye, Check, X, Clock, User, Phone, Mail, Calendar, BarChart3, DollarSign, Users, TrendingUp, Filter, Download, Search, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Shield, Eye, Check, X, Clock, User, Phone, Mail, Calendar, BarChart3, DollarSign, Users, TrendingUp, Filter, Download, Search, RefreshCw, Settings, Wrench, Plus, Trash2 } from "lucide-react";
 
 interface Reservation {
   id: string;
@@ -35,20 +39,82 @@ interface AdminPanelProps {
   onLogin: (password: string) => void;
   isAuthenticated: boolean;
   onChangeHours: (reservationId: string, newHours: number) => void;
+  equipment: any[];
+  onToggleMaintenance: (equipmentId: string, maintenanceMode: boolean, reason?: string) => void;
+  onAddClosedDay: (date: string, reason: string) => void;
+  onRemoveClosedDay: (id: string) => void;
 }
 
-const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, onChangeHours }: AdminPanelProps) => {
+const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, onChangeHours, equipment, onToggleMaintenance, onAddClosedDay, onRemoveClosedDay }: AdminPanelProps) => {
   const { toast } = useToast();
   const [password, setPassword] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [closedDays, setClosedDays] = useState<any[]>([]);
+  const [newClosedDate, setNewClosedDate] = useState('');
+  const [newClosedReason, setNewClosedReason] = useState('');
+  const [maintenanceReasons, setMaintenanceReasons] = useState<{[key: string]: string}>({});
+
+  // Cargar días cerrados
+  useEffect(() => {
+    const fetchClosedDays = async () => {
+      const { data } = await supabase
+        .from('closed_days')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (data) {
+        setClosedDays(data);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchClosedDays();
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(password);
     setPassword('');
+  };
+
+  const handleToggleMaintenance = async (equipmentId: string, maintenanceMode: boolean, reason?: string) => {
+    await onToggleMaintenance(equipmentId, maintenanceMode, reason);
+  };
+
+  const handleAddClosedDay = async () => {
+    if (newClosedDate && newClosedReason) {
+      await onAddClosedDay(newClosedDate, newClosedReason);
+      setNewClosedDate('');
+      setNewClosedReason('');
+      
+      // Refresh closed days
+      const { data } = await supabase
+        .from('closed_days')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (data) {
+        setClosedDays(data);
+      }
+    }
+  };
+
+  const handleRemoveClosedDay = async (id: string) => {
+    await onRemoveClosedDay(id);
+    
+    // Refresh closed days
+    const { data } = await supabase
+      .from('closed_days')
+      .select('*')
+      .order('date', { ascending: true });
+    
+    if (data) {
+      setClosedDays(data);
+    }
   };
 
   if (!isAuthenticated) {
@@ -149,7 +215,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
   return (
     <div className="space-y-6">
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gaming-surface border-gaming-border">
+        <TabsList className="grid w-full grid-cols-5 bg-gaming-surface border-gaming-border">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
@@ -165,6 +231,10 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Todas ({filteredReservations.length})
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Configuración
           </TabsTrigger>
         </TabsList>
 
@@ -621,6 +691,160 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Mantenimiento de Equipos */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-primary flex items-center gap-2">
+                  <Wrench className="h-5 w-5" />
+                  Mantenimiento de Equipos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {equipment.map((eq) => (
+                  <div key={eq.id} className="flex items-center justify-between p-3 border border-gaming-border rounded-md">
+                    <div>
+                      <div className="font-medium">{eq.name}</div>
+                      <div className="text-sm text-muted-foreground">{eq.description}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {eq.status === 'occupied' ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Check className="h-4 w-4 mr-1" />
+                              Activar
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Activar Equipo</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <p>¿Desactivar modo mantenimiento para {eq.name}?</p>
+                              <Button 
+                                onClick={() => handleToggleMaintenance(eq.id, false)}
+                                className="w-full"
+                              >
+                                Activar Equipo
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Wrench className="h-4 w-4 mr-1" />
+                              Mantenimiento
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Poner en Mantenimiento</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="maintenance-reason">Razón del mantenimiento</Label>
+                                <Textarea
+                                  id="maintenance-reason"
+                                  placeholder="Ej: Limpieza profunda, actualización de software..."
+                                  value={maintenanceReasons[eq.id] || ''}
+                                  onChange={(e) => {
+                                    setMaintenanceReasons(prev => ({
+                                      ...prev,
+                                      [eq.id]: e.target.value
+                                    }));
+                                  }}
+                                />
+                              </div>
+                              <Button 
+                                onClick={() => handleToggleMaintenance(eq.id, true, maintenanceReasons[eq.id] || "Mantenimiento general")}
+                                variant="destructive"
+                                className="w-full"
+                              >
+                                Poner en Mantenimiento
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Días Cerrados */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-primary flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Días Cerrados
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Agregar nuevo día cerrado */}
+                <div className="space-y-3 p-3 border border-gaming-border rounded-md bg-background/50">
+                  <div className="space-y-2">
+                    <Label htmlFor="closed-date">Fecha</Label>
+                    <Input
+                      id="closed-date"
+                      type="date"
+                      value={newClosedDate}
+                      onChange={(e) => setNewClosedDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="closed-reason">Razón</Label>
+                    <Input
+                      id="closed-reason"
+                      placeholder="Ej: Evento especial, reparaciones..."
+                      value={newClosedReason}
+                      onChange={(e) => setNewClosedReason(e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddClosedDay}
+                    disabled={!newClosedDate || !newClosedReason}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Día Cerrado
+                  </Button>
+                </div>
+
+                {/* Lista de días cerrados */}
+                <div className="space-y-2">
+                  {closedDays.length > 0 ? (
+                    closedDays.map((day) => (
+                      <div key={day.id} className="flex items-center justify-between p-3 border border-gaming-border rounded-md">
+                        <div>
+                          <div className="font-medium">{day.date}</div>
+                          <div className="text-sm text-muted-foreground">{day.reason}</div>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleRemoveClosedDay(day.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      No hay días cerrados configurados
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 

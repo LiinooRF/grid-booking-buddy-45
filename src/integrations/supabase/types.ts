@@ -14,12 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      closed_days: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       equipment: {
         Row: {
           created_at: string
           description: string | null
           id: string
           image_url: string | null
+          maintenance_mode: boolean
+          maintenance_reason: string | null
           name: string
           status: string
           type: string
@@ -30,6 +56,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          maintenance_mode?: boolean
+          maintenance_reason?: string | null
           name: string
           status?: string
           type: string
@@ -40,6 +68,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          maintenance_mode?: boolean
+          maintenance_reason?: string | null
           name?: string
           status?: string
           type?: string

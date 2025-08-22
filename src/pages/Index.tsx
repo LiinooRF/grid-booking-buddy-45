@@ -410,6 +410,92 @@ const Index = () => {
     });
   };
 
+  // Funciones para manejo de mantenimiento y días cerrados
+  const handleToggleMaintenance = async (equipmentId: string, maintenanceMode: boolean, reason?: string) => {
+    try {
+      const { error } = await supabase
+        .from('equipment')
+        .update({ 
+          maintenance_mode: maintenanceMode,
+          maintenance_reason: reason || null
+        })
+        .eq('id', equipmentId);
+      
+      if (error) throw error;
+      
+      // Actualizar estado local
+      setEquipment(prev => 
+        prev.map(eq => 
+          eq.id === equipmentId 
+            ? { ...eq, status: maintenanceMode ? 'occupied' : 'available' }
+            : eq
+        )
+      );
+      
+      toast({
+        title: maintenanceMode ? "Mantenimiento activado" : "Mantenimiento desactivado",
+        description: maintenanceMode 
+          ? `Equipo en mantenimiento: ${reason}` 
+          : "Equipo disponible nuevamente",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error toggling maintenance:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo cambiar el estado de mantenimiento",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddClosedDay = async (date: string, reason: string) => {
+    try {
+      const { error } = await supabase
+        .from('closed_days')
+        .insert({ date, reason });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Día cerrado agregado",
+        description: `Fecha ${date} marcada como cerrada`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error adding closed day:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el día cerrado",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRemoveClosedDay = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('closed_days')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Día cerrado removido",
+        description: "La fecha está disponible nuevamente",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error removing closed day:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo remover el día cerrado",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Función para buscar reservas por email
   const handleSearchReservations = async () => {
     if (!searchEmail.trim()) {
@@ -843,6 +929,10 @@ const Index = () => {
                 onLogin={handleAdminLogin}
                 isAuthenticated={isAdminAuthenticated}
                 onChangeHours={handleChangeHours}
+                equipment={equipment}
+                onToggleMaintenance={handleToggleMaintenance}
+                onAddClosedDay={handleAddClosedDay}
+                onRemoveClosedDay={handleRemoveClosedDay}
               />
             </div>
           </div>
