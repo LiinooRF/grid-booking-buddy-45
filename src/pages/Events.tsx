@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Settings, Clock, Trophy, MapPin, Plus } from "lucide-react";
+import { Calendar, Users, Settings, Clock, Trophy, MapPin, Plus, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import EventForm from "@/components/EventForm";
@@ -284,7 +284,7 @@ const Events = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
         <SiteHeader current="eventos" />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-primary animate-pulse">Cargando eventos...</div>
@@ -294,206 +294,305 @@ const Events = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       <SiteHeader current="eventos" />
       
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Admin Access Button */}
         <div className="fixed bottom-6 right-6 z-40">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowAdminAccess(!showAdminAccess)}
-            className="opacity-30 hover:opacity-100 transition-all duration-200 bg-black/50 backdrop-blur-sm border border-primary/30 hover:border-primary"
+            className="opacity-30 hover:opacity-100 transition-all duration-200 bg-gaming-surface/50 backdrop-blur-sm border border-primary/30 hover:border-primary"
           >
             <Settings className="h-4 w-4 text-primary" />
           </Button>
         </div>
 
-        {/* Events List */}
-        <div className="space-y-8">
-          {events.length === 0 ? (
-            <Card className="bg-gray-900/50 border-primary/20">
-              <CardContent className="p-12 text-center">
-                <Trophy className="h-16 w-16 text-primary mx-auto mb-4 opacity-50" />
-                <h3 className="text-2xl font-bold text-white mb-2">No hay eventos disponibles</h3>
-                <p className="text-gray-400">¡Mantente atento para próximos eventos increíbles!</p>
-              </CardContent>
-            </Card>
-          ) : (
-            events.map((event) => (
-              <div key={event.id} className="space-y-6">
-                {/* Event Banner */}
-                <div 
-                  className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center"
-                  style={{
-                    backgroundImage: event.image_url ? `url(${event.image_url})` : undefined
-                  }}
+        {/* Selected Event Banner */}
+        {selectedEvent && (
+          <div className="mb-8 space-y-6 animate-fade-in">
+            {/* Event Banner */}
+            <div 
+              className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center"
+              style={{
+                backgroundImage: selectedEvent.image_url ? `url(${selectedEvent.image_url})` : undefined
+              }}
+            >
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+              
+              {/* Back Button */}
+              <Button 
+                variant="ghost"
+                onClick={() => setSelectedEvent(null)}
+                className="absolute top-4 left-4 text-white hover:text-primary hover:bg-black/30 z-10"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Volver a eventos
+              </Button>
+              
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
+                <div className="space-y-4">
+                  <h1 className="text-4xl md:text-6xl font-black text-primary animate-scale-in">
+                    {selectedEvent.title.toUpperCase()}
+                  </h1>
+                  <div className="bg-primary text-black px-6 py-2 rounded-full font-bold text-lg animate-fade-in">
+                    {selectedEvent.description || "¡ÚNETE AL EVENTO!"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="absolute top-4 right-4">
+                <Badge 
+                  className={`px-3 py-1 text-sm font-bold ${
+                    selectedEvent.status === 'active' 
+                      ? 'bg-primary text-black' 
+                      : 'bg-gray-500 text-white'
+                  }`}
                 >
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                  
-                  {/* Content */}
-                  <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
-                    <div className="space-y-4">
-                      <h1 className="text-4xl md:text-6xl font-black text-primary animate-fade-in">
-                        {event.title.toUpperCase()}
-                      </h1>
-                      <div className="bg-primary text-black px-6 py-2 rounded-full font-bold text-lg animate-scale-in">
-                        {event.description || "¡ÚNETE AL EVENTO!"}
+                  {selectedEvent.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Event Details */}
+            <Card className="bg-gaming-surface/80 border-primary/30">
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Event Info */}
+                  <div className="md:col-span-2 space-y-4">
+                    <h2 className="text-2xl font-bold text-white">Información del Evento</h2>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-3 text-gray-300">
+                        <Calendar className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium">Fecha</p>
+                          <p>{format(new Date(selectedEvent.event_date), "PPPP", { locale: es })}</p>
+                        </div>
                       </div>
+                      
+                      <div className="flex items-center gap-3 text-gray-300">
+                        <Clock className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium">Horario</p>
+                          <p>{selectedEvent.start_time || '19:00'} - {selectedEvent.end_time || '23:00'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-gray-300">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium">Ubicación</p>
+                          <p>Gaming Grid</p>
+                        </div>
+                      </div>
+                      
+                      {selectedEvent.max_participants && (
+                        <div className="flex items-center gap-3 text-gray-300">
+                          <Users className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium">Participantes</p>
+                            <p>{selectedEvent.participant_count || 0}/{selectedEvent.max_participants}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Status Badge */}
-                  <div className="absolute top-4 right-4">
-                    <Badge 
-                      className={`px-3 py-1 text-sm font-bold ${
-                        event.status === 'active' 
-                          ? 'bg-primary text-black' 
-                          : 'bg-gray-500 text-white'
-                      }`}
-                    >
-                      {event.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
-                    </Badge>
+                  {/* Registration Form */}
+                  <div>
+                    <Card className="bg-gaming-surface/50 border-primary/30">
+                      <CardHeader>
+                        <CardTitle className="text-primary flex items-center gap-2">
+                          <Trophy className="h-5 w-5" />
+                          Inscríbete Ahora
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedEvent.status === 'active' ? (
+                          <form onSubmit={handleRegistrationSubmit} className="space-y-4">
+                            <div>
+                              <Label className="text-gray-300 font-medium">Nombre Completo</Label>
+                              <Input
+                                value={registrationData.participant_name}
+                                onChange={(e) => setRegistrationData({...registrationData, participant_name: e.target.value})}
+                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
+                                placeholder="Tu nombre completo"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-gray-300 font-medium">Teléfono</Label>
+                              <Input
+                                type="tel"
+                                value={registrationData.participant_phone}
+                                onChange={(e) => setRegistrationData({...registrationData, participant_phone: e.target.value})}
+                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
+                                placeholder="+56 9 1234 5678"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-gray-300 font-medium">Email</Label>
+                              <Input
+                                type="email"
+                                value={registrationData.participant_email}
+                                onChange={(e) => setRegistrationData({...registrationData, participant_email: e.target.value})}
+                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
+                                placeholder="tu@email.com"
+                                required
+                              />
+                            </div>
+                            
+                            {selectedEvent.is_group_event && (
+                              <div>
+                                <Label className="text-gray-300 font-medium">Nombre del Equipo</Label>
+                                <Input
+                                  value={registrationData.group_name}
+                                  onChange={(e) => setRegistrationData({...registrationData, group_name: e.target.value})}
+                                  className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
+                                  placeholder="Nombre de tu equipo"
+                                />
+                              </div>
+                            )}
+                            
+                            <Button 
+                              type="submit" 
+                              className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-105"
+                            >
+                              <Trophy className="h-4 w-4 mr-2" />
+                              INSCRIBIRSE AL EVENTO
+                            </Button>
+                          </form>
+                        ) : (
+                          <div className="text-center py-8">
+                            <p className="text-gray-400">Este evento no está disponible para inscripciones.</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-                {/* Event Details */}
-                <Card className="bg-gray-900/80 border-primary/30">
-                  <CardContent className="p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Event Info */}
-                      <div className="md:col-span-2 space-y-4">
-                        <h2 className="text-2xl font-bold text-white">Información del Evento</h2>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center gap-3 text-gray-300">
-                            <Calendar className="h-5 w-5 text-primary" />
-                            <div>
-                              <p className="font-medium">Fecha</p>
-                              <p>{format(new Date(event.event_date), "PPPP", { locale: es })}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-3 text-gray-300">
-                            <Clock className="h-5 w-5 text-primary" />
-                            <div>
-                              <p className="font-medium">Horario</p>
-                              <p>{event.start_time || '19:00'} - {event.end_time || '23:00'}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-3 text-gray-300">
-                            <MapPin className="h-5 w-5 text-primary" />
-                            <div>
-                              <p className="font-medium">Ubicación</p>
-                              <p>Gaming Grid</p>
-                            </div>
+        {/* Events Grid */}
+        {!selectedEvent && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-white mb-2">Eventos</h1>
+              <p className="text-muted-foreground">Descubre los próximos eventos de Gaming Grid</p>
+            </div>
+
+            {events.length === 0 ? (
+              <Card className="bg-gaming-surface/50 border-primary/20">
+                <CardContent className="p-12 text-center">
+                  <Trophy className="h-16 w-16 text-primary mx-auto mb-4 opacity-50" />
+                  <h3 className="text-2xl font-bold text-white mb-2">No hay eventos disponibles</h3>
+                  <p className="text-gray-400">¡Mantente atento para próximos eventos increíbles!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map((event) => (
+                  <Card 
+                    key={event.id} 
+                    className="overflow-hidden bg-gaming-surface/90 border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all group cursor-pointer hover-scale"
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                    <div className="relative">
+                      {/* Date Badge */}
+                      <div className="absolute top-3 left-3 z-10">
+                        <Badge className="bg-primary text-black font-bold px-3 py-1 text-sm">
+                          {format(new Date(event.event_date), "dd MMM", { locale: es }).toUpperCase()}
+                          <br />
+                          <span className="text-xs">{event.start_time || '19:00'} hrs</span>
+                        </Badge>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="absolute top-3 right-3 z-10">
+                        <Badge 
+                          className={`px-2 py-1 text-xs font-bold ${
+                            event.status === 'active' 
+                              ? 'bg-green-500 text-white' 
+                              : 'bg-gray-500 text-white'
+                          }`}
+                        >
+                          Gaming Grid
+                        </Badge>
+                      </div>
+
+                      {/* Event Image */}
+                      <div 
+                        className="h-48 bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center relative"
+                        style={{
+                          backgroundImage: event.image_url ? `url(${event.image_url})` : undefined
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                      </div>
+
+                      <CardContent className="p-5 space-y-4">
+                        {/* Title */}
+                        <h3 className="font-bold text-xl text-white group-hover:text-primary transition-colors">
+                          {event.title}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                          {event.description || "Únete a este increíble evento de Gaming Grid"}
+                        </p>
+
+                        {/* Event Details */}
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Users className="h-4 w-4 text-primary" />
+                            <span>Gaming Grid</span>
                           </div>
                           
                           {event.max_participants && (
-                            <div className="flex items-center gap-3 text-gray-300">
-                              <Users className="h-5 w-5 text-primary" />
-                              <div>
-                                <p className="font-medium">Participantes</p>
-                                <p>{event.participant_count || 0}/{event.max_participants}</p>
-                              </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Trophy className="h-4 w-4 text-primary" />
+                              <span>Máximo {event.max_participants} participantes</span>
                             </div>
                           )}
-                        </div>
-                      </div>
 
-                      {/* Registration Form */}
-                      <div>
-                        <Card className="bg-black/50 border-primary/30">
-                          <CardHeader>
-                            <CardTitle className="text-primary flex items-center gap-2">
-                              <Trophy className="h-5 w-5" />
-                              Inscríbete Ahora
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {event.status === 'active' ? (
-                              <form onSubmit={(e) => {
-                                setSelectedEvent(event);
-                                handleRegistrationSubmit(e);
-                              }} className="space-y-4">
-                                <div>
-                                  <Label className="text-gray-300 font-medium">Nombre Completo</Label>
-                                  <Input
-                                    value={registrationData.participant_name}
-                                    onChange={(e) => setRegistrationData({...registrationData, participant_name: e.target.value})}
-                                    className="bg-black/50 border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                    placeholder="Tu nombre completo"
-                                    required
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <Label className="text-gray-300 font-medium">Teléfono</Label>
-                                  <Input
-                                    type="tel"
-                                    value={registrationData.participant_phone}
-                                    onChange={(e) => setRegistrationData({...registrationData, participant_phone: e.target.value})}
-                                    className="bg-black/50 border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                    placeholder="+56 9 1234 5678"
-                                    required
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <Label className="text-gray-300 font-medium">Email</Label>
-                                  <Input
-                                    type="email"
-                                    value={registrationData.participant_email}
-                                    onChange={(e) => setRegistrationData({...registrationData, participant_email: e.target.value})}
-                                    className="bg-black/50 border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                    placeholder="tu@email.com"
-                                    required
-                                  />
-                                </div>
-                                
-                                {event.is_group_event && (
-                                  <div>
-                                    <Label className="text-gray-300 font-medium">Nombre del Equipo</Label>
-                                    <Input
-                                      value={registrationData.group_name}
-                                      onChange={(e) => setRegistrationData({...registrationData, group_name: e.target.value})}
-                                      className="bg-black/50 border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                      placeholder="Nombre de tu equipo"
-                                    />
-                                  </div>
-                                )}
-                                
-                                <Button 
-                                  type="submit" 
-                                  className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-105"
-                                >
-                                  <Trophy className="h-4 w-4 mr-2" />
-                                  INSCRIBIRSE AL EVENTO
-                                </Button>
-                              </form>
-                            ) : (
-                              <div className="text-center py-8">
-                                <p className="text-gray-400">Este evento no está disponible para inscripciones.</p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Clock className="h-4 w-4 text-primary" />
+                            <span>{event.start_time || '19:00'} - {event.end_time || '23:00'}</span>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <Button 
+                          className="w-full bg-primary/80 hover:bg-primary text-black font-semibold"
+                          disabled={event.status !== 'active'}
+                        >
+                          {event.status === 'active' ? 'Ver más' : 'No disponible'}
+                        </Button>
+                      </CardContent>
                     </div>
-                  </CardContent>
-                </Card>
+                  </Card>
+                ))}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Hidden Admin Panel */}
         {showAdminAccess && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-primary/30 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="bg-gaming-surface border border-primary/30 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-primary">Panel de Administración - Eventos</h2>
@@ -509,7 +608,7 @@ const Events = () => {
                 
                 <div className="space-y-6">
                   {/* Create Event Section */}
-                  <Card className="bg-black/50 border-primary/30">
+                  <Card className="bg-gaming-surface/50 border-primary/30">
                     <CardHeader>
                       <CardTitle className="text-primary flex items-center gap-2">
                         <Plus className="h-5 w-5" />
@@ -528,7 +627,7 @@ const Events = () => {
                             <Input
                               type="password"
                               placeholder="Contraseña de administrador"
-                              className="bg-black/50 border-primary/30 text-white focus:border-primary"
+                              className="bg-gaming-surface border-primary/30 text-white focus:border-primary"
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
                                   handleAdminLogin((e.target as HTMLInputElement).value);
