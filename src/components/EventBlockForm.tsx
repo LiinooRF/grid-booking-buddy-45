@@ -126,7 +126,7 @@ export function EventBlockForm({ equipment, onSuccess }: EventBlockFormProps) {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Crear Bloqueo por Evento</DialogTitle>
+          <DialogTitle className="text-primary">Crear Bloqueo por Evento</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>

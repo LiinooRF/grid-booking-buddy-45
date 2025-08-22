@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { format, addHours, startOfDay, isSameDay } from "date-fns";
+import { format, addHours, startOfDay, isSameDay, addDays, isAfter, isBefore } from "date-fns";
 import { es } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -43,10 +43,20 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Validar que selectedDate esté dentro del rango permitido (hoy + 5 días)
+  const today = startOfDay(new Date());
+  const maxDate = addDays(today, 5);
+  
+  const validSelectedDate = isBefore(selectedDate, today) 
+    ? today 
+    : isAfter(selectedDate, maxDate) 
+    ? maxDate 
+    : selectedDate;
+
   // Generar horas desde 12:00 PM hasta 12:00 AM (medianoche)
   const timeSlots = Array.from({ length: 13 }, (_, i) => {
     const hour = i === 12 ? 0 : 12 + i; // 12, 13, 14, ..., 23, 0
-    return format(addHours(startOfDay(selectedDate), hour), "HH:mm");
+    return format(addHours(startOfDay(validSelectedDate), hour), "HH:mm");
   });
 
   const fetchData = async () => {
@@ -62,7 +72,7 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
       if (equipmentError) throw equipmentError;
 
       // Obtener reservas del día seleccionado
-      const startOfSelectedDay = startOfDay(selectedDate);
+      const startOfSelectedDay = startOfDay(validSelectedDate);
       const endOfSelectedDay = addHours(startOfSelectedDay, 24);
 
       const { data: reservationsData, error: reservationsError } = await supabase
@@ -136,11 +146,11 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
       supabase.removeChannel(reservationsChannel);
       supabase.removeChannel(eventBlocksChannel);
     };
-  }, [selectedDate]);
+  }, [validSelectedDate]);
 
   const getCellStatus = (equipmentId: string, timeSlot: string) => {
     const [hours, minutes] = timeSlot.split(":").map(Number);
-    const cellTime = addHours(startOfDay(selectedDate), hours);
+    const cellTime = addHours(startOfDay(validSelectedDate), hours);
     const cellEndTime = addHours(cellTime, 1);
 
     // Verificar si hay un bloqueo de evento
@@ -196,22 +206,22 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   const getCellClass = (status: string) => {
     switch (status) {
       case "reserved":
-        return "bg-gray-400 text-white";
+        return "bg-gaming-accent/20 border-gaming-accent text-gaming-accent font-medium";
       case "event":
-        return "bg-red-500 text-white";
+        return "bg-red-500/90 text-white font-medium";
       case "maintenance":
-        return "bg-yellow-500 text-black";
+        return "bg-yellow-500/90 text-black font-medium";
       case "available":
       default:
-        return "bg-transparent border-gray-200";
+        return "bg-transparent border-gaming-border hover:bg-gaming-surface/50 transition-colors";
     }
   };
 
   if (loading) {
     return (
-      <Card className="w-full">
+      <Card className="w-full border-gaming-border bg-gaming-surface/30">
         <CardHeader>
-          <CardTitle>Disponibilidad - {format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}</CardTitle>
+          <CardTitle className="text-primary">Disponibilidad - {format(validSelectedDate, "EEEE, d 'de' MMMM", { locale: es })}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-96 w-full" />
@@ -221,45 +231,45 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-gaming-border bg-gaming-surface/30">
       <CardHeader>
-        <CardTitle className="text-center">
-          Disponibilidad - {format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}
+        <CardTitle className="text-center text-primary">
+          Disponibilidad - {format(validSelectedDate, "EEEE, d 'de' MMMM", { locale: es })}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {/* Leyenda */}
         <div className="flex flex-wrap gap-4 mb-6 justify-center text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border border-gray-200"></div>
-            <span>Disponible</span>
+            <div className="w-4 h-4 border border-gaming-border bg-transparent"></div>
+            <span className="text-gaming-text">Disponible</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-400"></div>
-            <span>Reservado</span>
+            <div className="w-4 h-4 bg-gaming-accent/20 border border-gaming-accent"></div>
+            <span className="text-gaming-text">Reservado</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500"></div>
-            <span>Evento</span>
+            <div className="w-4 h-4 bg-red-500/90"></div>
+            <span className="text-gaming-text">Evento</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-500"></div>
-            <span>Mantenimiento</span>
+            <div className="w-4 h-4 bg-yellow-500/90"></div>
+            <span className="text-gaming-text">Mantenimiento</span>
           </div>
         </div>
 
         {/* Tabla de horarios */}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse border border-gaming-border">
             <thead>
               <tr>
-                <th className="border border-gray-200 p-2 bg-gaming-surface text-left min-w-32">
+                <th className="border border-gaming-border p-2 bg-gaming-surface text-left min-w-32 text-primary font-bold">
                   Equipo
                 </th>
                 {timeSlots.map((time) => (
                   <th
                     key={time}
-                    className="border border-gray-200 p-2 bg-gaming-surface text-center min-w-16 text-xs"
+                    className="border border-gaming-border p-2 bg-gaming-surface text-center min-w-16 text-xs text-primary font-bold"
                   >
                     {time}
                   </th>
@@ -267,12 +277,17 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
               </tr>
             </thead>
             <tbody>
-              {equipment.map((eq) => (
+              {equipment.sort((a, b) => {
+                // Ordenar: PCs primero, luego Consolas
+                if (a.type === 'PC' && b.type === 'CONSOLE') return -1;
+                if (a.type === 'CONSOLE' && b.type === 'PC') return 1;
+                return a.name.localeCompare(b.name);
+              }).map((eq) => (
                 <tr key={eq.id}>
-                  <td className="border border-gray-200 p-2 font-medium bg-gaming-surface/30">
+                  <td className="border border-gaming-border p-2 font-medium bg-gaming-surface/50 text-gaming-text">
                     <div>
-                      <div className="text-sm">{eq.name}</div>
-                      <div className="text-xs text-muted-foreground">{eq.type}</div>
+                      <div className="text-sm font-bold">{eq.name}</div>
+                      <div className="text-xs text-primary/70">{eq.type}</div>
                     </div>
                   </td>
                   {timeSlots.map((time) => {
@@ -280,7 +295,7 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
                     return (
                       <td
                         key={`${eq.id}-${time}`}
-                        className={`border border-gray-200 p-1 text-center text-xs ${getCellClass(
+                        className={`border border-gaming-border p-1 text-center text-xs font-bold ${getCellClass(
                           cellData.status
                         )}`}
                         title={

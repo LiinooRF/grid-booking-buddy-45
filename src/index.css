@@ -48,6 +48,14 @@
     --gaming-border: 220 13% 20%;
     --gaming-glow: 127 100% 50%;
     --gaming-accent: 127 80% 55%;
+    --gaming-text: 120 100% 95%;
+    --gaming-muted: 120 20% 60%;
+    
+    /* Additional gaming colors */
+    --gaming-success: 120 100% 40%;
+    --gaming-warning: 45 100% 50%;
+    --gaming-danger: 0 84% 60%;
+    --gaming-info: 200 100% 60%;
 
     /* Equipment status colors */
     --status-available: 127 100% 45%;
@@ -73,6 +81,48 @@
 
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  /* Gaming utility classes */
+  .text-gaming-text {
+    color: hsl(var(--gaming-text));
+  }
+  
+  .text-gaming-muted {
+    color: hsl(var(--gaming-muted));
+  }
+  
+  .bg-gaming-success {
+    background-color: hsl(var(--gaming-success));
+  }
+  
+  .bg-gaming-warning {
+    background-color: hsl(var(--gaming-warning));
+  }
+  
+  .bg-gaming-danger {
+    background-color: hsl(var(--gaming-danger));
+  }
+  
+  .bg-gaming-info {
+    background-color: hsl(var(--gaming-info));
+  }
+  
+  .border-gaming-success {
+    border-color: hsl(var(--gaming-success));
+  }
+  
+  .border-gaming-warning {
+    border-color: hsl(var(--gaming-warning));
+  }
+  
+  .border-gaming-danger {
+    border-color: hsl(var(--gaming-danger));
+  }
+  
+  .border-gaming-info {
+    border-color: hsl(var(--gaming-info));
+  }
+
 
   .dark {
     --background: 222.2 84% 4.9%;

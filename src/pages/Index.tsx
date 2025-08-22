@@ -826,28 +826,28 @@ const Index = () => {
               {/* Calendario de disponibilidad */}
               <div className="mt-8">
                 <ScheduleCalendar selectedDate={selectedCalendarDate} />
-                <div className="mt-4 text-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedCalendarDate(new Date(selectedCalendarDate.getTime() - 24 * 60 * 60 * 1000))}
-                    className="mr-2"
-                  >
-                    ← Día Anterior
-                  </Button>
+                <div className="mt-4 text-center space-x-2">
                   <Button
                     variant="outline"
                     onClick={() => setSelectedCalendarDate(new Date())}
-                    className="mx-2"
+                    className="border-gaming-border text-primary hover:bg-gaming-surface"
                   >
                     Hoy
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedCalendarDate(new Date(selectedCalendarDate.getTime() + 24 * 60 * 60 * 1000))}
-                    className="ml-2"
-                  >
-                    Día Siguiente →
-                  </Button>
+                  {Array.from({ length: 5 }, (_, i) => i + 1).map((days) => {
+                    const futureDate = new Date();
+                    futureDate.setDate(futureDate.getDate() + days);
+                    return (
+                      <Button
+                        key={days}
+                        variant="outline"
+                        onClick={() => setSelectedCalendarDate(futureDate)}
+                        className="border-gaming-border text-primary hover:bg-gaming-surface"
+                      >
+                        +{days}d
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             </TabsContent>

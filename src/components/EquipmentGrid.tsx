@@ -63,8 +63,12 @@ const EquipmentGrid = ({
     }
   };
 
-  const pcs = equipment.filter(item => item.type === 'PC');
-  const consoles = equipment.filter(item => item.type === 'CONSOLE');
+  // Ordenar equipos: PCs primero, luego Consolas
+  const sortedEquipment = [...equipment].sort((a, b) => {
+    if (a.type === 'PC' && b.type === 'CONSOLE') return -1;
+    if (a.type === 'CONSOLE' && b.type === 'PC') return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   const renderEquipmentCard = (eq: Equipment) => {
     const config = statusConfig[eq.status];
@@ -118,7 +122,7 @@ const EquipmentGrid = ({
             <div className="flex gap-2 flex-wrap">
               {eq.status === 'available' && (
                 <Button 
-                  variant="admin" 
+                  variant="default" 
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -174,10 +178,13 @@ const EquipmentGrid = ({
     </div>
   );
 
+  const pcs = sortedEquipment.filter(item => item.type === 'PC');
+  const consoles = sortedEquipment.filter(item => item.type === 'CONSOLE');
+
   return (
     <div className="space-y-8">
-      {renderEquipmentSection(pcs, 'PCs Gaming', '')}
-      {renderEquipmentSection(consoles, 'Consolas', '')}
+      {renderEquipmentSection(pcs, 'PCs Gaming', '🖥️')}
+      {renderEquipmentSection(consoles, 'Consolas', '🎮')}
     </div>
   );
 };
