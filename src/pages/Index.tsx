@@ -195,52 +195,53 @@ const Index = () => {
       endTime: data.endTime
     };
     
-    // 🆕 NUEVO: Guardar en Supabase
+    // 🆕 NUEVO: Guardar en Supabase - SIMPLIFICADO PARA DEBUGAR
     try {
+      console.log('🔍 Iniciando guardado - datos completos:', {
+        equipmentCode: data.equipmentCode,
+        formData: data
+      });
+
       // Buscar equipo por código (los primeros 8 chars del ID)
-      const selectedEquipment = equipment.find(eq => eq.name === data.equipmentCode);
+      const foundEquipment = equipment.find(eq => eq.name === data.equipmentCode);
+      console.log('🎯 Equipo encontrado:', foundEquipment);
       
-      if (selectedEquipment) {
-        // Crear fechas basadas en la hora LOCAL y luego convertir a UTC con toISOString()
-        const startLocal = new Date(`${data.reservationDate}T${data.startTime}:00`);
-        let endLocal = new Date(`${data.reservationDate}T${data.endTime}:00`);
-
-        // Si el fin es menor o igual que el inicio, avanzar al día siguiente
-        if (endLocal <= startLocal) {
-          endLocal.setDate(endLocal.getDate() + 1);
-        }
-
-        const startISO = startLocal.toISOString();
-        const endISO = endLocal.toISOString();
-
-        console.log('🕐 Enviando a Supabase (LOCAL->UTC):', {
-          start: startISO,
-          end: endISO,
-          localDate: data.reservationDate,
-          localStart: data.startTime,
-          localEnd: data.endTime
-        });
-
-        const { error } = await supabase.from('reservations').insert([{
-          equipment_id: selectedEquipment.id,
-          user_name: data.fullName,
-          user_phone: data.phone,
-          start_time: startISO,
-          end_time: endISO,
-          hours: data.hours,
-          status: 'pending',
-          ticket_number: ticketNumber,
-          notes: `Alias: ${data.alias}, Email: ${data.email}`
-        }]);
-        
-        if (error) throw error;
-        console.log('✅ Reserva guardada en Supabase');
-        
-        toast({
-          title: "Reserva guardada",
-          description: "Tu reserva se ha guardado correctamente",
-        });
+      if (!foundEquipment) {
+        throw new Error('No se encontró el equipo seleccionado');
       }
+
+      const reservationData = {
+        equipment_id: foundEquipment.id,
+        user_name: data.fullName,
+        user_phone: data.phone,
+        start_time: `${data.reservationDate}T${data.startTime}:00`,
+        end_time: `${data.reservationDate}T${data.endTime}:00`,
+        hours: data.hours,
+        status: 'pending',
+        ticket_number: ticketNumber,
+        notes: `Alias: ${data.alias}, Email: ${data.email}`
+      };
+
+      console.log('📤 Enviando a Supabase:', reservationData);
+
+      const { data: insertedData, error } = await supabase
+        .from('reservations')
+        .insert([reservationData])
+        .select();
+
+      console.log('📥 Respuesta de Supabase:', { data: insertedData, error });
+
+      if (error) {
+        console.error('❌ Error detallado de Supabase:', error);
+        throw error;
+      }
+
+      console.log('✅ Reserva guardada exitosamente:', insertedData);
+        
+      toast({
+        title: "Reserva guardada",
+        description: "Tu reserva se ha guardado correctamente",
+      });
     } catch (error) {
       console.error('Error guardando en Supabase:', error);
       
