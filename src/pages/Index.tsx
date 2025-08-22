@@ -481,7 +481,66 @@ const Index = () => {
       const currentEndTime = new Date(`${reservation.reservationDate}T${reservation.endTime}:00`);
       const newEndTime = new Date(currentEndTime.getTime() + (minutes * 60 * 1000));
       
-      // Actualizar en Supabase
+      // Buscar el equipo por código para obtener el ID
+      const selectedEquip = equipment.find(eq => eq.name === reservation.equipmentCode);
+      if (!selectedEquip) {
+        toast({
+          title: "Error",
+          description: "Equipo no encontrado",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Verificar conflictos con otras reservas
+      const { data: conflictingReservations, error: conflictError } = await supabase
+        .from('reservations')
+        .select('id, user_name, start_time, end_time')
+        .eq('equipment_id', selectedEquip.id)
+        .neq('id', id)
+        .in('status', ['pending', 'confirmed', 'arrived', 'active'])
+        .gte('start_time', currentEndTime.toISOString())
+        .lt('start_time', newEndTime.toISOString());
+
+      if (conflictError) throw conflictError;
+
+      if (conflictingReservations && conflictingReservations.length > 0) {
+        const conflictUser = conflictingReservations[0].user_name;
+        const conflictTime = new Date(conflictingReservations[0].start_time).toLocaleTimeString('es-ES', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+        
+        toast({
+          title: "No se puede extender",
+          description: `Ya hay una reserva de ${conflictUser} a las ${conflictTime}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Verificar conflictos con eventos
+      const { data: conflictingEvents, error: eventError } = await supabase
+        .from('event_blocks')
+        .select('title, start_time, end_time')
+        .contains('equipment_ids', [selectedEquip.id])
+        .lte('start_time', newEndTime.toISOString())
+        .gte('end_time', currentEndTime.toISOString());
+
+      if (eventError) throw eventError;
+
+      if (conflictingEvents && conflictingEvents.length > 0) {
+        const eventTitle = conflictingEvents[0].title;
+        
+        toast({
+          title: "No se puede extender",
+          description: `Hay un evento programado: ${eventTitle}`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Si no hay conflictos, proceder con la extensión
       const { error } = await supabase
         .from('reservations')
         .update({ 
@@ -509,16 +568,33 @@ const Index = () => {
       
       toast({
         title: "Tiempo extendido",
-        description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}`,
+        description: `${hours} ${hours === 1 ? 'hora añadida' : 'horas añadidas'}. Las horas adicionales están ahora reservadas.`,
         variant: "default"
       });
     } catch (error) {
       console.error('Error extendiendo tiempo:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo extender el tiempo",
-        variant: "destructive"
-      });
+      
+      // Manejar errores específicos de conflictos
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('OVERLAP_CONFLICT')) {
+        toast({
+          title: "Conflicto de horario",
+          description: "Ya existe otra reserva en ese horario",
+          variant: "destructive"
+        });
+      } else if (errorMessage.includes('EVENT_CONFLICT')) {
+        toast({
+          title: "Conflicto con evento",
+          description: "Hay un evento programado en ese horario",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo extender el tiempo",
+          variant: "destructive"
+        });
+      }
     }
   };
 
