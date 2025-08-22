@@ -43,14 +43,14 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Validar que selectedDate esté dentro del rango permitido (hoy + 5 días)
+  // Validar que selectedDate esté dentro del rango permitido (hoy + 5 días incluidos)
   const today = startOfDay(new Date());
   const maxDate = addDays(today, 5);
   
   const validSelectedDate = isBefore(selectedDate, today) 
     ? today 
     : isAfter(selectedDate, maxDate) 
-    ? maxDate 
+    ? today  // Si está fuera del rango, volver a hoy en lugar de maxDate
     : selectedDate;
 
   // Generar horas desde 12:00 PM hasta 12:00 AM (medianoche)
