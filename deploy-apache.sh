@@ -41,26 +41,41 @@ echo "==> Copiando build de eventos"
 rm -rf "$APACHE_DIR/eventos" 2>/dev/null || true
 cp -r "$REPO_DIR/dist" "$APACHE_DIR/eventos"
 
-echo "==> Configurando Apache para SPA"
+echo "==> Configurando Apache para SPA y MIME"
+# Habilitar módulos necesarios (ignorar si ya están habilitados)
+a2enmod rewrite mime headers >/dev/null 2>&1 || true
+
 cat > "$APACHE_DIR/.htaccess" << 'EOF'
 RewriteEngine On
 
-# Handle /reservas route
+# Servir archivos reales sin reescritura
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule - [L]
+
+# SPA routing para /reservas
 RewriteCond %{REQUEST_URI} ^/reservas/(.*)$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^reservas/(.*)$ /reservas/index.html [L]
 
-# Handle /eventos route  
+# SPA routing para /eventos
 RewriteCond %{REQUEST_URI} ^/eventos/(.*)$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^eventos/(.*)$ /eventos/index.html [L]
 
-# Set correct MIME types
-AddType application/javascript .js
-AddType application/javascript .mjs
+# Tipos MIME correctos
+AddType application/javascript .js .mjs
 AddType text/css .css
+AddType application/wasm .wasm
+
+# Seguridad básica
+<IfModule mod_headers.c>
+Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+DirectoryIndex index.html
 EOF
 
 echo "==> Reiniciando Apache"
