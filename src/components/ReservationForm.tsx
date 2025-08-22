@@ -44,12 +44,12 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
 
 
   const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 12; hour < 24; hour++) {
+    const slots: string[] = [];
+    // De 12:00 a 23:00 (último inicio permitido)
+    for (let hour = 12; hour <= 23; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`;
       slots.push(timeString);
     }
-    slots.push("00:00"); // Add midnight
     return slots;
   };
 
@@ -166,7 +166,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       // Filtrar slots disponibles: remover ocupados y mantener solo horario de operación
       const availableSlots = allSlots.filter(slot => {
         const [slotHour] = slot.split(':').map(Number);
-        const inOperatingHours = slotHour >= 12 || slotHour === 0;
+        const inOperatingHours = slotHour >= 12 && slotHour <= 23;
         const notOccupied = !occupiedSlots.has(slot);
         return inOperatingHours && notOccupied;
       });
@@ -178,25 +178,53 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     }
   };
   
-  // Actualizar slots disponibles cuando cambie el equipo o fecha
+  // Función reutilizable para actualizar los horarios disponibles
+  const updateAvailableSlots = async () => {
+    if (!formData.equipmentCode || !formData.reservationDate) {
+      setAvailableSlots([]);
+      return;
+    }
+    const slots = await checkAvailability(formData.equipmentCode, formData.reservationDate);
+    setAvailableSlots(slots);
+    if (formData.startTime && !slots.includes(formData.startTime)) {
+      setFormData(prev => ({ ...prev, startTime: '', hours: 1 }));
+    }
+  };
+  
+  // Actualizar slots cuando cambian equipo/fecha o lista de reservas
   useEffect(() => {
-    const updateAvailableSlots = async () => {
-      if (!formData.equipmentCode || !formData.reservationDate) {
-        setAvailableSlots([]);
-        return;
-      }
-      
-      const slots = await checkAvailability(formData.equipmentCode, formData.reservationDate);
-      setAvailableSlots(slots);
-      
-      // Si el horario seleccionado ya no está disponible, limpiarlo
-      if (formData.startTime && !slots.includes(formData.startTime)) {
-        setFormData(prev => ({ ...prev, startTime: '', hours: 1 }));
-      }
-    };
-
     updateAvailableSlots();
   }, [formData.equipmentCode, formData.reservationDate, existingReservations]);
+
+  // Suscribirse a cambios en tiempo real para bloquear horarios inmediatamente
+  useEffect(() => {
+    if (!formData.equipmentCode || !formData.reservationDate) return;
+
+    const channel = supabase
+      .channel('reservations-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, async (payload) => {
+        try {
+          const selectedEquip = equipment.find(eq => eq.name === formData.equipmentCode);
+          if (!selectedEquip) return;
+
+          const row: any = payload.new || payload.old;
+          if (!row || row.equipment_id !== selectedEquip.id) return;
+
+          // Si afecta el día seleccionado, refrescar disponibilidad
+          const rowDate = new Date(row.start_time).toISOString().split('T')[0];
+          if (rowDate === formData.reservationDate) {
+            await updateAvailableSlots();
+          }
+        } catch (e) {
+          console.error('Realtime update error:', e);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [formData.equipmentCode, formData.reservationDate]);
 
   // Cargar días cerrados al inicio
   useEffect(() => {
