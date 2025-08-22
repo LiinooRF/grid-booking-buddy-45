@@ -489,24 +489,12 @@ const Events = () => {
         {!selectedEvent && (
           <div className="space-y-8">
             {/* Gaming Grid Banner */}
-            <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5">
-              {/* Subtle Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-              
-              {/* Logo and Brand */}
-              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
-                <div className="space-y-4 opacity-80">
-                  <img
-                    src="/lovable-uploads/4c96efc2-aefc-4592-918a-c87ffd48a6d7.png"
-                    alt="Gaming Grid"
-                    className="h-20 md:h-28 w-auto mx-auto"
-                  />
-                  <h1 className="text-3xl md:text-5xl font-black text-white">
-                    <span className="text-white">GAMING</span>{" "}
-                    <span className="text-primary">GRID</span>
-                  </h1>
-                </div>
-              </div>
+            <div className="relative h-80 rounded-2xl overflow-hidden">
+              <img
+                src="/lovable-uploads/a42b2dbc-cc15-498a-b267-02f4922cce94.png"
+                alt="Gaming Grid"
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div className="text-center">
