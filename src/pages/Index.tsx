@@ -728,6 +728,14 @@ const Index = () => {
             <div className="flex items-center gap-2 md:gap-4">
               <Button 
                 variant="outline" 
+                onClick={() => window.location.href = '/eventos'}
+                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
+              >
+                <span className="hidden md:inline">🎉 Eventos</span>
+                <span className="md:hidden">🎉</span>
+              </Button>
+              <Button 
+                variant="outline" 
                 onClick={() => window.location.href = 'https://gaminggrid.cl'}
                 className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
               >
