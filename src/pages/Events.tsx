@@ -487,10 +487,42 @@ const Events = () => {
 
         {/* Events Grid */}
         {!selectedEvent && (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Gaming Grid Banner */}
+            <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10">
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              
+              {/* Logo and Content */}
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
+                <div className="space-y-6">
+                  <img
+                    src="/lovable-uploads/4c96efc2-aefc-4592-918a-c87ffd48a6d7.png"
+                    alt="Gaming Grid"
+                    className="h-24 md:h-32 w-auto mx-auto animate-fade-in"
+                  />
+                  <div className="space-y-4">
+                    <h1 className="text-4xl md:text-6xl font-black text-white animate-scale-in">
+                      EVENTOS
+                    </h1>
+                    <div className="bg-primary text-black px-8 py-3 rounded-full font-bold text-lg md:text-xl animate-fade-in">
+                      PRÓXIMAMENTE EVENTOS INCREÍBLES
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute top-4 left-4">
+                <div className="w-16 h-16 border-2 border-primary/30 rounded-full animate-pulse"></div>
+              </div>
+              <div className="absolute bottom-4 right-4">
+                <div className="w-12 h-12 bg-primary/20 rounded-lg rotate-45 animate-pulse"></div>
+              </div>
+            </div>
+
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-white mb-2">Eventos</h1>
-              <p className="text-muted-foreground">Descubre los próximos eventos de Gaming Grid</p>
+              <p className="text-muted-foreground text-lg">Descubre los próximos eventos de Gaming Grid</p>
             </div>
 
             {events.length === 0 ? (
