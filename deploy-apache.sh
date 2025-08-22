@@ -29,12 +29,16 @@ else
   $PM install
 fi
 
-echo "==> Compilando (build)"
-$PM run build
-
-echo "==> Copiando archivos compilados a Apache"
-rm -rf "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || true
+echo "==> Compilando para /reservas/"
+VITE_BASE_PATH="/reservas/" $PM run build
+echo "==> Copiando build de reservas"
+rm -rf "$APACHE_DIR/reservas" 2>/dev/null || true
 cp -r "$REPO_DIR/dist" "$APACHE_DIR/reservas"
+
+echo "==> Compilando para /eventos/"
+VITE_BASE_PATH="/eventos/" $PM run build
+echo "==> Copiando build de eventos"
+rm -rf "$APACHE_DIR/eventos" 2>/dev/null || true
 cp -r "$REPO_DIR/dist" "$APACHE_DIR/eventos"
 
 echo "==> Configurando Apache para SPA"
