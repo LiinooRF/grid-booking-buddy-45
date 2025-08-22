@@ -22,14 +22,13 @@ export function SiteHeader({ current }: SiteHeaderProps) {
             className="flex items-center gap-4 hover-scale transition-transform"
           >
             <img
-              src="/lovable-uploads/4c96efc2-aefc-4592-918a-c87ffd48a6d7.png"
-              alt="Gaming Grid"
-              className="h-10 w-auto"
+              src="/lovable-uploads/96474a0a-1b4b-4240-8f77-bbaebb6bb1eb.png"
+              alt="GRID Logo"
+              className="h-8 w-auto"
             />
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold">
-                <span className="text-white">GAMING</span>{" "}
-                <span className="text-primary">GRID</span>
+              <h1 className="text-lg md:text-xl font-bold text-primary">
+                GRID
               </h1>
               <p className="text-xs md:text-sm text-muted-foreground">
                 {current === "reservas" ? "Sistema de Reservas" : "Eventos"}
