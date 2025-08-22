@@ -201,27 +201,19 @@ const Index = () => {
       const selectedEquipment = equipment.find(eq => eq.name === data.equipmentCode);
       
       if (selectedEquipment) {
-        // 🔧 FIX: Crear fechas en hora local chilena (UTC-3) 
-        const [startHour, startMin] = data.startTime.split(':').map(Number);
-        const [endHour, endMin] = data.endTime.split(':').map(Number);
-        
-        // Crear fecha base en la zona horaria local
-        const baseDate = new Date(data.reservationDate + 'T00:00:00');
-        
-        const startLocal = new Date(baseDate);
-        startLocal.setHours(startHour, startMin, 0, 0);
-        
-        let endLocal = new Date(baseDate);
-        endLocal.setHours(endHour, endMin, 0, 0);
-        
-        // Si la hora de fin es menor que la de inicio, avanzar al día siguiente
-        if (endLocal <= startLocal) {
-          endLocal.setDate(endLocal.getDate() + 1);
-        }
+        // Construir fechas en UTC para evitar conflictos de zona horaria con las validaciones del servidor
+        const [sHour, sMin] = data.startTime.split(':').map(Number);
+        const [eHour, eMin] = data.endTime.split(':').map(Number);
+        const [y, m, d] = data.reservationDate.split('-').map(Number);
 
-        console.log('🕐 Horarios para Supabase:', {
-          start: startLocal.toISOString(),
-          end: endLocal.toISOString(),
+        const startUtc = new Date(Date.UTC(y, m - 1, d, sHour, sMin, 0, 0));
+        const crossesMidnight = eHour < sHour || (eHour === sHour && eMin <= sMin);
+        const endUtc = new Date(Date.UTC(y, m - 1, d + (crossesMidnight ? 1 : 0), eHour, eMin, 0, 0));
+
+        console.log('🕐 Enviando a Supabase (UTC):', {
+          start: startUtc.toISOString(),
+          end: endUtc.toISOString(),
+          localDate: data.reservationDate,
           localStart: data.startTime,
           localEnd: data.endTime
         });
@@ -230,8 +222,8 @@ const Index = () => {
           equipment_id: selectedEquipment.id,
           user_name: data.fullName,
           user_phone: data.phone,
-          start_time: startLocal.toISOString(),
-          end_time: endLocal.toISOString(),
+          start_time: startUtc.toISOString(),
+          end_time: endUtc.toISOString(),
           hours: data.hours,
           status: 'pending',
           ticket_number: ticketNumber,
@@ -279,8 +271,9 @@ const Index = () => {
             equipment_name: data.equipmentCode,
             user_name: data.fullName,
             ticket_number: ticketNumber,
-            start_time: `${data.reservationDate}T${data.startTime}:00`,
-            end_time: `${data.reservationDate}T${data.endTime}:00`,
+            // Enviar los mismos timestamps en UTC usados para la inserción
+            start_time: (() => { const [y,m,d]=data.reservationDate.split('-').map(Number); const [h,min]=data.startTime.split(':').map(Number); return new Date(Date.UTC(y,m-1,d,h,min,0,0)).toISOString(); })(),
+            end_time: (() => { const [y,m,d]=data.reservationDate.split('-').map(Number); const [sh,sm]=data.startTime.split(':').map(Number); const [eh,em]=data.endTime.split(':').map(Number); const crosses= eh < sh || (eh===sh && em<=sm); return new Date(Date.UTC(y,m-1,d+(crosses?1:0),eh,em,0,0)).toISOString(); })(),
             user_phone: data.phone,
             hours: data.hours
           }
