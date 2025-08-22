@@ -7,6 +7,7 @@ import EquipmentGrid from "@/components/EquipmentGrid";
 import ReservationForm from "@/components/ReservationForm";
 import AdminPanel from "@/components/AdminPanel";
 import ClosedPlatform from "@/components/ClosedPlatform";
+import { ScheduleCalendar } from "@/components/ScheduleCalendar";
 import { useToast } from "@/hooks/use-toast";
 import { useClosedDays } from "@/hooks/useClosedDays";
 import { sendTelegramNotification, formatReservationNotification } from "@/lib/timeUtils";
@@ -56,6 +57,7 @@ const Index = () => {
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showAdminAccess, setShowAdminAccess] = useState(false);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
 
   // Cargar reservas desde Supabase
   const loadReservations = async () => {
@@ -820,6 +822,34 @@ const Index = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Calendario de disponibilidad */}
+              <div className="mt-8">
+                <ScheduleCalendar selectedDate={selectedCalendarDate} />
+                <div className="mt-4 text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedCalendarDate(new Date(selectedCalendarDate.getTime() - 24 * 60 * 60 * 1000))}
+                    className="mr-2"
+                  >
+                    ← Día Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedCalendarDate(new Date())}
+                    className="mx-2"
+                  >
+                    Hoy
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedCalendarDate(new Date(selectedCalendarDate.getTime() + 24 * 60 * 60 * 1000))}
+                    className="ml-2"
+                  >
+                    Día Siguiente →
+                  </Button>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="reservar" className="space-y-6">

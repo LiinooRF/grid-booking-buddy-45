@@ -77,6 +77,42 @@ export type Database = {
         }
         Relationships: []
       }
+      event_blocks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_time: string
+          equipment_ids: string[]
+          id: string
+          start_time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time: string
+          equipment_ids?: string[]
+          id?: string
+          start_time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time?: string
+          equipment_ids?: string[]
+          id?: string
+          start_time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           created_at: string

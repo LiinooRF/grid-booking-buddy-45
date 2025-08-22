@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { EventBlockForm } from "@/components/EventBlockForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Shield, Eye, Check, X, Clock, User, Phone, Mail, Calendar, BarChart3, DollarSign, Users, TrendingUp, Filter, Download, Search, RefreshCw, Settings, Wrench, Plus, Trash2 } from "lucide-react";
@@ -48,6 +48,8 @@ interface AdminPanelProps {
 const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onRelease, onExtendTime, onLogin, isAuthenticated, onChangeHours, equipment, onToggleMaintenance, onAddClosedDay, onRemoveClosedDay }: AdminPanelProps) => {
   const { toast } = useToast();
   const [password, setPassword] = useState('');
+  const [eventBlocks, setEventBlocks] = useState<any[]>([]);
+  const [loadingEventBlocks, setLoadingEventBlocks] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
@@ -74,6 +76,71 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
       fetchClosedDays();
     }
   }, [isAuthenticated]);
+
+  // Cargar bloqueos de eventos
+  useEffect(() => {
+    const fetchEventBlocks = async () => {
+      setLoadingEventBlocks(true);
+      try {
+        const { data } = await supabase
+          .from('event_blocks')
+          .select('*')
+          .order('start_time', { ascending: true });
+        
+        if (data) {
+          setEventBlocks(data);
+        }
+      } catch (error) {
+        console.error('Error loading event blocks:', error);
+      } finally {
+        setLoadingEventBlocks(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchEventBlocks();
+    }
+  }, [isAuthenticated]);
+
+  const handleDeleteEventBlock = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('event_blocks')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setEventBlocks(prev => prev.filter(block => block.id !== id));
+      
+      toast({
+        title: "Bloqueo eliminado",
+        description: "El bloqueo de evento ha sido eliminado",
+      });
+    } catch (error) {
+      console.error('Error deleting event block:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el bloqueo",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const refreshEventBlocks = async () => {
+    try {
+      const { data } = await supabase
+        .from('event_blocks')
+        .select('*')
+        .order('start_time', { ascending: true });
+      
+      if (data) {
+        setEventBlocks(data);
+      }
+    } catch (error) {
+      console.error('Error refreshing event blocks:', error);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -842,6 +909,57 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Bloqueos por Eventos */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-primary flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Bloqueos por Eventos
+                  </CardTitle>
+                  <EventBlockForm equipment={equipment} onSuccess={refreshEventBlocks} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingEventBlocks ? (
+                  <div className="text-center py-4">Cargando bloqueos...</div>
+                ) : eventBlocks.length > 0 ? (
+                  <div className="space-y-3">
+                    {eventBlocks.map((block) => (
+                      <div key={block.id} className="flex items-center justify-between p-3 border border-gaming-border rounded-md">
+                        <div className="flex-1">
+                          <div className="font-medium">{block.title}</div>
+                          {block.description && (
+                            <div className="text-sm text-muted-foreground mb-1">{block.description}</div>
+                          )}
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(block.start_time).toLocaleDateString('es-CL')} {' '}
+                            {new Date(block.start_time).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })} -{' '}
+                            {new Date(block.end_time).toLocaleDateString('es-CL')} {' '}
+                            {new Date(block.end_time).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Equipos: {block.equipment_ids.length} equipos bloqueados
+                          </div>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteEventBlock(block.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground py-4">
+                    No hay bloqueos por eventos configurados
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
