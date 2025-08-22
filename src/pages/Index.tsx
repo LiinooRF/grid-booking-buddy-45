@@ -201,13 +201,30 @@ const Index = () => {
       const selectedEquipment = equipment.find(eq => eq.name === data.equipmentCode);
       
       if (selectedEquipment) {
-        const startLocal = new Date(`${data.reservationDate}T${data.startTime}:00`);
-        let endLocal = new Date(`${data.reservationDate}T${data.endTime}:00`);
-
-        // Si el fin es menor o igual que el inicio (cruce de medianoche), mover fin al día siguiente
+        // 🔧 FIX: Crear fechas en hora local chilena (UTC-3) 
+        const [startHour, startMin] = data.startTime.split(':').map(Number);
+        const [endHour, endMin] = data.endTime.split(':').map(Number);
+        
+        // Crear fecha base en la zona horaria local
+        const baseDate = new Date(data.reservationDate + 'T00:00:00');
+        
+        const startLocal = new Date(baseDate);
+        startLocal.setHours(startHour, startMin, 0, 0);
+        
+        let endLocal = new Date(baseDate);
+        endLocal.setHours(endHour, endMin, 0, 0);
+        
+        // Si la hora de fin es menor que la de inicio, avanzar al día siguiente
         if (endLocal <= startLocal) {
           endLocal.setDate(endLocal.getDate() + 1);
         }
+
+        console.log('🕐 Horarios para Supabase:', {
+          start: startLocal.toISOString(),
+          end: endLocal.toISOString(),
+          localStart: data.startTime,
+          localEnd: data.endTime
+        });
 
         const { error } = await supabase.from('reservations').insert([{
           equipment_id: selectedEquipment.id,
