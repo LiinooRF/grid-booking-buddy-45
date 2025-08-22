@@ -75,7 +75,11 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
     }
   }, [isAuthenticated]);
 
-  // Authentication is now handled at the app level
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    onLogin(password);
+    setPassword('');
+  };
 
   const handleToggleMaintenance = async (equipmentId: string, maintenanceMode: boolean, reason?: string) => {
     await onToggleMaintenance(equipmentId, maintenanceMode, reason);
@@ -113,7 +117,36 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
     }
   };
 
-  // Admin panel is now only rendered for authenticated admin users
+  if (!isAuthenticated) {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-primary flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Acceso Administrador
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingresa la contraseña de admin"
+                autoFocus
+              />
+            </div>
+            <Button type="submit" variant="gaming" className="w-full">
+              Ingresar
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Filter reservations
   const filteredReservations = reservations.filter(reservation => {
