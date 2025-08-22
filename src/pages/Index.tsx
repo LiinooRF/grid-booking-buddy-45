@@ -159,6 +159,14 @@ const Index = () => {
     };
   }, []);
 
+  // Fallback: refresco periódico por si Realtime no está disponible
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadReservations();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleEquipmentSelect = (equipment: any) => {
     setSelectedEquipment(equipment.name);
     toast({

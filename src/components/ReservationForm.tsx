@@ -244,6 +244,18 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     fetchClosedDays();
   }, []);
 
+  // Actualizar horarios automáticamente cada minuto cuando la fecha es hoy
+  useEffect(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (formData.reservationDate !== todayStr || !formData.equipmentCode) return;
+
+    const interval = setInterval(() => {
+      updateAvailableSlots();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [formData.reservationDate, formData.equipmentCode]);
+
   const isTimeSlotAvailable = (startTime: string, hours: number, equipmentCode: string) => {
     if (!startTime || !hours || !equipmentCode || !availableSlots.length) return false;
 
