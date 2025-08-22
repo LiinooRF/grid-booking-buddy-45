@@ -2,12 +2,10 @@
 set -euo pipefail
 
 REPO_DIR="/var/www/reservas"
+APACHE_DIR="/var/www/html"
 BRANCH="main"
-PORT="${PORT:-4173}"
-HOST="${HOST:-0.0.0.0}"
-LOG_FILE="/var/log/reservas-preview.log"
 
-echo "==> Actualizando repo (SE DESCARTAN cambios locales)"
+echo "==> Actualizando repo y resolviendo conflictos"
 cd "$REPO_DIR"
 
 git merge --abort 2>/dev/null || true
@@ -34,24 +32,36 @@ fi
 echo "==> Compilando (build)"
 $PM run build
 
-echo "==> Cerrando procesos en el puerto $PORT si existen"
-if command -v lsof >/dev/null 2>&1; then
-  lsof -ti tcp:"$PORT" | xargs -r kill -9 || true
-fi
+echo "==> Copiando archivos compilados a Apache"
+rm -rf "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || true
+cp -r "$REPO_DIR/dist" "$APACHE_DIR/reservas"
+cp -r "$REPO_DIR/dist" "$APACHE_DIR/eventos"
 
-echo "==> Iniciando Vite Preview en segundo plano: http://$(hostname -I | awk '{print $1}'):$PORT"
-PREVIEW_CMD=""
-if [ "$PM" = "pnpm" ]; then
-  PREVIEW_CMD="pnpm exec vite preview --host \"$HOST\" --port \"$PORT\""
-elif [ "$PM" = "yarn" ]; then
-  PREVIEW_CMD="yarn vite preview --host \"$HOST\" --port \"$PORT\""
-else
-  PREVIEW_CMD="npx vite preview --host \"$HOST\" --port \"$PORT\""
-fi
+echo "==> Configurando Apache para SPA"
+cat > "$APACHE_DIR/.htaccess" << 'EOF'
+RewriteEngine On
 
-nohup bash -lc "$PREVIEW_CMD" > "$LOG_FILE" 2>&1 &
+# Handle /reservas route
+RewriteCond %{REQUEST_URI} ^/reservas/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^reservas/(.*)$ /reservas/index.html [L]
 
-PID=$!
-echo "==> PID: $PID"
-echo "==> Logs: tail -f $LOG_FILE"
-echo "==> URL: http://$HOST:$PORT"
+# Handle /eventos route  
+RewriteCond %{REQUEST_URI} ^/eventos/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^eventos/(.*)$ /eventos/index.html [L]
+
+# Set correct MIME types
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType text/css .css
+EOF
+
+echo "==> Reiniciando Apache"
+systemctl reload apache2 || service apache2 reload
+
+echo "==> ✅ Listo! Tu web está disponible en:"
+echo "    http://173.212.212.147/reservas/"
+echo "    http://173.212.212.147/eventos/"
