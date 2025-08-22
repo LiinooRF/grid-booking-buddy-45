@@ -53,8 +53,8 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [currentTab, setCurrentTab] = useState<string>('eventos');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [showAdminAccess, setShowAdminAccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [filterLocation, setFilterLocation] = useState('Todos');
   const [filterActivity, setFilterActivity] = useState('Todos');
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [registrationData, setRegistrationData] = useState({
@@ -291,9 +291,8 @@ const Events = () => {
   };
 
   const filteredEvents = events.filter(event => {
-    const locationMatch = filterLocation === 'Todos' || event.location === filterLocation;
     const activityMatch = filterActivity === 'Todos' || event.title.toLowerCase().includes(filterActivity.toLowerCase());
-    return locationMatch && activityMatch;
+    return activityMatch;
   });
 
   if (loading) {
@@ -357,58 +356,44 @@ const Events = () => {
             <CardHeader>
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <CardTitle className="text-2xl font-bold text-white">Eventos</CardTitle>
-                <TabsList className="grid w-full lg:w-auto grid-cols-2 lg:grid-cols-3">
+                <TabsList className="grid w-full lg:w-auto grid-cols-1 lg:grid-cols-1">
                   <TabsTrigger value="eventos" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Eventos
-                  </TabsTrigger>
-                  <TabsTrigger value="crear" className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Crear
-                  </TabsTrigger>
-                  <TabsTrigger value="admin" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Admin
+                    Eventos Disponibles
                   </TabsTrigger>
                 </TabsList>
+                
+                {/* Admin Access Button - Discreto */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAdminAccess(!showAdminAccess)}
+                  className="opacity-30 hover:opacity-100 transition-opacity"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
               </div>
             </CardHeader>
           </Card>
 
           {/* Events List Tab */}
           <TabsContent value="eventos" className="space-y-6">
-            {/* Filters */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Club</Label>
-                    <Select value={filterLocation} onValueChange={setFilterLocation}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Todos">Todos</SelectItem>
-                        <SelectItem value="TRÉBOL">TRÉBOL</SelectItem>
-                        <SelectItem value="VESPUCIO">VESPUCIO</SelectItem>
-                        <SelectItem value="NORTE">NORTE</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Actividad</Label>
-                    <Select value={filterActivity} onValueChange={setFilterActivity}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Todos">Todos</SelectItem>
-                        <SelectItem value="Torneo">Torneos</SelectItem>
-                        <SelectItem value="Madrugaming">Madrugaming</SelectItem>
-                        <SelectItem value="Super Series">Super Series</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            {/* Filter */}
+            <Card className="bg-gaming-surface/80 border-primary/20">
+              <CardContent className="p-4">
+                <div className="max-w-md">
+                  <Label className="text-primary font-medium">Filtrar por Actividad</Label>
+                  <Select value={filterActivity} onValueChange={setFilterActivity}>
+                    <SelectTrigger className="mt-2 border-primary/30 focus:border-primary">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Todos">Todas las Actividades</SelectItem>
+                      <SelectItem value="Torneo">Torneos</SelectItem>
+                      <SelectItem value="Competencia">Competencias</SelectItem>
+                      <SelectItem value="Evento">Eventos Especiales</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
@@ -416,7 +401,7 @@ const Events = () => {
             {/* Events Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden bg-gaming-surface border-gaming-border hover:border-primary/50 transition-all group">
+                <Card key={event.id} className="overflow-hidden bg-gaming-surface/90 border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all group">
                   <div className="relative">
                     {/* Event Image */}
                     <div 
@@ -430,71 +415,71 @@ const Events = () => {
                         <Badge className="bg-accent text-black font-bold px-2 py-1">
                           {format(new Date(event.event_date), "dd MMM", { locale: es }).toUpperCase()}
                           <br />
-                          <span className="text-xs">11:00 hrs</span>
+                          <span className="text-xs">{event.start_time || '19:00'} hrs</span>
                         </Badge>
                       </div>
 
-                      {/* Location Badge */}
+                      {/* Status Badge */}
                       <div className="absolute top-3 right-3">
-                        <Badge variant="outline" className="bg-primary text-white border-primary">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {event.location || 'VESPUCIO'}
+                        <Badge variant="outline" className="bg-primary/90 text-white border-primary">
+                          <Trophy className="h-3 w-3 mr-1" />
+                          {event.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
                         </Badge>
                       </div>
 
                       {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     </div>
 
-                    <CardContent className="p-4 space-y-3">
+                    <CardContent className="p-5 space-y-4">
                       {/* Title */}
-                      <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-xl text-white group-hover:text-primary transition-colors">
                         {event.title}
                       </h3>
 
                       {/* Description */}
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {event.description || "Ven y participa en este increíble evento"}
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                        {event.description || "Únete a este increíble evento de Gaming Grid"}
                       </p>
 
                       {/* Event Details */}
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-3 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span>Club Mellipizza {event.location || 'Vespucio'}</span>
+                          <Calendar className="h-4 w-4 text-primary" />
+                          <span>Gaming Grid - Evento Especial</span>
                         </div>
                         
-                        {event.entry_fee && (
+                        {event.max_participants && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <DollarSign className="h-4 w-4" />
-                            <span>Valor inscripción: desde {event.entry_fee}</span>
+                            <Users className="h-4 w-4 text-primary" />
+                            <span>Máximo {event.max_participants} participantes</span>
                           </div>
                         )}
 
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>De 21:00 a 09:00 am (12hrs)</span>
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span>Duración: {event.start_time || '19:00'} - {event.end_time || '23:00'}</span>
                         </div>
 
-                        {event.prize && (
+                        {event.is_group_event && (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <Trophy className="h-4 w-4" />
-                            <span>Premio: {event.prize}</span>
+                            <Users className="h-4 w-4 text-primary" />
+                            <span>Evento grupal - Equipos permitidos</span>
                           </div>
                         )}
                       </div>
 
                       {/* Action Button */}
                       <Button 
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-black font-semibold shadow-lg shadow-primary/20"
                         onClick={() => {
                           setSelectedEvent(event);
                           setShowRegistrationForm(true);
                         }}
                         disabled={event.status !== 'active'}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        {event.status === 'active' ? 'Ver más' : 'No disponible'}
+                        <Trophy className="h-4 w-4 mr-2" />
+                        {event.status === 'active' ? 'Inscribirse Ahora' : 'No disponible'}
                       </Button>
                     </CardContent>
                   </div>
@@ -503,127 +488,170 @@ const Events = () => {
             </div>
 
             {filteredEvents.length === 0 && (
-              <Card>
+              <Card className="bg-gaming-surface/80 border-primary/20">
                 <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No hay eventos disponibles que coincidan con los filtros seleccionados.</p>
+                  <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <p className="text-lg text-muted-foreground">No hay eventos disponibles en este momento.</p>
+                  <p className="text-sm text-muted-foreground mt-2">¡Mantente atento para próximos eventos!</p>
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-
-          {/* Create Event Tab */}
-          <TabsContent value="crear">
-            {isAdminAuthenticated ? (
-              <EventForm onSubmit={handleEventSubmit} />
-            ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="max-w-md mx-auto space-y-4">
-                    <h3 className="text-lg font-semibold text-center">Acceso Restringido</h3>
-                    <p className="text-sm text-muted-foreground text-center">
-                      Solo los administradores pueden crear eventos.
-                    </p>
-                    <div className="space-y-3">
-                      <Input
-                        type="password"
-                        placeholder="Contraseña de administrador"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleAdminLogin((e.target as HTMLInputElement).value);
-                          }
-                        }}
-                      />
-                      <Button 
-                        className="w-full"
-                        onClick={(e) => {
-                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                          handleAdminLogin(input.value);
-                        }}
-                      >
-                        Acceder
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Admin Panel Tab */}
-          <TabsContent value="admin">
-            <EventAdminPanel
-              events={events}
-              registrations={registrations}
-              isAuthenticated={isAdminAuthenticated}
-              onLogin={handleAdminLogin}
-              onDeleteEvent={handleDeleteEvent}
-              onUpdateRegistrationStatus={handleUpdateRegistrationStatus}
-            />
           </TabsContent>
         </Tabs>
 
-        {/* Registration Modal */}
-        {showRegistrationForm && selectedEvent && (
+        {/* Hidden Admin Panel */}
+        {showAdminAccess && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <Card className="max-w-md w-full max-h-[90vh] overflow-auto">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Inscribirse a: {selectedEvent.title}</CardTitle>
-                  <Button 
-                    variant="outline" 
+            <div className="bg-gaming-surface border-primary/30 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-primary">Panel de Administración - Eventos</h2>
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => setShowRegistrationForm(false)}
+                    onClick={() => setShowAdminAccess(false)}
+                    className="border-primary/50 hover:bg-primary/10"
                   >
                     ✕
                   </Button>
                 </div>
+                
+                <Tabs defaultValue="crear" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="crear" className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Crear Evento
+                    </TabsTrigger>
+                    <TabsTrigger value="admin" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Gestión
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="crear">
+                    {isAdminAuthenticated ? (
+                      <EventForm onSubmit={handleEventSubmit} />
+                    ) : (
+                      <Card className="bg-gaming-surface/80 border-primary/30">
+                        <CardContent className="p-6">
+                          <div className="max-w-md mx-auto space-y-4">
+                            <h3 className="text-lg font-semibold text-center text-primary">Acceso Restringido</h3>
+                            <p className="text-sm text-muted-foreground text-center">
+                              Solo los administradores pueden crear eventos.
+                            </p>
+                            <div className="space-y-3">
+                              <Input
+                                type="password"
+                                placeholder="Contraseña de administrador"
+                                className="border-primary/30 focus:border-primary"
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleAdminLogin((e.target as HTMLInputElement).value);
+                                  }
+                                }}
+                              />
+                              <Button 
+                                className="w-full bg-primary hover:bg-primary/90 text-black"
+                                onClick={(e) => {
+                                  const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                  handleAdminLogin(input.value);
+                                }}
+                              >
+                                Acceder
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="admin">
+                    <EventAdminPanel
+                      events={events}
+                      registrations={registrations}
+                      isAuthenticated={isAdminAuthenticated}
+                      onLogin={handleAdminLogin}
+                      onDeleteEvent={handleDeleteEvent}
+                      onUpdateRegistrationStatus={handleUpdateRegistrationStatus}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Registration Modal */}
+        {showRegistrationForm && selectedEvent && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="max-w-md w-full max-h-[90vh] overflow-auto bg-gaming-surface border-primary/30">
+              <CardHeader className="border-b border-primary/20">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-primary">Inscribirse al evento</CardTitle>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowRegistrationForm(false)}
+                    className="border-primary/50 hover:bg-primary/10"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">{selectedEvent.title}</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <form onSubmit={handleRegistrationSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Nombre Completo *</Label>
+                    <Label className="text-primary font-medium">Nombre Completo *</Label>
                     <Input
                       value={registrationData.participant_name}
                       onChange={(e) => setRegistrationData({...registrationData, participant_name: e.target.value})}
+                      className="border-primary/30 focus:border-primary"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Teléfono *</Label>
+                    <Label className="text-primary font-medium">Teléfono *</Label>
                     <Input
                       type="tel"
                       value={registrationData.participant_phone}
                       onChange={(e) => setRegistrationData({...registrationData, participant_phone: e.target.value})}
+                      className="border-primary/30 focus:border-primary"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Email *</Label>
+                    <Label className="text-primary font-medium">Email *</Label>
                     <Input
                       type="email"
                       value={registrationData.participant_email}
                       onChange={(e) => setRegistrationData({...registrationData, participant_email: e.target.value})}
+                      className="border-primary/30 focus:border-primary"
                       required
                     />
                   </div>
                   {selectedEvent.is_group_event && (
                     <div className="space-y-2">
-                      <Label>Nombre del Grupo/Equipo</Label>
+                      <Label className="text-primary font-medium">Nombre del Grupo/Equipo</Label>
                       <Input
                         value={registrationData.group_name}
                         onChange={(e) => setRegistrationData({...registrationData, group_name: e.target.value})}
+                        className="border-primary/30 focus:border-primary"
                       />
                     </div>
                   )}
                   <div className="space-y-2">
-                    <Label>Comentarios</Label>
+                    <Label className="text-primary font-medium">Comentarios</Label>
                     <Input
                       value={registrationData.notes}
                       onChange={(e) => setRegistrationData({...registrationData, notes: e.target.value})}
+                      className="border-primary/30 focus:border-primary"
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Inscribirse
+                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-black font-semibold">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Inscribirse al Evento
                   </Button>
                 </form>
               </CardContent>
