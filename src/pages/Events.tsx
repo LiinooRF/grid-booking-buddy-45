@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import EventForm from "@/components/EventForm";
 import EventAdminPanel from "@/components/EventAdminPanel";
+import SiteHeader from "@/components/SiteHeader";
 
 interface Event {
   id: string;
@@ -310,45 +311,7 @@ const Events = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
-      <header className="border-b border-gaming-border bg-gaming-surface/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
-                src="/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png" 
-                alt="Gaming Grid" 
-                className="h-10 w-auto"
-              />
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold">
-                  <span className="text-white">GAMING</span>{' '}
-                  <span className="text-primary">GRID</span>
-                </h1>
-                <p className="text-xs md:text-sm text-muted-foreground">Eventos</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 md:gap-4">
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/reservas'}
-                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
-              >
-                <span className="hidden md:inline">← Reservas</span>
-                <span className="md:hidden">←</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = 'https://gaminggrid.cl'}
-                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
-              >
-                <span className="hidden md:inline">Página Principal</span>
-                <span className="md:hidden">🏠</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SiteHeader current="eventos" />
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
@@ -405,7 +368,7 @@ const Events = () => {
                   <div className="relative">
                     {/* Event Image */}
                     <div 
-                      className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 bg-cover bg-center relative"
+                      className="h-48 bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center relative"
                       style={{
                         backgroundImage: event.image_url ? `url(${event.image_url})` : undefined
                       }}

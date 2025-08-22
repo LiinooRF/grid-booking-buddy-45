@@ -13,6 +13,7 @@ import { sendTelegramNotification, formatReservationNotification } from "@/lib/t
 import { supabase } from "@/integrations/supabase/client";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import SiteHeader from "@/components/SiteHeader";
 
 // 🆕 REAL: Cargar equipos desde Supabase
 interface Equipment {
@@ -707,55 +708,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gaming-bg via-background to-gaming-surface">
       {/* Header */}
-      <header className="border-b border-gaming-border bg-gaming-surface/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
-                src="/lovable-uploads/a5dbcafb-1a7b-407f-af67-eec3222cf045.png" 
-                alt="Gaming Grid" 
-                className="h-10 w-auto"
-              />
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold">
-                  <span className="text-white">GAMING</span>{' '}
-                  <span className="text-primary">GRID</span>
-                </h1>
-                <p className="text-xs md:text-sm text-muted-foreground">Sistema de Reservas</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 md:gap-4">
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/eventos'}
-                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
-              >
-                <span className="hidden md:inline">🎉 Eventos</span>
-                <span className="md:hidden">🎉</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = 'https://gaminggrid.cl'}
-                className="text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 h-8 md:h-10"
-              >
-                <span className="hidden md:inline">← Página Principal</span>
-                <span className="md:hidden">←</span>
-              </Button>
-              <div className="hidden md:flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">12PM - 12AM</span>
-              </div>
-              <Badge variant="outline" className="status-available text-xs">
-                {equipment.filter(eq => eq.status === 'available').length} Disponibles
-              </Badge>
-              <Badge variant="outline" className="status-occupied text-xs">
-                {equipment.filter(eq => eq.status === 'occupied').length} Ocupados
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SiteHeader current="reservas" />
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-8">
         {reservationTicket ? (
