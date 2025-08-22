@@ -223,12 +223,10 @@ const Index = () => {
       });
     }
     
-    // Send Telegram notification (usando el bot de Supabase)
+    // Send Telegram notification (usando el edge function de Supabase)
     try {
-      fetch('http://173.212.212.147:3001/telegram-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data: telegramData, error: telegramError } = await supabase.functions.invoke('telegram-bot', {
+        body: {
           action: 'new_reservation',
           adminChatId: '-4947999909',
           reservation: {
@@ -237,24 +235,35 @@ const Index = () => {
             user_name: data.fullName,
             ticket_number: ticketNumber,
             start_time: `${data.reservationDate}T${data.startTime}:00`,
-            end_time: `${data.reservationDate}T${data.endTime}:00`
+            end_time: `${data.reservationDate}T${data.endTime}:00`,
+            user_phone: data.phone,
+            hours: data.hours
           }
-        })
-      }).catch(error => console.error('Error notificación Telegram:', error));
-      
-      toast({
-        title: "Notificación enviada",
-        description: "El administrador ha sido notificado por Telegram",
-        variant: "default"
+        }
       });
+
+      if (telegramError) {
+        console.error('Error notificación Telegram:', telegramError);
+        toast({
+          title: "Error en notificación",
+          description: "La reserva se guardó pero no se pudo enviar la notificación",
+          variant: "destructive"
+        });
+      } else {
+        console.log('✅ Notificación Telegram enviada:', telegramData);
+        toast({
+          title: "Notificación enviada",
+          description: "El administrador ha sido notificado por Telegram",
+          variant: "default"
+        });
+      }
     } catch (error) {
       console.error("Error sending Telegram notification:", error);
-      // Fallback al método anterior si falla
-      try {
-        await sendTelegramNotification(formatReservationNotification(newReservation));
-      } catch (fallbackError) {
-        console.error("Fallback notification failed:", fallbackError);
-      }
+      toast({
+        title: "Error en notificación",
+        description: "La reserva se guardó pero no se pudo enviar la notificación",
+        variant: "destructive"
+      });
     }
     
     // Actualizar lista desde Supabase para asegurar IDs válidos
