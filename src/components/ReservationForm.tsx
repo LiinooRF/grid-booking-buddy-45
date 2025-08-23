@@ -81,11 +81,13 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
   }, [formData.equipmentCode, formData.reservationDate, equipment]);
   const generateTimeSlots = () => {
     const slots: string[] = [];
-    // De 12:00 a 23:00 (último inicio permitido)
+    // De 12:00 a 00:00 (medianoche)
     for (let hour = 12; hour <= 23; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`;
       slots.push(timeString);
     }
+    // Agregar medianoche (00:00)
+    slots.push('00:00');
     return slots;
   };
 
@@ -229,7 +231,8 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       const currentHour = new Date().getHours();
       const availableSlots = allSlots.filter(slot => {
         const [slotHour] = slot.split(':').map(Number);
-        const inOperatingHours = slotHour >= 12 && slotHour <= 23;
+        // Permitir horarios hasta las 00:00 (medianoche)
+        const inOperatingHours = slotHour >= 12 || slotHour === 0;
         const notOccupied = !occupiedSlots.has(slot);
         const notPast = formData.reservationDate === todayStr ? slotHour > currentHour : true;
         return inOperatingHours && notOccupied && notPast;
@@ -531,7 +534,6 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                   type="date"
                   value={formData.reservationDate}
                   min={new Date().toISOString().split('T')[0]}
-                  max={addDays(new Date(), 5).toISOString().split('T')[0]}
                   onChange={(e) => {
                     const selectedDate = e.target.value;
                     const isClosedDay = closedDays.some(cd => cd.date === selectedDate);
