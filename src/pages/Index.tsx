@@ -38,9 +38,11 @@ interface Reservation {
   hours: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'arrived';
   createdAt: string;
-  reservationDate: string;
-  startTime?: string;
-  endTime?: string;
+  reservationDate: string; // Fecha local YYYY-MM-DD
+  startTime?: string; // Hora local HH:mm
+  endTime?: string;   // Hora local HH:mm
+  startISO?: string;  // ISO UTC original
+  endISO?: string;    // ISO UTC original
 }
 
 const Index = () => {
@@ -82,21 +84,26 @@ const Index = () => {
       
       if (error) throw error;
       
-      // Mapear a formato del frontend
-      const mappedReservations: Reservation[] = data.map(r => ({
-        id: r.id,
-        fullName: r.user_name,
-        alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
-        phone: r.user_phone,
-        email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
-        equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
-        hours: r.hours,
-        status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
-        createdAt: r.created_at,
-        reservationDate: r.start_time?.split('T')[0] || new Date().toISOString().split('T')[0],
-        startTime: r.start_time?.split('T')[1]?.slice(0, 5),
-        endTime: r.end_time?.split('T')[1]?.slice(0, 5)
-      }));
+      const mappedReservations: Reservation[] = data.map(r => {
+        const start = new Date(r.start_time);
+        const end = new Date(r.end_time);
+        return {
+          id: r.id,
+          fullName: r.user_name,
+          alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
+          phone: r.user_phone,
+          email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
+          equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
+          hours: r.hours,
+          status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
+          createdAt: r.created_at,
+          reservationDate: start.toLocaleDateString('en-CA'),
+          startTime: start.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          endTime: end.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          startISO: r.start_time,
+          endISO: r.end_time
+        };
+      });
       
       setReservations(mappedReservations);
     } catch (error) {
@@ -477,8 +484,8 @@ const Index = () => {
         return;
       }
 
-      // Calcular nueva hora de fin
-      const currentEndTime = new Date(`${reservation.reservationDate}T${reservation.endTime}:00`);
+      // Calcular nueva hora de fin usando ISO real guardado (evita TZ)
+      const currentEndTime = new Date(reservation.endISO ?? `${reservation.reservationDate}T${reservation.endTime}:00`);
       const newEndTime = new Date(currentEndTime.getTime() + (minutes * 60 * 1000));
       
       // Si estamos reduciendo tiempo, verificar que no sea menor que la hora actual + 30 min
@@ -574,6 +581,7 @@ const Index = () => {
             return { 
               ...r, 
               endTime: newEndTimeString,
+              endISO: newEndTime.toISOString(),
               hours: r.hours + hours
             };
           }
@@ -622,7 +630,7 @@ const Index = () => {
       if (!reservation) return;
 
       // Calcular nueva hora de fin basada en las nuevas horas
-      const startTime = new Date(`${reservation.reservationDate}T${reservation.startTime}:00`);
+      const startTime = new Date(reservation.startISO ?? `${reservation.reservationDate}T${reservation.startTime}:00`);
       const newEndTime = new Date(startTime.getTime() + (newHours * 60 * 60 * 1000));
       
       // Actualizar en Supabase
@@ -644,7 +652,8 @@ const Index = () => {
             return {
               ...r,
               hours: newHours,
-              endTime: newEndTimeString
+              endTime: newEndTimeString,
+              endISO: newEndTime.toISOString()
             };
           }
           return r;
@@ -786,20 +795,26 @@ const Index = () => {
 
       if (error) throw error;
 
-      const mappedReservations: Reservation[] = data.map(r => ({
-        id: r.id,
-        fullName: r.user_name,
-        alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
-        phone: r.user_phone,
-        email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
-        equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
-        hours: r.hours,
-        status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
-        createdAt: r.created_at,
-        reservationDate: r.start_time?.split('T')[0] || new Date().toISOString().split('T')[0],
-        startTime: r.start_time?.split('T')[1]?.slice(0, 5),
-        endTime: r.end_time?.split('T')[1]?.slice(0, 5)
-      }));
+      const mappedReservations: Reservation[] = data.map(r => {
+        const start = new Date(r.start_time);
+        const end = new Date(r.end_time);
+        return {
+          id: r.id,
+          fullName: r.user_name,
+          alias: r.notes?.includes('Alias:') ? r.notes.split('Alias: ')[1]?.split(',')[0] || 'N/A' : 'N/A',
+          phone: r.user_phone,
+          email: r.notes?.includes('Email:') ? r.notes.split('Email: ')[1] || 'N/A' : 'N/A',
+          equipmentCode: (r.equipment as any)?.name || `EQ-${r.equipment_id.slice(0, 8)}`,
+          hours: r.hours,
+          status: r.status as 'pending' | 'confirmed' | 'cancelled' | 'arrived',
+          createdAt: r.created_at,
+          reservationDate: start.toLocaleDateString('en-CA'),
+          startTime: start.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          endTime: end.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          startISO: r.start_time,
+          endISO: r.end_time
+        };
+      });
 
       setUserReservations(mappedReservations);
       

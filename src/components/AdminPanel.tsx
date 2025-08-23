@@ -235,7 +235,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
 
   // Statistics  
   const todayReservations = reservations.filter(r => 
-    r.reservationDate === new Date().toISOString().split('T')[0]
+    r.reservationDate === new Date().toLocaleDateString('en-CA')
   );
 
   const equipmentUsage = reservations
