@@ -61,9 +61,9 @@ export function EventBlockForm({ equipment, onSuccess }: EventBlockFormProps) {
       title: "",
       description: "",
       startDate: format(new Date(), "yyyy-MM-dd"),
-      startTime: "15:00",
+      startTime: "12:00",
       endDate: format(new Date(), "yyyy-MM-dd"),
-      endTime: "18:00",
+      endTime: "23:59",
       equipmentIds: [],
     },
   });
