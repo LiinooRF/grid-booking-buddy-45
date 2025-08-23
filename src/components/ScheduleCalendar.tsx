@@ -117,9 +117,9 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   useEffect(() => {
     fetchData();
 
-    // Suscripción a cambios en tiempo real
-    const reservationsChannel = supabase
-      .channel("reservations-changes")
+    // Suscripción a cambios en tiempo real con canal único
+    const realtimeChannel = supabase
+      .channel("calendar-realtime-updates")
       .on(
         "postgres_changes",
         {
@@ -127,14 +127,11 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
           schema: "public",
           table: "reservations",
         },
-        () => {
+        (payload) => {
+          console.log('🔄 Real-time reservation change:', payload);
           fetchData();
         }
       )
-      .subscribe();
-
-    const eventBlocksChannel = supabase
-      .channel("event-blocks-changes")
       .on(
         "postgres_changes",
         {
@@ -142,15 +139,15 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
           schema: "public",
           table: "event_blocks",
         },
-        () => {
+        (payload) => {
+          console.log('🔄 Real-time event_blocks change:', payload);
           fetchData();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(reservationsChannel);
-      supabase.removeChannel(eventBlocksChannel);
+      supabase.removeChannel(realtimeChannel);
     };
   }, [validSelectedDate]);
 
