@@ -33,7 +33,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     phone: '',
     email: '',
     equipmentCode: selectedEquipment || '',
-    reservationDate: new Date().toISOString().split('T')[0],
+    reservationDate: new Date().toLocaleDateString('en-CA'), // Usar fecha local
     startTime: '',
     hours: 1
   });
@@ -95,7 +95,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
     if (!startTime) return 12;
     
     const [startHour] = startTime.split(':').map(Number);
-    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === new Date().toLocaleDateString('en-CA');
     const currentHour = new Date().getHours();
     
     // If it's today and the time has already passed, return 0
@@ -227,7 +227,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
       });
       
       // Filtrar slots disponibles: remover ocupados (reservas y eventos), fuera de horario y horas pasadas si es hoy
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = new Date().toLocaleDateString('en-CA'); // Usar fecha local en formato YYYY-MM-DD
       const currentHour = new Date().getHours();
       const availableSlots = allSlots.filter(slot => {
         const [slotHour] = slot.split(':').map(Number);
@@ -324,7 +324,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
 
   // Actualizar horarios automáticamente cada minuto cuando la fecha es hoy
   useEffect(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toLocaleDateString('en-CA');
     if (formData.reservationDate !== todayStr || !formData.equipmentCode) return;
 
     const interval = setInterval(() => {
@@ -418,7 +418,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
         phone: '',
         email: '',
         equipmentCode: '',
-        reservationDate: new Date().toISOString().split('T')[0],
+        reservationDate: new Date().toLocaleDateString('en-CA'),
         startTime: '',
         hours: 1
       });
@@ -533,7 +533,7 @@ const ReservationForm = ({ equipment, selectedEquipment, onSubmit, existingReser
                   id="reservationDate"
                   type="date"
                   value={formData.reservationDate}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toLocaleDateString('en-CA')}
                   onChange={(e) => {
                     const selectedDate = e.target.value;
                     const isClosedDay = closedDays.some(cd => cd.date === selectedDate);

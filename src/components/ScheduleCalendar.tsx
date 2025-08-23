@@ -43,10 +43,10 @@ export function ScheduleCalendar({ selectedDate }: ScheduleCalendarProps) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Permitir fechas desde hoy hacia adelante (sin límite artificial)
+  // Permitir fechas desde hoy hacia adelante (usando hora local)
   const today = startOfDay(new Date());
   
-  // Solo corregir si la fecha es anterior a hoy
+  // Solo corregir si la fecha es anterior a hoy (usando fecha local)
   const validSelectedDate = isBefore(selectedDate, today) 
     ? today 
     : selectedDate;
