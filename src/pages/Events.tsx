@@ -26,6 +26,8 @@ interface Event {
   start_time?: string;
   end_time?: string;
   external_link?: string;
+  max_groups?: number;
+  participants_per_group?: number;
 }
 
 interface Registration {
@@ -156,7 +158,9 @@ const Events = () => {
           is_group_event: eventData.is_group_event || false,
           max_participants: eventData.max_participants || null,
           status: eventData.status || 'active',
-          external_link: eventData.external_link || null
+          external_link: eventData.external_link || null,
+          max_groups: eventData.max_groups || null,
+          participants_per_group: eventData.participants_per_group || null
         }])
         .select();
 

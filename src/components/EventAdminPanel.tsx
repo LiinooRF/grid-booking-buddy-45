@@ -19,6 +19,9 @@ interface Event {
   is_group_event: boolean;
   max_participants?: number;
   status: 'active' | 'inactive' | 'completed';
+  external_link?: string;
+  max_groups?: number;
+  participants_per_group?: number;
 }
 
 interface Registration {
@@ -160,52 +163,130 @@ export default function EventAdminPanel({
         <TabsContent value="events" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Eventos</CardTitle>
+              <CardTitle>Gestión de Eventos</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {events.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell className="font-medium">{event.title}</TableCell>
-                      <TableCell>
-                        {format(new Date(event.event_date), "PPP", { locale: es })}
-                      </TableCell>
-                      <TableCell>
-                        {event.is_group_event ? 'Grupal' : 'Individual'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(event.status)}>
-                          {event.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => onDeleteEvent(event.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+              <div className="space-y-6">
+                {events.map((event) => (
+                  <Card key={event.id} className="border-l-4 border-l-primary">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Información Principal */}
+                        <div className="lg:col-span-2 space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-2">
+                              <h3 className="text-xl font-semibold">{event.title}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(event.event_date), "PPPP", { locale: es })}
+                              </p>
+                            </div>
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status === 'active' ? 'Activo' : event.status === 'inactive' ? 'Inactivo' : 'Completado'}
+                            </Badge>
+                          </div>
+                          
+                          {/* Descripción */}
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-sm">Descripción del Evento</h4>
+                            <div className="bg-muted/50 p-3 rounded-md">
+                              <p className="text-sm text-muted-foreground">
+                                {event.description || 'Sin descripción'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Enlace Externo */}
+                          {event.external_link && (
+                            <div className="space-y-2">
+                              <h4 className="font-medium text-sm">Enlace de Inscripción</h4>
+                              <div className="bg-muted/50 p-3 rounded-md">
+                                <a 
+                                  href={event.external_link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {event.external_link}
+                                </a>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+
+                        {/* Información del Evento y Acciones */}
+                        <div className="space-y-4">
+                          <Card className="bg-muted/30">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm">Detalles del Evento</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Tipo:</span>
+                                <span className="font-medium">
+                                  {event.is_group_event ? 'Evento Grupal' : 'Evento Individual'}
+                                </span>
+                              </div>
+                              
+                              {event.is_group_event ? (
+                                <>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Participantes por grupo:</span>
+                                    <span className="font-medium">
+                                      {event.participants_per_group || 'No definido'}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Máximo de grupos:</span>
+                                    <span className="font-medium">
+                                      {event.max_groups || 'No definido'}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Total participantes:</span>
+                                    <span className="font-medium">
+                                      {event.max_participants || 'No definido'}
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Máximo participantes:</span>
+                                  <span className="font-medium">
+                                    {event.max_participants || 'No definido'}
+                                  </span>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Acciones */}
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Editar
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => onDeleteEvent(event.id)}
+                              className="flex-1"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {events.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay eventos creados todavía.
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

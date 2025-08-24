@@ -165,10 +165,13 @@ export type Database = {
           created_at: string
           description: string | null
           event_date: string
+          external_link: string | null
           id: string
           image_url: string | null
           is_group_event: boolean
+          max_groups: number | null
           max_participants: number | null
+          participants_per_group: number | null
           status: string
           title: string
           updated_at: string
@@ -177,10 +180,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           event_date: string
+          external_link?: string | null
           id?: string
           image_url?: string | null
           is_group_event?: boolean
+          max_groups?: number | null
           max_participants?: number | null
+          participants_per_group?: number | null
           status?: string
           title: string
           updated_at?: string
@@ -189,10 +195,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           event_date?: string
+          external_link?: string | null
           id?: string
           image_url?: string | null
           is_group_event?: boolean
+          max_groups?: number | null
           max_participants?: number | null
+          participants_per_group?: number | null
           status?: string
           title?: string
           updated_at?: string

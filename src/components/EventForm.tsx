@@ -22,6 +22,8 @@ interface Event {
   max_participants?: number;
   status: 'active' | 'inactive' | 'completed';
   external_link?: string;
+  max_groups?: number;
+  participants_per_group?: number;
 }
 
 interface EventFormProps {
@@ -41,6 +43,8 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
   const [maxParticipants, setMaxParticipants] = useState(initialData?.max_participants?.toString() || '');
   const [status, setStatus] = useState(initialData?.status || 'active');
   const [externalLink, setExternalLink] = useState(initialData?.external_link || '');
+  const [maxGroups, setMaxGroups] = useState(initialData?.max_groups?.toString() || '');
+  const [participantsPerGroup, setParticipantsPerGroup] = useState(initialData?.participants_per_group?.toString() || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +61,9 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       is_group_event: isGroupEvent,
       max_participants: maxParticipants ? parseInt(maxParticipants) : undefined,
       status: status as 'active' | 'inactive' | 'completed',
-      external_link: externalLink.trim() || undefined
+      external_link: externalLink.trim() || undefined,
+      max_groups: maxGroups ? parseInt(maxGroups) : undefined,
+      participants_per_group: participantsPerGroup ? parseInt(participantsPerGroup) : undefined
     };
 
     onSubmit(eventData);
@@ -72,6 +78,8 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       setMaxParticipants('');
       setStatus('active');
       setExternalLink('');
+      setMaxGroups('');
+      setParticipantsPerGroup('');
     }
   };
 
@@ -84,124 +92,191 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título del Evento *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej: Torneo de FIFA 2024"
-                required
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Información Básica */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Información Básica</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Título del Evento *</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ej: Torneo de FIFA 2024"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Fecha del Evento *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !eventDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {eventDate ? format(eventDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={eventDate}
+                      onSelect={setEventDate}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Fecha del Evento *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !eventDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {eventDate ? format(eventDate, "PPP", { locale: es }) : "Seleccionar fecha"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={eventDate}
-                    onSelect={setEventDate}
-                    initialFocus
-                    locale={es}
+              <Label htmlFor="description">Descripción del Evento</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe los detalles del evento, reglas, premios, etc..."
+                rows={4}
+              />
+            </div>
+          </div>
+
+          {/* URLs y Enlaces */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Enlaces del Evento</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="imageUrl">URL de la Imagen</Label>
+                <Input
+                  id="imageUrl"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  type="url"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="externalLink">Enlace de Inscripción</Label>
+                <Input
+                  id="externalLink"
+                  value={externalLink}
+                  onChange={(e) => setExternalLink(e.target.value)}
+                  placeholder="https://forms.google.com/..."
+                  type="url"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Configuración de Participantes */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Configuración de Participantes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isGroupEvent"
+                    checked={isGroupEvent}
+                    onChange={(e) => setIsGroupEvent(e.target.checked)}
+                    className="rounded"
                   />
-                </PopoverContent>
-              </Popover>
+                  <Label htmlFor="isGroupEvent">Evento Grupal</Label>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="status">Estado del Evento</Label>
+                <Select value={status} onValueChange={(value: 'active' | 'inactive' | 'completed') => setStatus(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="inactive">Inactivo</SelectItem>
+                    <SelectItem value="completed">Completado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            {/* Lógica condicional para tipo de evento */}
+            {isGroupEvent ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="participantsPerGroup">Participantes por Grupo</Label>
+                  <Input
+                    id="participantsPerGroup"
+                    type="number"
+                    value={participantsPerGroup}
+                    onChange={(e) => {
+                      setParticipantsPerGroup(e.target.value);
+                      // Auto-calcular max_participants si se tienen ambos valores
+                      if (maxGroups && e.target.value) {
+                        setMaxParticipants((parseInt(maxGroups) * parseInt(e.target.value)).toString());
+                      }
+                    }}
+                    placeholder="ej: 5"
+                    min="1"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="maxGroups">Máximo de Grupos</Label>
+                  <Input
+                    id="maxGroups"
+                    type="number"
+                    value={maxGroups}
+                    onChange={(e) => {
+                      setMaxGroups(e.target.value);
+                      // Auto-calcular max_participants si se tienen ambos valores
+                      if (participantsPerGroup && e.target.value) {
+                        setMaxParticipants((parseInt(participantsPerGroup) * parseInt(e.target.value)).toString());
+                      }
+                    }}
+                    placeholder="ej: 8"
+                    min="1"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="maxParticipants">Total Participantes</Label>
+                  <Input
+                    id="maxParticipants"
+                    type="number"
+                    value={maxParticipants}
+                    onChange={(e) => setMaxParticipants(e.target.value)}
+                    placeholder="Calculado automáticamente"
+                    min="1"
+                    className="bg-muted/50"
+                    readOnly
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="maxParticipants">Máximo de Participantes</Label>
+                <Input
+                  id="maxParticipants"
+                  type="number"
+                  value={maxParticipants}
+                  onChange={(e) => setMaxParticipants(e.target.value)}
+                  placeholder="Número máximo de participantes individuales"
+                  min="1"
+                />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe los detalles del evento..."
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">URL de la Imagen</Label>
-              <Input
-                id="imageUrl"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://ejemplo.com/imagen.jpg"
-                type="url"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="externalLink">Enlace de Inscripción</Label>
-              <Input
-                id="externalLink"
-                value={externalLink}
-                onChange={(e) => setExternalLink(e.target.value)}
-                placeholder="https://forms.google.com/..."
-                type="url"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="eventType">Tipo de Evento</Label>
-              <Select value={isGroupEvent.toString()} onValueChange={(value) => setIsGroupEvent(value === 'true')}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="false">Individual</SelectItem>
-                  <SelectItem value="true">Grupal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="maxParticipants">Máximo Participantes</Label>
-              <Input
-                id="maxParticipants"
-                type="number"
-                value={maxParticipants}
-                onChange={(e) => setMaxParticipants(e.target.value)}
-                placeholder="Ej: 20"
-                min="1"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Estado</Label>
-              <Select value={status} onValueChange={(value) => setStatus(value as 'active' | 'inactive' | 'completed')}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="inactive">Inactivo</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3">
             {isEditing ? 'Actualizar Evento' : 'Crear Evento'}
           </Button>
         </form>
