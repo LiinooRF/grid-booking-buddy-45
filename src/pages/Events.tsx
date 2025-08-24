@@ -25,6 +25,7 @@ interface Event {
   participant_count?: number;
   start_time?: string;
   end_time?: string;
+  external_link?: string;
 }
 
 interface Registration {
@@ -154,7 +155,8 @@ const Events = () => {
           image_url: eventData.image_url || null,
           is_group_event: eventData.is_group_event || false,
           max_participants: eventData.max_participants || null,
-          status: eventData.status || 'active'
+          status: eventData.status || 'active',
+          external_link: eventData.external_link || null
         }])
         .select();
 
@@ -404,73 +406,45 @@ const Events = () => {
                     </div>
                   </div>
 
-                  {/* Registration Form */}
+                  {/* External Link / Registration */}
                   <div>
                     <Card className="bg-gaming-surface/50 border-primary/30">
                       <CardHeader>
                         <CardTitle className="text-primary flex items-center gap-2">
                           <Trophy className="h-5 w-5" />
-                          Inscríbete Ahora
+                          Participar en el Evento
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         {selectedEvent.status === 'active' ? (
-                          <form onSubmit={handleRegistrationSubmit} className="space-y-4">
-                            <div>
-                              <Label className="text-gray-300 font-medium">Nombre Completo</Label>
-                              <Input
-                                value={registrationData.participant_name}
-                                onChange={(e) => setRegistrationData({...registrationData, participant_name: e.target.value})}
-                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                placeholder="Tu nombre completo"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label className="text-gray-300 font-medium">Teléfono</Label>
-                              <Input
-                                type="tel"
-                                value={registrationData.participant_phone}
-                                onChange={(e) => setRegistrationData({...registrationData, participant_phone: e.target.value})}
-                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                placeholder="+56 9 1234 5678"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label className="text-gray-300 font-medium">Email</Label>
-                              <Input
-                                type="email"
-                                value={registrationData.participant_email}
-                                onChange={(e) => setRegistrationData({...registrationData, participant_email: e.target.value})}
-                                className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                placeholder="tu@email.com"
-                                required
-                              />
-                            </div>
-                            
-                            {selectedEvent.is_group_event && (
-                              <div>
-                                <Label className="text-gray-300 font-medium">Nombre del Equipo</Label>
-                                <Input
-                                  value={registrationData.group_name}
-                                  onChange={(e) => setRegistrationData({...registrationData, group_name: e.target.value})}
-                                  className="bg-gaming-surface border-primary/30 text-white placeholder-gray-500 focus:border-primary"
-                                  placeholder="Nombre de tu equipo"
-                                />
-                              </div>
-                            )}
+                          <div className="space-y-4 text-center">
+                            <p className="text-gray-300">
+                              Haz clic en el botón para inscribirte en el evento
+                            </p>
                             
                             <Button 
-                              type="submit" 
+                              onClick={() => {
+                                if (selectedEvent.external_link) {
+                                  window.open(selectedEvent.external_link, '_blank');
+                                } else {
+                                  toast({
+                                    title: "Información",
+                                    description: "Enlace de inscripción próximamente disponible",
+                                  });
+                                }
+                              }}
                               className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-105"
                             >
                               <Trophy className="h-4 w-4 mr-2" />
                               INSCRIBIRSE AL EVENTO
                             </Button>
-                          </form>
+                            
+                            {selectedEvent.external_link && (
+                              <p className="text-xs text-gray-400">
+                                Se abrirá en una nueva ventana
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <div className="text-center py-8">
                             <p className="text-gray-400">Este evento no está disponible para inscripciones.</p>

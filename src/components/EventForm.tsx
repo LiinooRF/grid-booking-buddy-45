@@ -21,6 +21,7 @@ interface Event {
   is_group_event: boolean;
   max_participants?: number;
   status: 'active' | 'inactive' | 'completed';
+  external_link?: string;
 }
 
 interface EventFormProps {
@@ -39,6 +40,7 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
   const [isGroupEvent, setIsGroupEvent] = useState(initialData?.is_group_event || false);
   const [maxParticipants, setMaxParticipants] = useState(initialData?.max_participants?.toString() || '');
   const [status, setStatus] = useState(initialData?.status || 'active');
+  const [externalLink, setExternalLink] = useState(initialData?.external_link || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +56,8 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       event_date: eventDate.toISOString().split('T')[0],
       is_group_event: isGroupEvent,
       max_participants: maxParticipants ? parseInt(maxParticipants) : undefined,
-      status: status as 'active' | 'inactive' | 'completed'
+      status: status as 'active' | 'inactive' | 'completed',
+      external_link: externalLink.trim() || undefined
     };
 
     onSubmit(eventData);
@@ -68,6 +71,7 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       setIsGroupEvent(false);
       setMaxParticipants('');
       setStatus('active');
+      setExternalLink('');
     }
   };
 
@@ -132,15 +136,28 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL de la Imagen</Label>
-            <Input
-              id="imageUrl"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-              type="url"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">URL de la Imagen</Label>
+              <Input
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://ejemplo.com/imagen.jpg"
+                type="url"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="externalLink">Enlace de Inscripción</Label>
+              <Input
+                id="externalLink"
+                value={externalLink}
+                onChange={(e) => setExternalLink(e.target.value)}
+                placeholder="https://forms.google.com/..."
+                type="url"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -1038,7 +1038,7 @@ const Index = () => {
                   >
                     Hoy
                   </Button>
-                  {Array.from({ length: 5 }, (_, i) => i + 1).map((days) => {
+                  {Array.from({ length: 7 }, (_, i) => i + 1).map((days) => {
                     const futureDate = new Date();
                     futureDate.setDate(futureDate.getDate() + days);
                     return (

@@ -70,73 +70,77 @@ export default function EventsList({ events, onEventSelect, selectedEventId }: E
           }`}
           onClick={() => onEventSelect(event)}
         >
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <CardTitle className="text-lg">{event.title}</CardTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {format(new Date(event.event_date), "PPP", { locale: es })}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {event.is_group_event ? (
-                      <Users className="h-4 w-4" />
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
-                    {event.is_group_event ? 'Grupal' : 'Individual'}
-                  </div>
-                  {event.max_participants && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      Max: {event.max_participants}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <Badge className={getStatusColor(event.status)}>
-                {getStatusText(event.status)}
-              </Badge>
-            </div>
-          </CardHeader>
-          
-          {(event.description || event.image_url) && (
-            <CardContent>
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Event Image */}
               {event.image_url && (
-                <div className="mb-3">
+                <div className="lg:w-1/3">
                   <img 
                     src={event.image_url} 
                     alt={event.title}
-                    className="w-full h-48 object-cover rounded-md"
+                    className="w-full h-48 lg:h-full object-cover rounded-lg"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 </div>
               )}
-              {event.description && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  {event.description}
-                </p>
-              )}
               
-              <div className="flex justify-between items-center">
-                {event.participant_count !== undefined && (
-                  <span className="text-sm text-muted-foreground">
-                    {event.participant_count} inscrito{event.participant_count !== 1 ? 's' : ''}
-                  </span>
-                )}
+              {/* Event Content */}
+              <div className={`flex-1 ${!event.image_url ? 'w-full' : ''}`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <CardTitle className="text-xl mb-2">{event.title}</CardTitle>
+                    {event.description && (
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {event.description}
+                      </p>
+                    )}
+                  </div>
+                  <Badge className={getStatusColor(event.status)}>
+                    {getStatusText(event.status)}
+                  </Badge>
+                </div>
+                
+                {/* Event Details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{format(new Date(event.event_date), "PPP", { locale: es })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    {event.is_group_event ? (
+                      <Users className="h-4 w-4" />
+                    ) : (
+                      <User className="h-4 w-4" />
+                    )}
+                    <span>{event.is_group_event ? 'Evento Grupal' : 'Evento Individual'}</span>
+                  </div>
+                  {event.max_participants && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span>Máximo: {event.max_participants} participantes</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-4 w-4" />
+                    <span>{event.participant_count || 0} inscritos</span>
+                  </div>
+                </div>
+                
+                {/* Action Button */}
                 <Button 
                   variant={event.status === 'active' ? 'default' : 'secondary'}
                   size="sm"
                   disabled={event.status !== 'active'}
+                  onClick={() => onEventSelect(event)}
+                  className="w-full sm:w-auto"
                 >
-                  {event.status === 'active' ? 'Inscribirse' : 'No Disponible'}
+                  {event.status === 'active' ? 'Ver Detalles' : 'No Disponible'}
                 </Button>
               </div>
-            </CardContent>
-          )}
+            </div>
+          </CardContent>
         </Card>
       ))}
     </div>
