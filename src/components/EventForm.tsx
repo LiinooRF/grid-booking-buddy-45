@@ -57,7 +57,7 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       title: title.trim(),
       description: description.trim(),
       image_url: imageUrl.trim() || undefined,
-      event_date: eventDate.toISOString().split('T')[0],
+      event_date: eventDate ? eventDate.toISOString().split('T')[0] : '',
       is_group_event: isGroupEvent,
       max_participants: maxParticipants ? parseInt(maxParticipants) : undefined,
       status: status as 'active' | 'inactive' | 'completed',

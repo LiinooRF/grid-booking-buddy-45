@@ -22,7 +22,7 @@ export function SiteHeader({ current }: SiteHeaderProps) {
             className="flex items-center gap-2 md:gap-4 hover-scale transition-transform"
           >
             <img
-              src="/lovable-uploads/93081e9c-4ed3-407c-8d8b-2c07bb625826.png"
+              src="/lovable-uploads/grid-logo.png"
               alt="GRID Logo"
               className="h-10 w-auto md:h-12 lg:h-14"
             />

@@ -157,7 +157,6 @@ export default function EventAdminPanel({
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList>
           <TabsTrigger value="events">Gestión de Eventos</TabsTrigger>
-          <TabsTrigger value="registrations">Inscripciones</TabsTrigger>
         </TabsList>
 
         <TabsContent value="events" className="space-y-4">
@@ -261,15 +260,11 @@ export default function EventAdminPanel({
 
                           {/* Acciones */}
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1">
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Editar
-                            </Button>
                             <Button 
-                              variant="outline" 
+                              variant="destructive" 
                               size="sm"
                               onClick={() => onDeleteEvent(event.id)}
-                              className="flex-1"
+                              className="w-full"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Eliminar
@@ -291,86 +286,6 @@ export default function EventAdminPanel({
           </Card>
         </TabsContent>
 
-        <TabsContent value="registrations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Inscripciones
-                <div className="flex gap-2">
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-1 border rounded-md text-sm"
-                  >
-                    <option value="all">Todas</option>
-                    <option value="pending">Pendientes</option>
-                    <option value="confirmed">Confirmadas</option>
-                    <option value="cancelled">Canceladas</option>
-                  </select>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Evento</TableHead>
-                    <TableHead>Participante</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Teléfono</TableHead>
-                    <TableHead>Grupo</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRegistrations.map((registration) => (
-                    <TableRow key={registration.id}>
-                      <TableCell className="font-medium">
-                        {registration.event?.title || 'N/A'}
-                      </TableCell>
-                      <TableCell>{registration.participant_name}</TableCell>
-                      <TableCell>{registration.participant_email}</TableCell>
-                      <TableCell>{registration.participant_phone}</TableCell>
-                      <TableCell>{registration.group_name || '-'}</TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(registration.status)}>
-                          {registration.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(registration.created_at), "PPP", { locale: es })}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          {registration.status === 'pending' && (
-                            <>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => onUpdateRegistrationStatus(registration.id, 'confirmed')}
-                              >
-                                Confirmar
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => onUpdateRegistrationStatus(registration.id, 'cancelled')}
-                              >
-                                Cancelar
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

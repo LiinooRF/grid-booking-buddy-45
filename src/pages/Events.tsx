@@ -469,7 +469,7 @@ const Events = () => {
             {/* Gaming Grid Banner */}
             <div className="relative h-80 rounded-2xl overflow-hidden">
               <img
-                src="/lovable-uploads/a42b2dbc-cc15-498a-b267-02f4922cce94.png"
+                src="/lovable-uploads/events-cover.png"
                 alt="Gaming Grid"
                 className="w-full h-full object-cover"
               />
