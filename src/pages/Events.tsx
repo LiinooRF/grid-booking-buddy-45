@@ -318,123 +318,185 @@ const Events = () => {
           </Button>
         </div>
 
-        {/* Selected Event Banner */}
+        {/* Enhanced Selected Event Banner */}
         {selectedEvent && (
           <div className="mb-8 space-y-6 animate-fade-in">
-            {/* Event Banner */}
+            {/* Event Banner with improved design */}
             <div 
-              className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center"
+              className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center group"
               style={{
                 backgroundImage: selectedEvent.image_url ? `url(${selectedEvent.image_url})` : undefined
               }}
             >
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+              {/* Enhanced Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-gaming-accent/10" />
               
               {/* Back Button */}
               <Button 
                 variant="ghost"
                 onClick={() => setSelectedEvent(null)}
-                className="absolute top-4 left-4 text-white hover:text-primary hover:bg-black/30 z-10"
+                className="absolute top-6 left-6 text-white hover:text-primary hover:bg-black/40 z-10 backdrop-blur-sm border border-white/20 hover:border-primary/50 transition-all duration-200"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Volver a eventos
               </Button>
               
-              {/* Content */}
+              {/* Enhanced Content */}
               <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
-                <div className="space-y-4">
-                  <h1 className="text-4xl md:text-6xl font-black text-primary animate-scale-in">
-                    {selectedEvent.title.toUpperCase()}
-                  </h1>
-                  <div className="bg-primary text-black px-6 py-2 rounded-full font-bold text-lg animate-fade-in">
+                <div className="space-y-6 max-w-4xl">
+                  <div className="relative">
+                    <h1 className="text-4xl md:text-7xl font-black text-white animate-scale-in leading-tight">
+                      {selectedEvent.title.toUpperCase()}
+                    </h1>
+                    <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-gaming-accent/20 blur-xl -z-10 rounded-lg"></div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-primary via-primary to-gaming-accent text-black px-8 py-3 rounded-full font-bold text-lg animate-fade-in shadow-lg inline-block">
                     ¡ÚNETE AL EVENTO!
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-300">
+                    <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>{format(new Date(selectedEvent.event_date), "dd 'de' MMMM", { locale: es })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>{selectedEvent.start_time || '19:00'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>{selectedEvent.participant_count || 0} inscritos</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Status Badge */}
-              <div className="absolute top-4 right-4">
+              {/* Enhanced Status Badge */}
+              <div className="absolute top-6 right-6">
                 <Badge 
-                  className={`px-3 py-1 text-sm font-bold ${
+                  className={`px-4 py-2 text-sm font-bold shadow-xl backdrop-blur-sm ${
                     selectedEvent.status === 'active' 
-                      ? 'bg-primary text-black' 
-                      : 'bg-gray-500 text-white'
+                      ? 'bg-primary text-black shadow-primary/50' 
+                      : 'bg-gray-500/80 text-white'
                   }`}
                 >
                   {selectedEvent.status === 'active' ? 'ACTIVO' : 'INACTIVO'}
                 </Badge>
               </div>
+              
+              {/* Decorative Elements */}
+              <div className="absolute bottom-6 left-6 w-12 h-12 border-2 border-primary/40 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-6 right-6 w-8 h-8 border-2 border-gaming-accent/40 rounded-full animate-pulse"></div>
             </div>
 
-            {/* Event Details */}
-            <Card className="bg-gaming-surface/80 border-primary/30">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Enhanced Event Details */}
+            <Card className="bg-gaming-surface/90 border-primary/40 shadow-2xl relative overflow-hidden">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-gaming-accent/5"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl"></div>
+              
+              <CardContent className="p-8 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {/* Event Info */}
-                  <div className="md:col-span-2 space-y-4">
-                    <h2 className="text-2xl font-bold text-white">Información del Evento</h2>
+                  <div className="md:col-span-2 space-y-6">
+                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                      <Trophy className="h-8 w-8 text-primary" />
+                      Información del Evento
+                    </h2>
                     
-                    {/* Descripción del evento */}
+                    {/* Descripción del evento mejorada */}
                     {selectedEvent.description && (
-                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 mb-4">
-                        <h3 className="text-lg font-semibold text-primary mb-2">Descripción</h3>
-                        <p className="text-gray-300 leading-relaxed">{selectedEvent.description}</p>
+                      <div className="bg-gradient-to-r from-gaming-surface/80 to-gaming-surface/40 border border-primary/30 rounded-xl p-6 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-gaming-accent"></div>
+                        <h3 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                          Descripción del Evento
+                        </h3>
+                        <p className="text-gray-300 leading-relaxed text-lg">{selectedEvent.description}</p>
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-3 text-gray-300">
-                        <Calendar className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="font-medium">Fecha</p>
-                          <p>{format(new Date(selectedEvent.event_date), "PPPP", { locale: es })}</p>
+                    {/* Detalles mejorados */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
+                        <div className="flex items-center gap-3 text-gray-300">
+                          <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">Fecha del Evento</p>
+                            <p className="text-gray-400">{format(new Date(selectedEvent.event_date), "PPPP", { locale: es })}</p>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3 text-gray-300">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="font-medium">Horario</p>
-                          <p>{selectedEvent.start_time || '19:00'} - {selectedEvent.end_time || '23:00'}</p>
+                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
+                        <div className="flex items-center gap-3 text-gray-300">
+                          <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">Horario</p>
+                            <p className="text-gray-400">{selectedEvent.start_time || '19:00'} - {selectedEvent.end_time || '23:00'}</p>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3 text-gray-300">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="font-medium">Ubicación</p>
-                          <p>Gaming Grid</p>
+                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
+                        <div className="flex items-center gap-3 text-gray-300">
+                          <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <MapPin className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">Ubicación</p>
+                            <p className="text-gray-400">Gaming Grid Arena</p>
+                          </div>
                         </div>
                       </div>
                       
                       {selectedEvent.max_participants && (
-                        <div className="flex items-center gap-3 text-gray-300">
-                          <Users className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">Participantes</p>
-                            <p>{selectedEvent.participant_count || 0}/{selectedEvent.max_participants}</p>
+                        <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
+                          <div className="flex items-center gap-3 text-gray-300">
+                            <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                              <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-white">Participantes</p>
+                              <p className="text-gray-400">{selectedEvent.participant_count || 0}/{selectedEvent.max_participants}</p>
+                            </div>
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* External Link / Registration */}
+                  {/* Enhanced Registration Section */}
                   <div>
-                    <Card className="bg-gaming-surface/50 border-primary/30">
-                      <CardHeader>
-                        <CardTitle className="text-primary flex items-center gap-2">
-                          <Trophy className="h-5 w-5" />
+                    <Card className="bg-gradient-to-br from-gaming-surface/80 to-gaming-surface/40 border-primary/40 shadow-xl relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-gaming-accent/10"></div>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-2xl"></div>
+                      
+                      <CardHeader className="relative z-10">
+                        <CardTitle className="text-primary flex items-center gap-3">
+                          <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <Trophy className="h-5 w-5 text-primary" />
+                          </div>
                           Participar en el Evento
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="relative z-10">
                         {selectedEvent.status === 'active' ? (
-                          <div className="space-y-4 text-center">
-                            <p className="text-gray-300">
-                              Haz clic en el botón para inscribirte en el evento
-                            </p>
+                          <div className="space-y-6 text-center">
+                            <div className="space-y-3">
+                              <p className="text-gray-300 text-lg">
+                                ¿Listo para la competencia?
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                Haz clic en el botón para inscribirte
+                              </p>
+                            </div>
                             
                             <Button 
                               onClick={() => {
@@ -447,21 +509,27 @@ const Events = () => {
                                   });
                                 }
                               }}
-                              className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-105"
+                              className="w-full bg-gradient-to-r from-primary to-gaming-accent hover:from-primary/90 hover:to-gaming-accent/90 text-black font-bold py-4 text-lg shadow-xl shadow-primary/30 transition-all duration-200 hover:scale-105 relative overflow-hidden group"
                             >
-                              <Trophy className="h-4 w-4 mr-2" />
-                              INSCRIBIRSE AL EVENTO
+                              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                              <Trophy className="h-5 w-5 mr-2" />
+                              INSCRIBIRSE AHORA
                             </Button>
                             
                             {selectedEvent.external_link && (
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
+                                <div className="w-1 h-1 bg-primary rounded-full"></div>
                                 Se abrirá en una nueva ventana
+                                <div className="w-1 h-1 bg-primary rounded-full"></div>
                               </p>
                             )}
                           </div>
                         ) : (
                           <div className="text-center py-8">
-                            <p className="text-gray-400">Este evento no está disponible para inscripciones.</p>
+                            <div className="w-16 h-16 bg-gray-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Trophy className="h-8 w-8 text-gray-500" />
+                            </div>
+                            <p className="text-gray-400 text-lg">Este evento no está disponible para inscripciones.</p>
                           </div>
                         )}
                       </CardContent>
@@ -476,30 +544,79 @@ const Events = () => {
         {/* Events Grid */}
         {!selectedEvent && (
           <div className="space-y-8">
-            {/* Gaming Grid Banner */}
-            <div className="relative h-80 rounded-2xl overflow-hidden">
+            {/* Gaming Grid Banner - Enhanced */}
+            <div className="relative h-96 rounded-2xl overflow-hidden group">
               <img
                 src="/lovable-uploads/events-cover.png"
-                alt="Gaming Grid"
-                className="w-full h-full object-cover"
+                alt="Gaming Grid Events"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-gaming-accent/10" />
+              
+              {/* Enhanced Content */}
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8">
+                <div className="space-y-6 animate-fade-in">
+                  <div className="relative">
+                    <h1 className="text-5xl md:text-7xl font-black text-white mb-4 animate-scale-in">
+                      EVENTOS <span className="text-primary">ÉPICOS</span>
+                    </h1>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-gaming-accent/20 blur-sm -z-10 rounded-lg"></div>
+                  </div>
+                  
+                  <p className="text-xl md:text-2xl text-gray-300 max-w-2xl leading-relaxed">
+                    Únete a la acción más intensa en Gaming Grid
+                  </p>
+                  
+                  <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      <span>Torneos Semanales</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gaming-accent rounded-full animate-pulse"></div>
+                      <span>Premios Increíbles</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      <span>Competencia Real</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 w-20 h-20 border border-primary/30 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-4 left-4 w-16 h-16 border border-gaming-accent/30 rounded-full animate-pulse"></div>
             </div>
 
-            <div className="text-center">
-              <p className="text-muted-foreground text-lg">Descubre los próximos eventos de Gaming Grid</p>
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-bold text-white">Próximos Eventos</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Descubre la próxima generación de competencias gaming. Cada evento es una oportunidad de demostrar tu habilidad.
+              </p>
             </div>
 
             {events.length === 0 ? (
-              <Card className="bg-gaming-surface/50 border-primary/20">
-                <CardContent className="p-12 text-center">
-                  <Trophy className="h-16 w-16 text-primary mx-auto mb-4 opacity-50" />
-                  <h3 className="text-2xl font-bold text-white mb-2">No hay eventos disponibles</h3>
-                  <p className="text-gray-400">¡Mantente atento para próximos eventos increíbles!</p>
+              <Card className="bg-gaming-surface/50 border-primary/20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-gaming-accent/5"></div>
+                <CardContent className="p-12 text-center relative z-10">
+                  <div className="relative">
+                    <Trophy className="h-20 w-20 text-primary mx-auto mb-6 opacity-50 animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-gaming-accent/20 blur-xl rounded-full"></div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-white mb-4">Eventos en Preparación</h3>
+                  <p className="text-gray-400 text-lg">¡Los eventos más épicos están por llegar! Mantente atento para experiencias gaming increíbles.</p>
+                  <div className="mt-6 flex justify-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gaming-accent rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map((event) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {events.map((event, index) => (
                   <Card 
                     key={event.id} 
                     className="overflow-hidden bg-gaming-surface/90 border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all group cursor-pointer hover-scale"
