@@ -24,6 +24,8 @@ interface Event {
   external_link?: string;
   max_groups?: number;
   participants_per_group?: number;
+  start_time?: string;
+  end_time?: string;
 }
 
 interface EventFormProps {
@@ -45,6 +47,8 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
   const [externalLink, setExternalLink] = useState(initialData?.external_link || '');
   const [maxGroups, setMaxGroups] = useState(initialData?.max_groups?.toString() || '');
   const [participantsPerGroup, setParticipantsPerGroup] = useState(initialData?.participants_per_group?.toString() || '');
+  const [startTime, setStartTime] = useState(initialData?.start_time || '19:00');
+  const [endTime, setEndTime] = useState(initialData?.end_time || '23:00');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +67,9 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       status: status as 'active' | 'inactive' | 'completed',
       external_link: externalLink.trim() || undefined,
       max_groups: maxGroups ? parseInt(maxGroups) : undefined,
-      participants_per_group: participantsPerGroup ? parseInt(participantsPerGroup) : undefined
+      participants_per_group: participantsPerGroup ? parseInt(participantsPerGroup) : undefined,
+      start_time: startTime,
+      end_time: endTime
     };
 
     onSubmit(eventData);
@@ -80,6 +86,8 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
       setExternalLink('');
       setMaxGroups('');
       setParticipantsPerGroup('');
+      setStartTime('19:00');
+      setEndTime('23:00');
     }
   };
 
@@ -174,7 +182,29 @@ export default function EventForm({ onSubmit, initialData, isEditing = false }: 
                 />
               </div>
             </div>
-          </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startTime">Hora de Inicio</Label>
+                <Input
+                  id="startTime"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="endTime">Hora de Finalización</Label>
+                <Input
+                  id="endTime"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
+            </div>
 
           {/* Configuración de Participantes */}
           <div className="space-y-4">

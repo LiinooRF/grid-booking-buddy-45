@@ -160,7 +160,9 @@ const Events = () => {
           status: eventData.status || 'active',
           external_link: eventData.external_link || null,
           max_groups: eventData.max_groups || null,
-          participants_per_group: eventData.participants_per_group || null
+          participants_per_group: eventData.participants_per_group || null,
+          start_time: eventData.start_time || null,
+          end_time: eventData.end_time || null
         }])
         .select();
 
@@ -346,7 +348,7 @@ const Events = () => {
                     {selectedEvent.title.toUpperCase()}
                   </h1>
                   <div className="bg-primary text-black px-6 py-2 rounded-full font-bold text-lg animate-fade-in">
-                    {selectedEvent.description || "¡ÚNETE AL EVENTO!"}
+                    ¡ÚNETE AL EVENTO!
                   </div>
                 </div>
               </div>
@@ -372,6 +374,14 @@ const Events = () => {
                   {/* Event Info */}
                   <div className="md:col-span-2 space-y-4">
                     <h2 className="text-2xl font-bold text-white">Información del Evento</h2>
+                    
+                    {/* Descripción del evento */}
+                    {selectedEvent.description && (
+                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-primary mb-2">Descripción</h3>
+                        <p className="text-gray-300 leading-relaxed">{selectedEvent.description}</p>
+                      </div>
+                    )}
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-3 text-gray-300">
