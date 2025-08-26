@@ -354,21 +354,26 @@ const Events = () => {
                     ¡ÚNETE AL EVENTO!
                   </div>
                   
-                   <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-300">
-                    <div className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-6 py-3">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-white">
+                   <div className="flex items-center justify-center gap-8 text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
+                        <Calendar className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-lg">
                           {((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(selectedEvent.event_date), "MMMM d", { locale: es }))}
-                        </span>
-                        <span className="text-xs text-gray-400">Fecha del evento</span>
+                        </p>
+                        <p className="text-gray-400 text-sm">Fecha del evento</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-6 py-3">
-                      <Clock className="h-5 w-5 text-primary" />
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-white">{selectedEvent.start_time || '19:00'}</span>
-                        <span className="text-xs text-gray-400">Hora de inicio</span>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
+                        <Clock className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-lg">{selectedEvent.start_time || '19:00'}</p>
+                        <p className="text-gray-400 text-sm">Hora de inicio</p>
                       </div>
                     </div>
                   </div>
@@ -613,13 +618,17 @@ const Events = () => {
                       <div className="relative">
                         {/* Date Badge */}
                         <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-primary text-black font-bold px-3 py-2 text-xs flex flex-col items-center leading-tight">
-                          <span className="text-sm font-black">
-                            {((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(event.event_date), "MMMM d", { locale: es }))}
-                          </span>
-                          <div className="w-full h-px bg-black/20 my-1"></div>
-                          <span className="text-xs font-semibold opacity-90">{event.start_time || '19:00'} hrs</span>
-                        </Badge>
+                        <div className="bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-center">
+                          <div className="text-primary font-black text-lg leading-none">
+                            {format(new Date(event.event_date), "dd", { locale: es })}
+                          </div>
+                          <div className="text-white text-xs font-semibold uppercase tracking-wide">
+                            {format(new Date(event.event_date), "MMM", { locale: es })}
+                          </div>
+                          <div className="text-gray-300 text-xs mt-1">
+                            {event.start_time || '19:00'}
+                          </div>
+                        </div>
                         </div>
 
                         {/* Status Badge */}
