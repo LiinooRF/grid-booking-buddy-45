@@ -25,6 +25,9 @@ export function SiteHeader({ current }: SiteHeaderProps) {
               src="/lovable-uploads/93081e9c-4ed3-407c-8d8b-2c07bb625826.png"
               alt="GRID Logo"
               className="h-10 w-auto md:h-12 lg:h-14"
+              onError={(e) => {
+                e.currentTarget.src = "https://media.discordapp.net/attachments/1400553982396469351/1408557214611931219/G_-_1_-_Edited.png?ex=68ab7e21&is=68aa2ca1&hm=fd38c6929349978c67ade13644af734fe73cba3cc89c58bc98139774107f40b0&=&format=webp&quality=lossless";
+              }}
             />
             
             <div className="hidden xs:block">

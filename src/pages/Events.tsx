@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Users, Settings, Clock, Trophy, MapPin, Plus, ArrowLeft } from "lucide-react";
+import { Calendar, Users, Settings, Clock, Trophy, MapPin, Plus, ArrowLeft, MessageCircle, Mail } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import EventForm from "@/components/EventForm";
@@ -160,9 +160,7 @@ const Events = () => {
           status: eventData.status || 'active',
           external_link: eventData.external_link || null,
           max_groups: eventData.max_groups || null,
-          participants_per_group: eventData.participants_per_group || null,
-          start_time: eventData.start_time || null,
-          end_time: eventData.end_time || null
+          participants_per_group: eventData.participants_per_group || null
         }])
         .select();
 
@@ -359,15 +357,11 @@ const Events = () => {
                   <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-300">
                     <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
                       <Calendar className="h-4 w-4 text-primary" />
-                      <span>{format(new Date(selectedEvent.event_date), "dd 'de' MMMM", { locale: es })}</span>
+                      <span>{((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(selectedEvent.event_date), "MMMM d", { locale: es }))}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
                       <Clock className="h-4 w-4 text-primary" />
                       <span>{selectedEvent.start_time || '19:00'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
-                      <Users className="h-4 w-4 text-primary" />
-                      <span>{selectedEvent.participant_count || 0} inscritos</span>
                     </div>
                   </div>
                 </div>
@@ -427,7 +421,7 @@ const Events = () => {
                           </div>
                           <div>
                             <p className="font-medium text-white">Fecha del Evento</p>
-                            <p className="text-gray-400">{format(new Date(selectedEvent.event_date), "PPPP", { locale: es })}</p>
+                            <p className="text-gray-400">{((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(selectedEvent.event_date), "MMMM d, yyyy", { locale: es }))}</p>
                           </div>
                         </div>
                       </div>
@@ -451,24 +445,11 @@ const Events = () => {
                           </div>
                           <div>
                             <p className="font-medium text-white">Ubicación</p>
-                            <p className="text-gray-400">Gaming Grid Arena</p>
+                            <p className="text-gray-400">Gaming Grid</p>
                           </div>
                         </div>
                       </div>
                       
-                      {selectedEvent.max_participants && (
-                        <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
-                          <div className="flex items-center gap-3 text-gray-300">
-                            <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                              <Users className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-white">Participantes</p>
-                              <p className="text-gray-400">{selectedEvent.participant_count || 0}/{selectedEvent.max_participants}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -550,6 +531,9 @@ const Events = () => {
                 src="/lovable-uploads/events-cover.png"
                 alt="Gaming Grid Events"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  e.currentTarget.src = "https://media.discordapp.net/attachments/1400553982396469351/1409016147214336021/G.png?ex=68abd80b&is=68aa868b&hm=f14c7c6f380dcb0bc6f26e2855c71d9640d89ce18b3cea1908e01abd51ff9828&=&format=webp&quality=lossless";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-gaming-accent/10" />
@@ -569,10 +553,6 @@ const Events = () => {
                   </p>
                   
                   <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                      <span>Torneos Semanales</span>
-                    </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-gaming-accent rounded-full animate-pulse"></div>
                       <span>Premios Increíbles</span>
@@ -597,7 +577,6 @@ const Events = () => {
               </p>
             </div>
 
-            {events.length === 0 ? (
               <Card className="bg-gaming-surface/50 border-primary/20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-gaming-accent/5"></div>
                 <CardContent className="p-12 text-center relative z-10">
@@ -614,91 +593,85 @@ const Events = () => {
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {events.map((event, index) => (
-                  <Card 
-                    key={event.id} 
-                    className="overflow-hidden bg-gaming-surface/90 border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all group cursor-pointer hover-scale"
-                    onClick={() => setSelectedEvent(event)}
-                  >
-                    <div className="relative">
-                      {/* Date Badge */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-primary text-black font-bold px-3 py-1 text-sm">
-                          {format(new Date(event.event_date), "dd MMM", { locale: es }).toUpperCase()}
-                          <br />
-                          <span className="text-xs">{event.start_time || '19:00'} hrs</span>
-                        </Badge>
-                      </div>
 
-                      {/* Status Badge */}
-                      <div className="absolute top-3 right-3 z-10">
-                        <Badge 
-                          className={`px-2 py-1 text-xs font-bold ${
-                            event.status === 'active' 
-                              ? 'bg-green-500 text-white' 
-                              : 'bg-gray-500 text-white'
-                          }`}
-                        >
-                          Gaming Grid
-                        </Badge>
-                      </div>
-
-                      {/* Event Image */}
-                      <div 
-                        className="h-48 bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center relative"
-                        style={{
-                          backgroundImage: event.image_url ? `url(${event.image_url})` : undefined
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                      </div>
-
-                      <CardContent className="p-5 space-y-4">
-                        {/* Title */}
-                        <h3 className="font-bold text-xl text-white group-hover:text-primary transition-colors">
-                          {event.title}
-                        </h3>
-
-                        {/* Description */}
-                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                          {event.description || "Únete a este increíble evento de Gaming Grid"}
-                        </p>
-
-                        {/* Event Details */}
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Users className="h-4 w-4 text-primary" />
-                            <span>Gaming Grid</span>
-                          </div>
-                          
-                          {event.max_participants && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Trophy className="h-4 w-4 text-primary" />
-                              <span>Máximo {event.max_participants} participantes</span>
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Clock className="h-4 w-4 text-primary" />
-                            <span>{event.start_time || '19:00'} - {event.end_time || '23:00'}</span>
-                          </div>
+              {events.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {events.map((event, index) => (
+                    <Card 
+                      key={event.id} 
+                      className="overflow-hidden bg-gaming-surface/90 border-primary/30 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all group cursor-pointer hover-scale"
+                      onClick={() => setSelectedEvent(event)}
+                    >
+                      <div className="relative">
+                        {/* Date Badge */}
+                        <div className="absolute top-3 left-3 z-10">
+                          <Badge className="bg-primary text-black font-bold px-3 py-1 text-sm">
+                            {((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(event.event_date), "MMMM d", { locale: es }))}
+                            <br />
+                            <span className="text-xs">{event.start_time || '19:00'} hrs</span>
+                          </Badge>
                         </div>
 
-                        {/* Action Button */}
-                        <Button 
-                          className="w-full bg-primary/80 hover:bg-primary text-black font-semibold"
-                          disabled={event.status !== 'active'}
+                        {/* Status Badge */}
+                        <div className="absolute top-3 right-3 z-10">
+                          <Badge 
+                            className={`px-2 py-1 text-xs font-bold ${
+                              event.status === 'active' 
+                                ? 'bg-green-500 text-white' 
+                                : 'bg-gray-500 text-white'
+                            }`}
+                          >
+                            Gaming Grid
+                          </Badge>
+                        </div>
+
+                        {/* Event Image */}
+                        <div 
+                          className="h-48 bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center relative"
+                          style={{
+                            backgroundImage: event.image_url ? `url(${event.image_url})` : undefined
+                          }}
                         >
-                          {event.status === 'active' ? 'Ver más' : 'No disponible'}
-                        </Button>
-                      </CardContent>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                        </div>
+
+                        <CardContent className="p-5 space-y-4">
+                          {/* Title */}
+                          <h3 className="font-bold text-xl text-white group-hover:text-primary transition-colors">
+                            {event.title}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                            {event.description || "Únete a este increíble evento de Gaming Grid"}
+                          </p>
+
+                          {/* Event Details */}
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <MapPin className="h-4 w-4 text-primary" />
+                              <span>Gaming Grid</span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Clock className="h-4 w-4 text-primary" />
+                              <span>{event.start_time || '19:00'} - {event.end_time || '23:00'}</span>
+                            </div>
+                          </div>
+
+                          {/* Action Button */}
+                          <Button 
+                            className="w-full bg-primary/80 hover:bg-primary text-black font-semibold"
+                            disabled={event.status !== 'active'}
+                          >
+                            {event.status === 'active' ? 'Ver más' : 'No disponible'}
+                          </Button>
+                        </CardContent>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
           </div>
         )}
 
@@ -779,6 +752,37 @@ const Events = () => {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-primary">¿Necesitas ayuda?</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
+              <a 
+                href="https://wa.me/56978414767" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-green-500 hover:text-green-400 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>WhatsApp: +56 9 7841 4767</span>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <a 
+                href="mailto:TheGridChile@gmail.com"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                <span>TheGridChile@gmail.com</span>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

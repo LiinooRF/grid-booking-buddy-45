@@ -106,25 +106,11 @@ export default function EventsList({ events, onEventSelect, selectedEventId }: E
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>{format(new Date(event.event_date), "PPP", { locale: es })}</span>
+                    <span>{((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(event.event_date), "MMMM d", { locale: es }))}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    {event.is_group_event ? (
-                      <Users className="h-4 w-4" />
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
-                    <span>{event.is_group_event ? 'Evento Grupal' : 'Evento Individual'}</span>
-                  </div>
-                  {event.max_participants && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>Máximo: {event.max_participants} participantes</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{event.participant_count || 0} inscritos</span>
+                    <MapPin className="h-4 w-4" />
+                    <span>Gaming Grid</span>
                   </div>
                 </div>
                 
