@@ -380,11 +380,18 @@ const Events = () => {
                     
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30">
-                        <Clock className="h-6 w-6 text-primary" />
+                        <Users className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <p className="text-white font-semibold text-lg">{selectedEvent.start_time ? selectedEvent.start_time : 'Por confirmar'}</p>
-                        <p className="text-gray-400 text-sm">Hora de inicio</p>
+                        <p className="text-white font-semibold text-lg">
+                          {selectedEvent.is_group_event 
+                            ? `${selectedEvent.max_groups || 'Ilimitados'} equipos`
+                            : `${selectedEvent.max_participants || 'Ilimitados'} personas`
+                          }
+                        </p>
+                        <p className="text-gray-400 text-sm">
+                          {selectedEvent.is_group_event ? 'Máximo de equipos' : 'Máximo de participantes'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -453,11 +460,16 @@ const Events = () => {
                       <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
                         <div className="flex items-center gap-3 text-gray-300">
                           <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-primary" />
+                            <Users className="h-5 w-5 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium text-white">Horario</p>
-                            <p className="text-gray-400">{selectedEvent.start_time ? (selectedEvent.end_time ? `${selectedEvent.start_time} - ${selectedEvent.end_time}` : selectedEvent.start_time) : 'Por confirmar'}</p>
+                            <p className="font-medium text-white">Participantes</p>
+                            <p className="text-gray-400">
+                              {selectedEvent.is_group_event 
+                                ? `${selectedEvent.max_groups || 'Ilimitados'} equipos de ${selectedEvent.participants_per_group || 'cualquier'} personas`
+                                : `Máximo ${selectedEvent.max_participants || 'ilimitados'} participantes`
+                              }
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -620,11 +632,6 @@ const Events = () => {
                               <div className="text-white text-xs font-semibold uppercase tracking-wide">
                                 {format(new Date(event.event_date), "MMM", { locale: es })}
                               </div>
-                              {event.start_time && (
-                                <div className="text-gray-300 text-xs mt-1">
-                                  {event.start_time}
-                                </div>
-                              )}
                             </div>
                           </div>
 
@@ -669,10 +676,15 @@ const Events = () => {
                                 <span>Gaming Grid</span>
                               </div>
 
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Clock className="h-4 w-4 text-primary" />
-                                <span>{event.start_time ? (event.end_time ? `${event.start_time} - ${event.end_time}` : event.start_time) : 'Por confirmar'}</span>
-                              </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Users className="h-4 w-4 text-primary" />
+                              <span>
+                                {event.is_group_event 
+                                  ? `${event.max_groups || 'Ilimitados'} equipos`
+                                  : `${event.max_participants || 'Ilimitados'} personas`
+                                }
+                              </span>
+                            </div>
                             </div>
 
                             {/* Action Button */}
