@@ -22,11 +22,11 @@ export function SiteHeader({ current }: SiteHeaderProps) {
             className="flex items-center gap-2 md:gap-4 hover-scale transition-transform"
           >
             <img
-              src="/lovable-uploads/93081e9c-4ed3-407c-8d8b-2c07bb625826.png"
+              src="https://media.discordapp.net/attachments/1400553982396469351/1408557214611931219/G_-_1_-_Edited.png?ex=68ae2121&is=68accfa1&hm=1dec7dfd9df3a88ecffb9783537670e806abdc1a4a3045fd5c762240f4a23b35&=&format=webp&quality=lossless&width=952&height=544"
               alt="GRID Logo"
               className="h-10 w-auto md:h-12 lg:h-14"
               onError={(e) => {
-                e.currentTarget.src = "https://media.discordapp.net/attachments/1400553982396469351/1408557214611931219/G_-_1_-_Edited.png?ex=68ab7e21&is=68aa2ca1&hm=fd38c6929349978c67ade13644af734fe73cba3cc89c58bc98139774107f40b0&=&format=webp&quality=lossless";
+                e.currentTarget.src = "/lovable-uploads/93081e9c-4ed3-407c-8d8b-2c07bb625826.png";
               }}
             />
             
