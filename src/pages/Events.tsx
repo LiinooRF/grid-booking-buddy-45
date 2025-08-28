@@ -13,7 +13,7 @@ import EventForm from "@/components/EventForm";
 import EventAdminPanel from "@/components/EventAdminPanel";
 import SiteHeader from "@/components/SiteHeader";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
+import eventsCover from "@/assets/events-cover.png";
 interface Event {
   id: string;
   title: string;
@@ -578,12 +578,10 @@ const Events = () => {
             {/* Gaming Grid Banner - Enhanced */}
             <div className="relative h-96 rounded-2xl overflow-hidden group">
             <img
-              src="https://media.discordapp.net/attachments/1400553982396469351/1409016147214336021/G.png?ex=68add24b&is=68ac80cb&hm=2bc43e3a072d329b71a87dd88ae6ad4e009d657e18489043bd52428a829f953c&=&format=webp&quality=lossless&width=952&height=544"
-              alt="Gaming Grid Events"
+              src={eventsCover}
+              alt="Gaming Grid eventos - banner"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              onError={(e) => {
-                e.currentTarget.src = "/lovable-uploads/events-cover.png";
-              }}
+              loading="lazy"
             />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-gaming-accent/10" />
@@ -666,7 +664,7 @@ const Events = () => {
                           <div 
                             className="h-48 bg-gradient-to-br from-primary/30 to-primary/10 bg-cover bg-center relative"
                             style={{
-                              backgroundImage: `url(${event.image_url || 'https://media.discordapp.net/attachments/1400553982396469351/1409016147214336021/G.png?ex=68add24b&is=68ac80cb&hm=2bc43e3a072d329b71a87dd88ae6ad4e009d657e18489043bd52428a829f953c&=&format=webp&quality=lossless&width=952&height=544'})`
+                              backgroundImage: `url(${event.image_url || eventsCover})`
                             }}
                           >
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
