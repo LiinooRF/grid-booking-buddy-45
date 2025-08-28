@@ -164,6 +164,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          end_time: string | null
           event_date: string
           external_link: string | null
           id: string
@@ -172,6 +173,7 @@ export type Database = {
           max_groups: number | null
           max_participants: number | null
           participants_per_group: number | null
+          start_time: string | null
           status: string
           title: string
           updated_at: string
@@ -179,6 +181,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          end_time?: string | null
           event_date: string
           external_link?: string | null
           id?: string
@@ -187,6 +190,7 @@ export type Database = {
           max_groups?: number | null
           max_participants?: number | null
           participants_per_group?: number | null
+          start_time?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -194,6 +198,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          end_time?: string | null
           event_date?: string
           external_link?: string | null
           id?: string
@@ -202,6 +207,7 @@ export type Database = {
           max_groups?: number | null
           max_participants?: number | null
           participants_per_group?: number | null
+          start_time?: string | null
           status?: string
           title?: string
           updated_at?: string

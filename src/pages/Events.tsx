@@ -171,7 +171,9 @@ const Events = () => {
           status: eventData.status || 'active',
           external_link: eventData.external_link || null,
           max_groups: eventData.max_groups || null,
-          participants_per_group: eventData.participants_per_group || null
+          participants_per_group: eventData.participants_per_group || null,
+          start_time: eventData.start_time || null,
+          end_time: eventData.end_time || null
         }])
         .select();
 
@@ -453,6 +455,18 @@ const Events = () => {
                           <div>
                             <p className="font-medium text-white">Fecha del Evento</p>
                             <p className="text-gray-400">{((s: string) => s.charAt(0).toUpperCase() + s.slice(1))(format(new Date(selectedEvent.event_date), "MMMM d, yyyy", { locale: es }))}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gaming-surface/50 border border-primary/20 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
+                        <div className="flex items-center gap-3 text-gray-300">
+                          <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">Horario</p>
+                            <p className="text-gray-400">{selectedEvent.start_time ? (selectedEvent.end_time ? `${selectedEvent.start_time} - ${selectedEvent.end_time}` : selectedEvent.start_time) : 'Por confirmar'}</p>
                           </div>
                         </div>
                       </div>
