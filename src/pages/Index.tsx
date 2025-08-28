@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Cpu, HardDrive, Monitor, Zap } from "lucide-react";
 import logoGrid from "@/assets/logo-grid.png";
@@ -158,32 +159,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gaming-surface/50 border-t border-gaming-border py-12 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <img
-              src={logoGrid}
-              alt="Gaming Grid logo"
-              className="h-12 w-auto"
-              loading="lazy"
-            />
-            <div>
-              <h3 className="text-xl font-bold">
-                <span className="text-white">GAMING</span>{" "}
-                <span className="text-primary">GRID</span>
-              </h3>
-            </div>
-          </div>
-          <p className="text-muted-foreground mb-4">
-            La mejor experiencia de gaming en equipos de última generación
-          </p>
-          <div className="flex justify-center gap-8 text-sm text-muted-foreground">
-            <span>📧 contacto@gaminggrid.cl</span>
-            <span>📱 +56 9 1234 5678</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 };

@@ -12,6 +12,7 @@ import { es } from "date-fns/locale";
 import EventForm from "@/components/EventForm";
 import EventAdminPanel from "@/components/EventAdminPanel";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import eventsCover from "@/assets/events-cover.png";
 interface Event {
@@ -834,36 +835,7 @@ const Events = () => {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center space-y-4">
-            <h3 className="text-lg font-semibold text-primary">¿Necesitas ayuda?</h3>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
-              <a 
-                href="https://wa.me/56978414767" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-green-500 hover:text-green-400 transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>WhatsApp: +56 9 7841 4767</span>
-              </a>
-              <span className="hidden sm:inline text-muted-foreground">•</span>
-              <a 
-                href="mailto:TheGridChile@gmail.com"
-                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-                <span>TheGridChile@gmail.com</span>
-              </a>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 };
