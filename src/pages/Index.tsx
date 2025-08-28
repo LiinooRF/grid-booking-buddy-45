@@ -66,8 +66,8 @@ const Index = () => {
                 <CardTitle className="text-xl text-white">Procesador</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <h3 className="text-lg font-semibold text-primary mb-2">Intel Core i7xd</h3>
-                <p className="text-muted-foreground">9393 núcleos, hasta 5.4 GHz</p>
+                <h3 className="text-lg font-semibold text-primary mb-2">Intel Core i7-13700K</h3>
+                <p className="text-muted-foreground">16 núcleos, hasta 5.4 GHz</p>
                 <p className="text-sm text-muted-foreground mt-2">Máximo rendimiento para gaming y streaming</p>
               </CardContent>
             </Card>
@@ -81,7 +81,7 @@ const Index = () => {
                 <CardTitle className="text-xl text-white">Tarjeta Gráfica</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <h3 className="text-lg font-semibold text-primary mb-2">RTX 5070</h3>
+                <h3 className="text-lg font-semibold text-primary mb-2">RTX 4070 Ti</h3>
                 <p className="text-muted-foreground">12GB GDDR6X</p>
                 <p className="text-sm text-muted-foreground mt-2">Ray Tracing y DLSS 3.0 para máxima calidad</p>
               </CardContent>
@@ -111,7 +111,7 @@ const Index = () => {
                 <CardTitle className="text-xl text-white">Almacenamiento</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <h3 className="text-lg font-semibold text-primary mb-2">1TB NVMe SSD creo</h3>
+                <h3 className="text-lg font-semibold text-primary mb-2">1TB NVMe SSD</h3>
                 <p className="text-muted-foreground">PCIe Gen 4</p>
                 <p className="text-sm text-muted-foreground mt-2">Tiempos de carga ultrarrápidos</p>
               </CardContent>
@@ -124,7 +124,7 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-gaming-surface/30 rounded-lg p-6 border border-gaming-border">
                 <h4 className="text-lg font-semibold text-primary mb-2">Monitores 4K</h4>
-                <p className="text-muted-foreground">180Hz para la experiencia visual perfecta</p>
+                <p className="text-muted-foreground">144Hz para la experiencia visual perfecta</p>
               </div>
               <div className="bg-gaming-surface/30 rounded-lg p-6 border border-gaming-border">
                 <h4 className="text-lg font-semibold text-primary mb-2">Periféricos Gaming</h4>
@@ -153,7 +153,7 @@ const Index = () => {
           <div className="bg-gaming-surface/30 border border-gaming-border rounded-xl p-12">
             <h3 className="text-xl text-white mb-4">Tabla de Precios</h3>
             <p className="text-muted-foreground">
-              Aquí irá la tabla de precios lino
+              Aquí irá la tabla de precios que me enviarás
             </p>
           </div>
         </div>
