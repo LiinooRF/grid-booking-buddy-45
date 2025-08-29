@@ -9,7 +9,6 @@ import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 
 interface Equipment {
@@ -465,7 +464,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background">
-      <SiteHeader current="reservas" />
+      
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
