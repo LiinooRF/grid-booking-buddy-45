@@ -9,6 +9,8 @@ import AdminPanel from "@/components/AdminPanel";
 import { useToast } from "@/hooks/use-toast";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 interface Equipment {
   id: string;
@@ -463,6 +465,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background">
+      <SiteHeader current="reservas" />
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -612,19 +615,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Footer */}
-        <footer className="text-center py-6 border-t border-border/50">
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              <span>Telegram: @gaming_grid</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <span>contacto@gaminggrid.cl</span>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </div>
   );
