@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Gamepad2, Users, Settings, MessageCircle, Mail, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-
 interface Equipment {
   id: string;
   name: string;
@@ -464,7 +463,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background">
-      
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
