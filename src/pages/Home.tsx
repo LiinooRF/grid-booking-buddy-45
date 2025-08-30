@@ -169,27 +169,163 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="max-w-4xl mx-auto">
-            <Card className="bg-gaming-surface border-gaming-border">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center">Tabla de Precios</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center p-8">
-                  <Clock className="h-16 w-16 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Información de Precios Próximamente</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Estamos finalizando nuestra estructura de precios. ¡Pronto tendrás toda la información!
-                  </p>
-                  <Link to="/reservas">
-                    <Button className="bg-primary hover:bg-primary/90 text-black">
-                      <Users className="mr-2 h-4 w-4" />
-                      Consultar Precios
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Gaming Sessions */}
+              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">Sesiones Gaming</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>1 Hora</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$5,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>3 Horas</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$10,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Pase Completo</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$20,000</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gaming Packages */}
+              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">Paquetes Gaming</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Starter Boost</span>
+                      <span className="text-sm text-muted-foreground">5 horas</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$15,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">XP Pack</span>
+                      <span className="text-sm text-muted-foreground">10 horas</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$26,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Level Up</span>
+                      <span className="text-sm text-muted-foreground">25 horas</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$50,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Elite Pass</span>
+                      <span className="text-sm text-muted-foreground">50 horas</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$90,000</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Combo Deals */}
+              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">Combos Especiales</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Gamer Snack Pack</span>
+                      <span className="text-sm text-muted-foreground">1hr + bebida + snack</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$7,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">AFK Combo</span>
+                      <span className="text-sm text-muted-foreground">1hr + bebida + snack + 2 refill</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$12,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Duo Pack</span>
+                      <span className="text-sm text-muted-foreground">2hrs + snack + bebida x persona</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$14,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Full Day Fuel</span>
+                      <span className="text-sm text-muted-foreground">Pase + 2 snacks + 2 bebidas</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$25,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block">Power Boost</span>
+                      <span className="text-sm text-muted-foreground">4hrs + bebida + snack + refill</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$18,000</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Adicionales */}
+              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">Adicionales</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Snack</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$2,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Bebida</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$2,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Café</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$2,000</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Persona Adicional</span>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$3,000</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Torneos */}
+              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300 md:col-span-2 lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary">Torneos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center p-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-semibold">Entrada a Torneo</span>
+                      <Badge variant="outline" className="border-primary/50 text-primary text-lg px-4 py-2">$20,000</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Incluye entrada al torneo y grandes premios para el ganador
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center mt-12">
+              <Link to="/reservas">
+                <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary/90 text-black shadow-lg">
+                  <Users className="mr-2 h-5 w-5" />
+                  Reservar Ahora
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
