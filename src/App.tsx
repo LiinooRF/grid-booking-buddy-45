@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import IndexWithSupabase from "./pages/IndexWithSupabase"; // Ruta de reservas
@@ -17,7 +18,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<IndexWithSupabase />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/reservas" element={<IndexWithSupabase />} />
           <Route path="/eventos" element={<Events />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
