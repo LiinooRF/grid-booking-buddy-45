@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Calendar, Home, Trophy } from "lucide-react";
 import logoGrid from "@/assets/logo-grid.png";
@@ -44,6 +45,7 @@ export function SiteHeader({ current }: SiteHeaderProps) {
           <div className="flex items-center gap-2 md:gap-3">
             <NavLink
               to="/"
+              end
               className={({ isActive }) =>
                 `px-3 py-2 md:px-4 md:py-2 rounded-md font-medium transition-all duration-200 hover-scale text-sm md:text-sm ${
                   isActive || current === "home" ? active : inactive
