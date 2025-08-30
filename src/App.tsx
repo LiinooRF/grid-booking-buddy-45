@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
-import IndexWithSupabase from "./pages/IndexWithSupabase"; // Ruta de reservas
+import Home from "./pages/Home";
 
 const queryClient = new QueryClient();
 
@@ -18,8 +18,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/reservas" element={<IndexWithSupabase />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/reservas" element={<Index />} />
           <Route path="/eventos" element={<Events />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
