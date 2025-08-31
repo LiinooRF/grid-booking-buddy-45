@@ -4,29 +4,75 @@ import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Cpu, HardDrive, Monitor, Gamepad2, Clock, Users, Calendar, ArrowRight } from "lucide-react";
+import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, Zap, Shield, Wifi } from "lucide-react";
 import gamingHero from "@/assets/gaming-hero.jpg";
 
 const Home = () => {
   useEffect(() => {
-    // SEO basics
-    document.title = "Inicio | Gaming Grid";
+    // SEO completo
+    document.title = "Gaming Grid - Centro de Gaming con PCs Gamer y Consolas | Reserva Online";
+    
+    // Meta description optimizada
     const metaDesc = document.querySelector('meta[name="description"]');
+    const description = "Centro de gaming premium con PCs gamer de alta gama, consolas PS5 y Xbox, eventos eSports. Reserva online tu sesión gaming. Tarifas desde $5.000/hora.";
     if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Inicio de Gaming Grid: reserva PCs y consolas y descubre eventos de eSports."
-      );
+      metaDesc.setAttribute("content", description);
     } else {
       const m = document.createElement("meta");
       m.setAttribute("name", "description");
-      m.setAttribute(
-        "content",
-        "Inicio de Gaming Grid: reserva PCs y consolas y descubre eventos de eSports."
-      );
+      m.setAttribute("content", description);
       document.head.appendChild(m);
     }
-    // Canonical
+
+    // Keywords meta tag
+    const existingKeywords = document.querySelector('meta[name="keywords"]');
+    const keywords = "gaming center, pc gamer, consolas, reservas online, esports, gaming santiago, centro gaming, ps5, xbox, rtx 4070";
+    if (existingKeywords) {
+      existingKeywords.setAttribute("content", keywords);
+    } else {
+      const kw = document.createElement("meta");
+      kw.setAttribute("name", "keywords");
+      kw.setAttribute("content", keywords);
+      document.head.appendChild(kw);
+    }
+
+    // Open Graph meta tags
+    const setOGTag = (property: string, content: string) => {
+      const existing = document.querySelector(`meta[property="${property}"]`);
+      if (existing) {
+        existing.setAttribute("content", content);
+      } else {
+        const tag = document.createElement("meta");
+        tag.setAttribute("property", property);
+        tag.setAttribute("content", content);
+        document.head.appendChild(tag);
+      }
+    };
+
+    setOGTag("og:title", "Gaming Grid - Centro de Gaming Premium");
+    setOGTag("og:description", description);
+    setOGTag("og:type", "website");
+    setOGTag("og:url", window.location.href);
+    setOGTag("og:site_name", "Gaming Grid");
+
+    // Twitter Card meta tags
+    const setTwitterTag = (name: string, content: string) => {
+      const existing = document.querySelector(`meta[name="${name}"]`);
+      if (existing) {
+        existing.setAttribute("content", content);
+      } else {
+        const tag = document.createElement("meta");
+        tag.setAttribute("name", name);
+        tag.setAttribute("content", content);
+        document.head.appendChild(tag);
+      }
+    };
+
+    setTwitterTag("twitter:card", "summary_large_image");
+    setTwitterTag("twitter:title", "Gaming Grid - Centro de Gaming Premium");
+    setTwitterTag("twitter:description", description);
+
+    // Canonical URL
     const existingCanonical = document.querySelector('link[rel="canonical"]');
     const canonicalHref = window.location.origin + "/";
     if (existingCanonical) {
@@ -36,6 +82,43 @@ const Home = () => {
       link.setAttribute("rel", "canonical");
       link.setAttribute("href", canonicalHref);
       document.head.appendChild(link);
+    }
+
+    // JSON-LD structured data
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Gaming Grid",
+      "description": "Centro de gaming con PCs gamer de alta gama y consolas",
+      "url": window.location.origin,
+      "priceRange": "$5000-$90000",
+      "serviceType": "Gaming Center",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios Gaming",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Sesión Gaming 1 Hora",
+              "description": "Una hora de gaming en PC de alta gama"
+            },
+            "price": "5000",
+            "priceCurrency": "CLP"
+          }
+        ]
+      }
+    };
+
+    const existingScript = document.querySelector('script[type="application/ld+json"]');
+    if (existingScript) {
+      existingScript.textContent = JSON.stringify(structuredData);
+    } else {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(script);
     }
   }, []);
 
@@ -298,20 +381,28 @@ const Home = () => {
                 </CardContent>
               </Card>
 
-              {/* Torneos */}
+              {/* Servicios Premium */}
               <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300 md:col-span-2 lg:col-span-1">
                 <CardHeader>
-                  <CardTitle className="text-xl text-primary">Torneos</CardTitle>
+                  <CardTitle className="text-xl text-primary flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    Servicios Premium
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-center p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold">Entrada a Torneo</span>
-                      <Badge variant="outline" className="border-primary/50 text-primary text-lg px-4 py-2">$20,000</Badge>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-primary" />
+                      <span>Coaching Pro</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Incluye entrada al torneo y grandes premios para el ganador
-                    </p>
+                    <Badge variant="outline" className="border-primary/50 text-primary">Consultar</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Wifi className="h-4 w-4 text-primary" />
+                      <span>Streaming Setup</span>
+                    </div>
+                    <Badge variant="outline" className="border-primary/50 text-primary">Consultar</Badge>
                   </div>
                 </CardContent>
               </Card>

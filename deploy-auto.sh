@@ -57,6 +57,12 @@ fi
 echo "==> Preparando directorios"
 mkdir -p "$APACHE_DIR"
 
+echo "==> Compilando para la raíz (/) - página principal"
+$PM run build
+echo "==> Copiando build principal a la raíz"
+rm -rf "$APACHE_DIR/index.html" "$APACHE_DIR/assets" 2>/dev/null || true
+cp -r "$REPO_DIR/dist/." "$APACHE_DIR/"
+
 echo "==> Compilando para /reservas/"
 VITE_BASE_PATH="/reservas/" $PM run build
 echo "==> Copiando build de reservas"
@@ -79,6 +85,21 @@ server {
     server_name _;
     root /var/www/html;
     index index.html;
+
+    # Handle root route (/) - main page
+    location / {
+        try_files $uri $uri/ /index.html;
+        
+        location ~* \.(js|mjs)$ {
+            add_header Content-Type application/javascript;
+            expires 1y;
+        }
+        
+        location ~* \.(css)$ {
+            add_header Content-Type text/css;
+            expires 1y;
+        }
+    }
 
     # Handle /reservas route
     location /reservas {
@@ -140,6 +161,10 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# SPA routing for root (/) - main page
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^(.*)$ /index.html [L]
+
 # SPA routing for /reservas
 RewriteCond %{REQUEST_URI} ^/reservas
 RewriteRule ^reservas(/.*)?$ /reservas/index.html [L]
@@ -166,17 +191,19 @@ EOF
 fi
 
 echo "==> Estableciendo permisos correctos"
-chown -R www-data:www-data "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || \
-chown -R apache:apache "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || \
-chown -R nginx:nginx "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || true
+chown -R www-data:www-data "$APACHE_DIR" 2>/dev/null || \
+chown -R apache:apache "$APACHE_DIR" 2>/dev/null || \
+chown -R nginx:nginx "$APACHE_DIR" 2>/dev/null || true
 
-chmod -R 755 "$APACHE_DIR/reservas" "$APACHE_DIR/eventos" 2>/dev/null || true
+chmod -R 755 "$APACHE_DIR" 2>/dev/null || true
 
 echo "==> ✅ Deploy completado! URLs disponibles:"
+echo "    http://173.212.212.147/ (página principal)"
 echo "    http://173.212.212.147/reservas/"
 echo "    http://173.212.212.147/eventos/"
 echo ""
 echo "==> Verificando archivos compilados:"
+ls -la "$APACHE_DIR/" | head -5 2>/dev/null || echo "ERROR: No se encontró el directorio principal"
 ls -la "$APACHE_DIR/reservas/" 2>/dev/null || echo "ERROR: No se encontró el directorio reservas"
 ls -la "$APACHE_DIR/eventos/" 2>/dev/null || echo "ERROR: No se encontró el directorio eventos"
 echo ""
