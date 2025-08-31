@@ -180,8 +180,8 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Badge variant="outline" className="border-primary/50 text-primary">AMD Ryzen 7 5800X</Badge>
-                  <p className="text-sm text-muted-foreground">8 núcleos, 16 hilos @ 3.8GHz</p>
+                  <Badge variant="outline" className="border-primary/50 text-primary">Intel Core i5 14400F</Badge>
+                  <p className="text-sm text-muted-foreground">10 núcleos, 16 hilos @ 2.5GHz</p>
                 </div>
               </CardContent>
             </Card>
@@ -197,8 +197,8 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Badge variant="outline" className="border-primary/50 text-primary">RTX 4070 Super</Badge>
-                  <p className="text-sm text-muted-foreground">12GB GDDR6X VRAM</p>
+                  <Badge variant="outline" className="border-primary/50 text-primary">MSI GeForce RTX 5070 12GB</Badge>
+                  <p className="text-sm text-muted-foreground">12GB GDDR6 VRAM</p>
                 </div>
               </CardContent>
             </Card>
@@ -215,7 +215,7 @@ const Home = () => {
               <CardContent>
                 <div className="space-y-2">
                   <Badge variant="outline" className="border-primary/50 text-primary">32GB DDR4</Badge>
-                  <p className="text-sm text-muted-foreground">3200MHz RGB Gaming</p>
+                  <p className="text-sm text-muted-foreground">Alta velocidad gaming</p>
                 </div>
               </CardContent>
             </Card>
@@ -230,9 +230,19 @@ const Home = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Badge variant="outline" className="border-primary/50 text-primary">Gaming Pro</Badge>
-                  <p className="text-sm text-muted-foreground">Teclado mecánico RGB, Mouse gaming</p>
+                <div className="space-y-3">
+                  <div className="flex flex-col space-y-1">
+                    <Badge variant="outline" className="border-primary/50 text-primary w-fit">HyperX Cloud III</Badge>
+                    <span className="text-xs text-muted-foreground">Auriculares gaming</span>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <Badge variant="outline" className="border-primary/50 text-primary w-fit">Monitor Legion 280Hz 27"</Badge>
+                    <span className="text-xs text-muted-foreground">Monitor gaming</span>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <Badge variant="outline" className="border-primary/50 text-primary w-fit">Razer DeathAdder Essential</Badge>
+                    <span className="text-xs text-muted-foreground">Mouse gaming</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
