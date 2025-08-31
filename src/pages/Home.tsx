@@ -4,7 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, Zap, Shield, Wifi } from "lucide-react";
+import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, Zap, Shield, Wifi, MessageCircle, Mail } from "lucide-react";
 import gamingHero from "@/assets/gaming-hero.jpg";
 
 const Home = () => {
@@ -431,12 +431,33 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gaming-surface border-t border-gaming-border py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
-            © 2024 Gaming Grid. Todos los derechos reservados.
-          </p>
+      {/* Footer igual que en otras páginas */}
+      <footer className="bg-gaming-surface/80 border-t border-gaming-border py-8">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm">
+              <a 
+                href="https://wa.me/56978414767"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>WhatsApp: +56 9 7841 4767</span>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <a 
+                href="mailto:TheGridChile@gmail.com"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                <span>TheGridChile@gmail.com</span>
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
