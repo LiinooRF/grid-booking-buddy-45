@@ -214,7 +214,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Badge variant="outline" className="border-primary/50 text-primary">32GB DDR4</Badge>
+                  <Badge variant="outline" className="border-primary/50 text-primary">32GB DDR5</Badge>
                   <p className="text-sm text-muted-foreground">Alta velocidad gaming</p>
                 </div>
               </CardContent>

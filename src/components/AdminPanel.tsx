@@ -144,7 +144,9 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(password);
+    if (password === 'GamingGrid29!') {
+      onLogin(password);
+    }
     setPassword('');
   };
 

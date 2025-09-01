@@ -80,9 +80,9 @@ export default function EventAdminPanel({
               placeholder="Contraseña de administrador"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && onLogin(password)}
+              onKeyPress={(e) => e.key === 'Enter' && password === 'GamingGrid29!' && onLogin(password)}
             />
-            <Button onClick={() => onLogin(password)}>
+            <Button onClick={() => password === 'GamingGrid29!' && onLogin(password)}>
               Ingresar
             </Button>
           </div>

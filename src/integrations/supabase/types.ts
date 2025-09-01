@@ -38,6 +38,36 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          created_at: string
+          email: string
+          games_request: string | null
+          id: string
+          message: string
+          name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          games_request?: string | null
+          id?: string
+          message: string
+          name: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          games_request?: string | null
+          id?: string
+          message?: string
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
       equipment: {
         Row: {
           created_at: string
