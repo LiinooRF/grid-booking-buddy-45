@@ -343,7 +343,7 @@ const Index = () => {
 
   const handleAdminLogin = (password: string) => {
     // Simple password check - in real app this would be secure
-    if (password === 'admin123') {
+    if (password === 'GamingGrid29!') {
       setIsAdminAuthenticated(true);
       toast({
         title: "Acceso concedido",

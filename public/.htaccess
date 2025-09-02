@@ -1,0 +1,11 @@
+# SPA routing for Apache - redirect all non-file requests to index.html
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Allow direct access to existing files and directories
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  # Fallback to index.html for client-side routing (e.g., /reservas, /eventos)
+  RewriteRule . /index.html [L]
+</IfModule>

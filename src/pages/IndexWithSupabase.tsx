@@ -262,7 +262,7 @@ const Index = () => {
   };
 
   const handleAdminLogin = (password: string) => {
-    if (password === "admin123") {
+    if (password === "GamingGrid29!") {
       setIsAdminAuthenticated(true);
       toast({
         title: "Acceso autorizado",
