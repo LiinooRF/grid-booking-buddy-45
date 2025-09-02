@@ -4,7 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, Zap, Shield, Wifi, MessageCircle, Mail } from "lucide-react";
+import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, MessageCircle, Mail } from "lucide-react";
 import gamingHero from "@/assets/gaming-hero.jpg";
 
 const Home = () => {
@@ -390,32 +390,6 @@ const Home = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Servicios Premium */}
-              <Card className="bg-gaming-surface border-gaming-border hover:border-primary/50 transition-colors duration-300 md:col-span-2 lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="text-xl text-primary flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    Servicios Premium
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-primary" />
-                      <span>Coaching Pro</span>
-                    </div>
-                    <Badge variant="outline" className="border-primary/50 text-primary">Consultar</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Wifi className="h-4 w-4 text-primary" />
-                      <span>Streaming Setup</span>
-                    </div>
-                    <Badge variant="outline" className="border-primary/50 text-primary">Consultar</Badge>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
             <div className="text-center mt-12">
@@ -426,6 +400,33 @@ const Home = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Discord Community Section */}
+      <section className="py-20 bg-gaming-surface/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-gaming-surface border-gaming-border border-2 rounded-2xl p-8 hover:border-primary/50 transition-colors duration-300">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                ¡Únete a nuestra comunidad en <span className="text-[#5865F2]">Discord</span>!
+              </h2>
+              <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
+                Conecta con otros gamers, entérate de eventos exclusivos, torneos y participa en nuestras actividades de la comunidad.
+              </p>
+              <a 
+                href="https://discord.gg/sjkY4mVGnc"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg">
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Unirse al Discord
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </a>
             </div>
           </div>
         </div>
@@ -452,6 +453,16 @@ const Home = () => {
               >
                 <Mail className="h-4 w-4" />
                 <span>TheGridChile@gmail.com</span>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <a 
+                href="https://discord.gg/sjkY4mVGnc"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>Discord</span>
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
