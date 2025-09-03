@@ -414,7 +414,7 @@ const Home = () => {
                 ¡Únete a nuestra comunidad en <span className="text-[#5865F2]">Discord</span>!
               </h2>
               <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-                Conecta con otros gamers, entérate de eventos exclusivos, torneos y participa en nuestras actividades de la comunidad.
+                Conecta con otros gamers, participa en eventos exclusivos, torneos emocionantes y comparte estrategias con jugadores de todo Chile. ¡Forma parte de la familia Gaming Grid!
               </p>
               <a 
                 href="https://discord.gg/sjkY4mVGnc"

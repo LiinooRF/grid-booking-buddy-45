@@ -356,6 +356,16 @@ export default function Comments() {
                   <Mail className="h-4 w-4" />
                   <span>TheGridChile@gmail.com</span>
                 </a>
+                <span className="hidden sm:inline text-muted-foreground">•</span>
+                <a 
+                  href="https://discord.gg/sjkY4mVGnc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Discord</span>
+                </a>
               </div>
               <p className="text-xs text-muted-foreground">
                 Gaming Grid - Antonio Varas 1347, LOCAL 106, Providencia.
