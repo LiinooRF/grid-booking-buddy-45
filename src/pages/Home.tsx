@@ -178,15 +178,15 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-4 mt-16">
               <Badge variant="outline" className="px-6 py-3 text-lg border-primary/50 bg-primary/10 text-primary backdrop-blur-sm">
                 <Cpu className="mr-2 h-5 w-5" />
-                RTX 4070 Gaming PCs
+                RTX 5070 Gaming PCs
               </Badge>
               <Badge variant="outline" className="px-6 py-3 text-lg border-gaming-accent/50 bg-gaming-accent/10 text-gaming-accent backdrop-blur-sm">
                 <Monitor className="mr-2 h-5 w-5" />
-                144Hz Monitors
+                280 Hz Monitors
               </Badge>
               <Badge variant="outline" className="px-6 py-3 text-lg border-white/50 bg-white/10 text-white backdrop-blur-sm">
                 <Gamepad2 className="mr-2 h-5 w-5" />
-                PS5 & Xbox Series X
+                PS5 & Nintendo Switch 2
               </Badge>
             </div>
           </div>
@@ -466,21 +466,6 @@ const Home = () => {
                 <p className="text-muted-foreground text-xl md:text-2xl mb-10 max-w-3xl mx-auto leading-relaxed">
                   Conecta con otros gamers, participa en <span className="text-primary font-semibold">eventos exclusivos</span>, torneos emocionantes y comparte estrategias con jugadores de todo Chile. ¡Forma parte de la familia Gaming Grid!
                 </p>
-                
-                <div className="flex flex-wrap justify-center gap-6 mb-10">
-                  <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 rounded-full border border-primary/30">
-                    <Users className="h-5 w-5 text-primary" />
-                    <span className="text-primary font-semibold">+500 Gamers</span>
-                  </div>
-                  <div className="flex items-center gap-3 px-6 py-3 bg-gaming-accent/10 rounded-full border border-gaming-accent/30">
-                    <Gamepad2 className="h-5 w-5 text-gaming-accent" />
-                    <span className="text-gaming-accent font-semibold">Torneos Semanales</span>
-                  </div>
-                  <div className="flex items-center gap-3 px-6 py-3 bg-blue-500/10 rounded-full border border-blue-500/30">
-                    <MessageCircle className="h-5 w-5 text-blue-400" />
-                    <span className="text-blue-400 font-semibold">Chat 24/7</span>
-                  </div>
-                </div>
                 
                 <a 
                   href="https://discord.gg/sjkY4mVGnc"
