@@ -183,10 +183,10 @@ export default function Comments() {
   }
 
   return (
-    <div className="min-h-screen bg-gaming-background text-foreground">
+    <div className="min-h-screen bg-gaming-background text-foreground flex flex-col">
       <SiteHeader current="comentarios" />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Comparte tu Experiencia</h1>
@@ -333,8 +333,8 @@ export default function Comments() {
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8">
+        {/* Footer - fuera del container para que llegue a los bordes */}
+        <footer className="border-t border-gaming-border bg-gaming-surface/30 mt-8 w-full">
           <div className="container mx-auto px-4 py-6">
             <div className="text-center space-y-4">
               <h3 className="text-lg font-semibold text-primary">¿Necesitas ayuda?</h3>

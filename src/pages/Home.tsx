@@ -126,33 +126,75 @@ const Home = () => {
     <div className="min-h-screen bg-gaming-background text-foreground">
       <SiteHeader current="home" />
       
-      {/* Hero Section */}
+      {/* Hero Section - Mejorado visualmente */}
       <section 
-        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{ backgroundImage: `url(${gamingHero})` }}
       >
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
-            Bienvenido a <span className="text-primary">Gaming Grid</span>
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            El mejor centro de gaming con PCs de alta gama, consolas de última generación y eventos épicos de eSports.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/reservas">
-              <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary/90 text-black shadow-lg">
-                Reservar Ahora
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/eventos">
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-white/30 bg-white/10 text-white hover:bg-white/20">
-                Ver Eventos
-                <Calendar className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+        {/* Overlay con gradiente más dramático */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-primary/20" />
+        
+        {/* Efectos de partículas/luces */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gaming-accent/20 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-3/4 left-1/3 w-64 h-64 bg-blue-500/20 rounded-full blur-2xl animate-pulse delay-500" />
+        </div>
+        
+        {/* Contenido principal con animaciones mejoradas */}
+        <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
+          <div className="space-y-8 animate-fade-in">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6 bg-gradient-to-r from-white via-primary to-gaming-accent bg-clip-text text-transparent animate-scale-in">
+              Gaming <span className="text-primary drop-shadow-2xl">Grid</span>
+            </h1>
+            
+            <div className="relative">
+              <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-3xl mx-auto font-medium leading-relaxed">
+                El <span className="text-primary font-bold">centro gaming más avanzado</span> de Chile con PCs RTX 4070, consolas next-gen y la mejor experiencia eSports.
+              </p>
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-gaming-accent/10 blur-xl rounded-lg"></div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-12">
+              <Link to="/reservas" className="group">
+                <Button size="lg" className="relative px-10 py-6 text-xl font-bold bg-gradient-to-r from-primary to-gaming-accent hover:from-primary/90 hover:to-gaming-accent/90 text-black shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-xl overflow-hidden">
+                  <span className="relative z-10 flex items-center">
+                    Reservar Ahora
+                    <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gaming-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Button>
+              </Link>
+              
+              <Link to="/eventos" className="group">
+                <Button variant="outline" size="lg" className="px-10 py-6 text-xl border-2 border-white/40 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm hover:border-primary transition-all duration-300 rounded-xl transform hover:scale-105 shadow-xl">
+                  <Calendar className="mr-2 h-6 w-6 group-hover:rotate-12 transition-transform" />
+                  Ver Eventos
+                </Button>
+              </Link>
+            </div>
+            
+            {/* Stats/badges mejorados */}
+            <div className="flex flex-wrap justify-center gap-4 mt-16">
+              <Badge variant="outline" className="px-6 py-3 text-lg border-primary/50 bg-primary/10 text-primary backdrop-blur-sm">
+                <Cpu className="mr-2 h-5 w-5" />
+                RTX 4070 Gaming PCs
+              </Badge>
+              <Badge variant="outline" className="px-6 py-3 text-lg border-gaming-accent/50 bg-gaming-accent/10 text-gaming-accent backdrop-blur-sm">
+                <Monitor className="mr-2 h-5 w-5" />
+                144Hz Monitors
+              </Badge>
+              <Badge variant="outline" className="px-6 py-3 text-lg border-white/50 bg-white/10 text-white backdrop-blur-sm">
+                <Gamepad2 className="mr-2 h-5 w-5" />
+                PS5 & Xbox Series X
+              </Badge>
+            </div>
           </div>
+        </div>
+        
+        {/* Efecto de scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-1 h-16 bg-gradient-to-b from-primary to-transparent rounded-full"></div>
         </div>
       </section>
 
@@ -405,28 +447,57 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Discord Community Section */}
-      <section className="py-20 bg-gaming-surface/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gaming-surface border-gaming-border border-2 rounded-2xl p-8 hover:border-primary/50 transition-colors duration-300">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                ¡Únete a nuestra comunidad en <span className="text-[#5865F2]">Discord</span>!
-              </h2>
-              <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-                Conecta con otros gamers, participa en eventos exclusivos, torneos emocionantes y comparte estrategias con jugadores de todo Chile. ¡Forma parte de la familia Gaming Grid!
-              </p>
-              <a 
-                href="https://discord.gg/sjkY4mVGnc"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg">
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Unirse al Discord
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </a>
+      {/* Discord Community Section - Mejorado */}
+      <section className="py-24 bg-gradient-to-br from-gaming-surface/40 via-background to-gaming-surface/20 relative overflow-hidden">
+        {/* Efectos de fondo */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-[#5865F2]/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="bg-gaming-surface/80 border-gaming-border border-2 rounded-3xl p-12 hover:border-primary/50 transition-all duration-500 backdrop-blur-sm shadow-2xl transform hover:scale-[1.02]">
+              <div className="space-y-8">
+                <h2 className="text-4xl md:text-5xl font-black mb-6 bg-gradient-to-r from-white via-[#5865F2] to-primary bg-clip-text text-transparent">
+                  ¡Únete a nuestra comunidad en <span className="text-[#5865F2] drop-shadow-lg">Discord</span>!
+                </h2>
+                
+                <p className="text-muted-foreground text-xl md:text-2xl mb-10 max-w-3xl mx-auto leading-relaxed">
+                  Conecta con otros gamers, participa en <span className="text-primary font-semibold">eventos exclusivos</span>, torneos emocionantes y comparte estrategias con jugadores de todo Chile. ¡Forma parte de la familia Gaming Grid!
+                </p>
+                
+                <div className="flex flex-wrap justify-center gap-6 mb-10">
+                  <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 rounded-full border border-primary/30">
+                    <Users className="h-5 w-5 text-primary" />
+                    <span className="text-primary font-semibold">+500 Gamers</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-gaming-accent/10 rounded-full border border-gaming-accent/30">
+                    <Gamepad2 className="h-5 w-5 text-gaming-accent" />
+                    <span className="text-gaming-accent font-semibold">Torneos Semanales</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-6 py-3 bg-blue-500/10 rounded-full border border-blue-500/30">
+                    <MessageCircle className="h-5 w-5 text-blue-400" />
+                    <span className="text-blue-400 font-semibold">Chat 24/7</span>
+                  </div>
+                </div>
+                
+                <a 
+                  href="https://discord.gg/sjkY4mVGnc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-block"
+                >
+                  <Button size="lg" className="relative px-12 py-6 text-xl font-bold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl overflow-hidden">
+                    <span className="relative z-10 flex items-center">
+                      <MessageCircle className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform" />
+                      Unirse al Discord
+                      <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#4752C4] to-[#5865F2] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Button>
+                </a>
+              </div>
             </div>
           </div>
         </div>
