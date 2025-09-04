@@ -26,7 +26,7 @@ const Home = () => {
 
     // Keywords meta tag
     const existingKeywords = document.querySelector('meta[name="keywords"]');
-    const keywords = "gaming center, pc gamer, consolas, reservas online, esports, gaming santiago, centro gaming, ps5, xbox, rtx 4070";
+    const keywords = "gaming center, pc gamer, consolas, reservas online, esports, gaming santiago, centro gaming, ps5, xbox, rtx 5070";
     if (existingKeywords) {
       existingKeywords.setAttribute("content", keywords);
     } else {
@@ -150,7 +150,7 @@ const Home = () => {
             
             <div className="relative">
               <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-3xl mx-auto font-medium leading-relaxed">
-                El <span className="text-primary font-bold">centro gaming más avanzado</span> de Chile con PCs RTX 4070, consolas next-gen y la mejor experiencia eSports.
+                El <span className="text-primary font-bold">centro gaming más avanzado</span> de Chile con PCs RTX 5070, consolas next-gen y la mejor experiencia eSports.
               </p>
               <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-gaming-accent/10 blur-xl rounded-lg"></div>
             </div>
@@ -463,8 +463,26 @@ const Home = () => {
                   ¡Únete a nuestra comunidad en <span className="text-[#5865F2] drop-shadow-lg">Discord</span>!
                 </h2>
                 
-                <p className="text-muted-foreground text-xl md:text-2xl mb-10 max-w-3xl mx-auto leading-relaxed">
-                  Conecta con otros gamers, participa en <span className="text-primary font-semibold">eventos exclusivos</span>, torneos emocionantes y comparte estrategias con jugadores de todo Chile. ¡Forma parte de la familia Gaming Grid!
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105">
+                    <Users className="h-8 w-8 text-primary mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Comunidad Activa</h3>
+                    <p className="text-muted-foreground text-sm">Conecta con gamers chilenos apasionados</p>
+                  </div>
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105">
+                    <Gamepad2 className="h-8 w-8 text-gaming-accent mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Eventos Exclusivos</h3>
+                    <p className="text-muted-foreground text-sm">Torneos y actividades especiales</p>
+                  </div>
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105 md:col-span-2 lg:col-span-1">
+                    <MessageCircle className="h-8 w-8 text-[#5865F2] mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Chat 24/7</h3>
+                    <p className="text-muted-foreground text-sm">Comparte estrategias y forma equipos</p>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed">
+                  ¡Forma parte de la familia Gaming Grid y vive la experiencia gamer completa!
                 </p>
                 
                 <a 
