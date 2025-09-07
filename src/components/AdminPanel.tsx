@@ -780,7 +780,7 @@ const AdminPanel = ({ reservations, onConfirm, onCancel, onMarkArrived, onReleas
                       <div className="text-sm text-muted-foreground">{eq.description}</div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {eq.status === 'occupied' ? (
+                      {eq.maintenance_mode ? (
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
