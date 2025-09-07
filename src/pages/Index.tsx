@@ -692,7 +692,11 @@ const Index = () => {
       setEquipment(prev => 
         prev.map(eq => 
           eq.id === equipmentId 
-            ? { ...eq, status: maintenanceMode ? 'occupied' : 'available' }
+            ? { 
+                ...eq, 
+                maintenance_mode: maintenanceMode,
+                maintenance_reason: reason || null
+              }
             : eq
         )
       );
