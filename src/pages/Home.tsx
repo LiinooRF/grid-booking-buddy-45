@@ -491,11 +491,11 @@ const Home = () => {
                   rel="noopener noreferrer"
                   className="group inline-block"
                 >
-                  <Button size="lg" className="relative px-12 py-6 text-xl font-bold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl overflow-hidden">
+                  <Button size="lg" className="relative px-6 md:px-12 py-3 md:py-6 text-lg md:text-xl font-bold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl overflow-hidden">
                     <span className="relative z-10 flex items-center">
-                      <MessageCircle className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform" />
+                      <MessageCircle className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:rotate-12 transition-transform" />
                       Unirse al Discord
-                      <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#4752C4] to-[#5865F2] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </Button>
