@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://173.212.212.147/reservas/</loc>
+    <loc>https://gaminggrid.cl/</loc>
     <lastmod>2025-01-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>http://173.212.212.147/eventos/</loc>
+    <loc>https://gaminggrid.cl/eventos</loc>
     <lastmod>2025-01-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://173.212.212.147/reservas/comentarios</loc>
+    <loc>https://gaminggrid.cl/comentarios</loc>
     <lastmod>2025-01-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
