@@ -14,7 +14,7 @@ const Home = () => {
     
     // Meta description optimizada
     const metaDesc = document.querySelector('meta[name="description"]');
-    const description = "Centro de gaming premium con PCs gamer de alta gama, consolas PS5 y Xbox, eventos eSports. Reserva online tu sesión gaming. Tarifas desde $5.000/hora.";
+    const description = "Gaming Grid - Cyber Gaming Center de vanguardia con PCs gamer extremos, consolas PS5 y Xbox Series X. Experimenta el gaming profesional en nuestro game center premium. ¡Reserva tu sesión ahora!";
     if (metaDesc) {
       metaDesc.setAttribute("content", description);
     } else {
