@@ -6,12 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Cpu, HardDrive, Monitor, Gamepad2, Users, Calendar, ArrowRight, MessageCircle, Mail } from "lucide-react";
 import gamingHero from "@/assets/gaming-hero.jpg";
-
 const Home = () => {
   useEffect(() => {
     // SEO completo
     document.title = "Gaming Grid - Centro de Gaming con PCs Gamer y Consolas | Reserva Online";
-    
+
     // Meta description optimizada
     const metaDesc = document.querySelector('meta[name="description"]');
     const description = "Gaming Grid - Cyber Gaming Center de vanguardia con PCs gamer extremos, consolas PS5 y Xbox Series X. Experimenta el gaming profesional en nuestro game center premium. ¡Reserva tu sesión ahora!";
@@ -48,7 +47,6 @@ const Home = () => {
         document.head.appendChild(tag);
       }
     };
-
     setOGTag("og:title", "Gaming Grid - Centro de Gaming Premium");
     setOGTag("og:description", description);
     setOGTag("og:type", "website");
@@ -67,7 +65,6 @@ const Home = () => {
         document.head.appendChild(tag);
       }
     };
-
     setTwitterTag("twitter:card", "summary_large_image");
     setTwitterTag("twitter:title", "Gaming Grid - Centro de Gaming Premium");
     setTwitterTag("twitter:description", description);
@@ -96,21 +93,18 @@ const Home = () => {
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Servicios Gaming",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Sesión Gaming 1 Hora",
-              "description": "Una hora de gaming en PC de alta gama"
-            },
-            "price": "5000",
-            "priceCurrency": "CLP"
-          }
-        ]
+        "itemListElement": [{
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Sesión Gaming 1 Hora",
+            "description": "Una hora de gaming en PC de alta gama"
+          },
+          "price": "5000",
+          "priceCurrency": "CLP"
+        }]
       }
     };
-
     const existingScript = document.querySelector('script[type="application/ld+json"]');
     if (existingScript) {
       existingScript.textContent = JSON.stringify(structuredData);
@@ -121,16 +115,13 @@ const Home = () => {
       document.head.appendChild(script);
     }
   }, []);
-
-  return (
-    <div className="min-h-screen bg-gaming-background text-foreground">
+  return <div className="min-h-screen bg-gaming-background text-foreground">
       <SiteHeader current="home" />
       
       {/* Hero Section - Mejorado visualmente */}
-      <section 
-        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden"
-        style={{ backgroundImage: `url(${gamingHero})` }}
-      >
+      <section className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden" style={{
+      backgroundImage: `url(${gamingHero})`
+    }}>
         {/* Overlay con gradiente más dramático */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-primary/20" />
         
@@ -317,7 +308,7 @@ const Home = () => {
                     <Badge variant="outline" className="border-primary/50 text-primary">$5,000</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>3 Horas</span>
+                    <span>4 Horas</span>
                     <Badge variant="outline" className="border-primary/50 text-primary">$10,000</Badge>
                   </div>
                   <div className="flex justify-between items-center">
@@ -485,12 +476,7 @@ const Home = () => {
                   ¡Forma parte de la familia Gaming Grid y vive la experiencia gamer completa!
                 </p>
                 
-                <a 
-                  href="https://discord.gg/sjkY4mVGnc"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-block"
-                >
+                <a href="https://discord.gg/sjkY4mVGnc" target="_blank" rel="noopener noreferrer" className="group inline-block">
                   <Button size="lg" className="relative px-6 md:px-12 py-3 md:py-6 text-lg md:text-xl font-bold bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl overflow-hidden">
                     <span className="relative z-10 flex items-center">
                       <MessageCircle className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:rotate-12 transition-transform" />
@@ -511,30 +497,17 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm">
-              <a 
-                href="https://wa.me/56978414767"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-              >
+              <a href="https://wa.me/56978414767" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
                 <MessageCircle className="h-4 w-4" />
                 <span>WhatsApp: +56 9 7841 4767</span>
               </a>
               <span className="hidden sm:inline text-muted-foreground">•</span>
-              <a 
-                href="mailto:TheGridChile@gmail.com"
-                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-              >
+              <a href="mailto:TheGridChile@gmail.com" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
                 <Mail className="h-4 w-4" />
                 <span>TheGridChile@gmail.com</span>
               </a>
               <span className="hidden sm:inline text-muted-foreground">•</span>
-              <a 
-                href="https://discord.gg/sjkY4mVGnc"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors"
-              >
+              <a href="https://discord.gg/sjkY4mVGnc" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#5865F2] hover:text-[#4752C4] transition-colors">
                 <MessageCircle className="h-4 w-4" />
                 <span>Discord</span>
               </a>
@@ -545,8 +518,6 @@ const Home = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Home;
