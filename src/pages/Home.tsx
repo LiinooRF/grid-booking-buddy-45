@@ -305,7 +305,7 @@ const Home = () => {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span>1 Hora</span>
-                    <Badge variant="outline" className="border-primary/50 text-primary">$5,000</Badge>
+                    <Badge variant="outline" className="border-primary/50 text-primary">$3,000</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>4 Horas</span>
