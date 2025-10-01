@@ -492,6 +492,60 @@ const Home = () => {
         </div>
       </section>
 
+      {/* WhatsApp Community Section */}
+      <section className="py-24 bg-gradient-to-br from-gaming-surface/40 via-background to-gaming-surface/20 relative overflow-hidden">
+        {/* Efectos de fondo */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-[#25D366]/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="bg-gaming-surface/80 border-gaming-border border-2 rounded-3xl p-12 hover:border-primary/50 transition-all duration-500 backdrop-blur-sm shadow-2xl transform hover:scale-[1.02]">
+              <div className="space-y-8">
+                <h2 className="text-4xl md:text-5xl font-black mb-6 bg-gradient-to-r from-white via-[#25D366] to-primary bg-clip-text text-transparent">
+                  ¡Únete a nuestra comunidad en <span className="text-[#25D366] drop-shadow-lg">WhatsApp</span>!
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105">
+                    <Users className="h-8 w-8 text-primary mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Comunidad Activa</h3>
+                    <p className="text-muted-foreground text-sm">Conecta con gamers chilenos apasionados</p>
+                  </div>
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105">
+                    <Gamepad2 className="h-8 w-8 text-gaming-accent mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Eventos Exclusivos</h3>
+                    <p className="text-muted-foreground text-sm">Torneos y actividades especiales</p>
+                  </div>
+                  <div className="bg-gaming-surface/60 border border-gaming-border rounded-2xl p-6 text-center hover:border-primary/50 transition-all duration-300 transform hover:scale-105 md:col-span-2 lg:col-span-1">
+                    <MessageCircle className="h-8 w-8 text-[#25D366] mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-white mb-2">Chat 24/7</h3>
+                    <p className="text-muted-foreground text-sm">Comparte estrategias y forma equipos</p>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed">
+                  ¡Forma parte de la familia Gaming Grid y vive la experiencia gamer completa!
+                </p>
+                
+                <a href="https://chat.whatsapp.com/DOWwAILTZuWITV4yJ5nEdp" target="_blank" rel="noopener noreferrer" className="group inline-block">
+                  <Button size="lg" className="relative px-6 md:px-12 py-3 md:py-6 text-lg md:text-xl font-bold bg-[#25D366] hover:bg-[#1DA851] text-white shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl overflow-hidden">
+                    <span className="relative z-10 flex items-center">
+                      <MessageCircle className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:rotate-12 transition-transform" />
+                      Unirse al WhatsApp
+                      <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#1DA851] to-[#25D366] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer igual que en otras páginas */}
       <footer className="bg-gaming-surface/80 border-t border-gaming-border py-8">
         <div className="container mx-auto px-4">
